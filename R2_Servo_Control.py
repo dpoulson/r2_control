@@ -8,11 +8,9 @@ import collections
 
 servo_config_file = "servo.conf"
 pipePath = "/tmp/r2_commands.pipe"
-
-Servos = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax')
-
 servo_list = []
 
+Servos = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax')
 
 def init_config():
    # Load in CSV of Servo definitions
@@ -27,9 +25,6 @@ def init_config():
       servo_list.append(Servos(address=servo_address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax))
    ifile.close()
 
-
-
-
 def servo_command(servo_name, position):
    current_servo = []
    for servo in servo_list:
@@ -41,8 +36,6 @@ def servo_command(servo_name, position):
       actual_position = int(((current_servo.servoMax - current_servo.servoMin)*float(position)) + current_servo.servoMin)
       print "Setting servo %s(%s) to position = %s(%s)" % (servo_name, current_servo.channel, actual_position, position)
       pwm.setPWM(current_servo.channel, 0, actual_position)
-
-
 
 # Main loop
 
@@ -63,13 +56,12 @@ while(True):
          servo_list = []
          init_config()
       elif command == "QUIT":
+         print "Quitting..."
          break
       else: 
          command_name = command.split(',')[0]
          command_position = command.split(',')[1]
          servo_command(command_name, command_position)
-
-
 
 rp.close()
 
