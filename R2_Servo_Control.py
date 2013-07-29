@@ -25,7 +25,7 @@ def init_config():
       servo_servoMin = int(row[3])
       servo_servoMax = int(row[4])
       servo_list.append(Servos(address=servo_address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax))
-   print servo_list
+   ifile.close()
 
 
 
@@ -57,14 +57,19 @@ while(True):
    response = rp.readline()
    command = response.rstrip('\r\n ')
    if command != "":
-      command_name = command.split(',')[0]
-      command_position = command.split(',')[1]
-      if command_name == "RELOAD":
+      print "Processing command..."
+      if command == "RELOAD":
          print "Reloading config file"
          servo_list = []
          init_config()
-      else:
+      elif command == "QUIT":
+         break
+      else: 
+         command_name = command.split(',')[0]
+         command_position = command.split(',')[1]
          servo_command(command_name, command_position)
+
+
 
 rp.close()
 
