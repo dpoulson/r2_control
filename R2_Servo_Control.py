@@ -18,7 +18,7 @@
 # along with pyfa.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
 
-import os
+import os, sys
 import thread
 from Adafruit_PWM_Servo_Driver import PWM
 import time
@@ -29,7 +29,7 @@ servo_config_file = "servo.conf"
 pipePath = "/tmp/r2_commands.pipe"
 servo_list = []
 
-Servos = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax, servoHome')
+Servos = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax, servoHome, servoCurrent')
 
 def init_config():
    # Load in CSV of Servo definitions
@@ -42,8 +42,15 @@ def init_config():
       servo_servoMin = int(row[3])
       servo_servoMax = int(row[4])
       servo_home = int(row[5])
-      servo_list.append(Servos(address = servo_address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home))
+      servo_list.append(Servos(address = servo_address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = servo_home))
    ifile.close()
+   # Check the pipe file exists, if it doesn't, create it.
+   try:
+      os.mkfifo(pipePath)
+   except:
+      print "FIFO already exists"
+   os.chmod(pipePath,0666)
+   
 
 # Send a command over i2c to turn a servo to a given position (percentage) over a set duration (seconds)
 def servo_command(servo_name, position, duration):

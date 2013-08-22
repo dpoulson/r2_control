@@ -23,4 +23,5 @@ R2_Servo_Control.py
      * {servo name},{value},{duration} - Name is specified in the config file, and value is between 0 and 1 signifying what position to put the servo in. Duration is in seconds, and if omitted will run as fast as possible
 
 
+More instructions on the wiki: https://github.com/dpoulson/r2_control/wiki
 
