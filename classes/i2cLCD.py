@@ -24,7 +24,7 @@ from datetime import datetime
 
 
 
-class i2cLcd:
+class i2cLCD:
   # commands
   __CLEARDISPLAY=0x01
   __RETURNHOME=0x02

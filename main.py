@@ -21,10 +21,11 @@
 
 import ConfigParser
 import os, sys
+sys.path.append("./classes/")
 import thread
 import time
 import collections
-from i2cLcd import i2cLcd
+from i2cLCD import i2cLCD
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')
@@ -35,16 +36,32 @@ pipePath = config.get('DEFAULT', 'pipe')
 debug = config.getboolean('DEFAULT', 'debug')
 debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
 
+keywords = []
 ######################################
 # initialise modules
+x=0
 for module in modules:
    if debug:
       print "Initialising module: %s" % module
    command = config.get(module, 'command')
    mod_type = config.get(module, 'type')
    address = config.get(module, 'address')
+   keywords.append(command)
    if debug:
       print "Module uses command: %s, and is of type %s at address %s" % (command, mod_type, address)
+   if mod_type == "lcd":
+      modules[x] = "test"
+      print "LCD %s %s" % (command, address)
+   elif mod_type == "teecee":
+      print "teecee %s %s" % (command, address)
+   elif mod_type == "servo":
+      servoconfig = config.get(module, 'config_file')
+      print "Servo %s %s" % (command, address)
+   x += 1
+
+
+def run_module(keyword, data):
+   print "Running........"
 
 ######################################
 # Create pipe
@@ -67,20 +84,26 @@ while(True):
    if command_module != "":
       if debug: 
          print "Processing command..."
-      if command_module == "RELOAD":
+      if command_module in keywords:
          if debug:
-            print "Reloading config file"
-	 config_reload()
-      elif command_module == "QUIT":
-         print "Quitting..."
-         break
-      elif command_module == "HOME":
-         servo_home()
-      else: 
-         command_data = command.split(',',1)[1]
+            print "In keywords" 
+         if command_module == "RELOAD":
+            if debug:
+               print "Reloading config file"
+   	    config_reload()
+         elif command_module == "QUIT":
+            print "Quitting..."
+            break
+         elif command_module == "HOME":
+            servo_home()
+         else: 
+            command_data = command.split(',',1)[1]
+            if debug:
+	       print "Module called: %s\tData Sent: %s" % (command_module, command_data)
+	    run_module(command_module, command_data)
+      else:
          if debug:
-	    print "Module called: %s\tData Sent: %s" % (command_module, command_data)
-	 run_module(command_module, command_data)
+            print "Invalid Keyword"
 	
 
 rp.close()
