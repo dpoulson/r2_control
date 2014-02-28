@@ -31,13 +31,9 @@ class ServoControl :
 
   Servos = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax, servoHome, servoCurrent')
 
-  def __init__(self, address, servo_config_file):
-    self = PWM(address, debug=False)
-    self.setPWMFreq(60)
-
-  def init_config():
-   # Load in CSV of Servo definitions
-   ifile = open(servo_config_file, "rb")
+  def init_config(self, servo_config_file):
+   "Load in CSV of Servo definitions"
+   ifile = open('config/%s' % servo_config_file, "rb")
    reader = csv.reader(ifile)
    for row in reader:
       servo_address = row[0]
@@ -46,24 +42,24 @@ class ServoControl :
       servo_servoMin = int(row[3])
       servo_servoMax = int(row[4])
       servo_home = int(row[5])
-      servo_list.append(Servos(address = servo_address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = servo_home))
+      self.servo_list.append(self.Servos(address = servo_address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = servo_home))
    ifile.close()
-   # Check the pipe file exists, if it doesn't, create it.
-   try:
-      os.mkfifo(pipePath)
-   except:
-      print "FIFO already exists"
-   os.chmod(pipePath,0666)
-   
+
+
+  def __init__(self, address, servo_config_file):
+    self.i2c = PWM(0x40, debug=False)
+    self.i2c.setPWMFreq(60)
+    self.init_config(servo_config_file)
+
 
   # Send a command over i2c to turn a servo to a given position (percentage) over a set duration (seconds)
-  def servo_command(servo_name, position, duration):
+  def servo_command(self, servo_name, position, duration):
    current_servo = []
    try:
       position = float(position)
    except:
       print "Position not a float"
-   for servo in servo_list:
+   for servo in self.servo_list:
       if servo.name == servo_name:
          current_servo = servo
    if position > 1 or position < 0 or not current_servo:
@@ -71,7 +67,7 @@ class ServoControl :
    else: 
       actual_position = int(((current_servo.servoMax - current_servo.servoMin)*position) + current_servo.servoMin)
       print "Setting servo %s(%s) to position = %s(%s) with duration = %s" % (servo_name, current_servo.channel, actual_position, position, duration)
-      pwm.setPWM(current_servo.channel, 0, actual_position)
+      self.i2c.setPWM(current_servo.channel, 0, actual_position)
 
   # Set all servos to home position
   def servo_home():

@@ -65,6 +65,7 @@ for module in modules:
 
 
 def run_module(keyword, data):
+   devices[0].servo_command("P1", 0.5, 1)
    print "Running........"
 
 ######################################
