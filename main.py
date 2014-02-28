@@ -25,7 +25,9 @@ sys.path.append("./classes/")
 import thread
 import time
 import collections
-from i2cLCD import i2cLCD
+# from i2cLCD import i2cLCD
+from Adafruit_PWM_Servo_Driver import PWM
+from R2_Servo_Control import ServoControl
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')
@@ -37,6 +39,7 @@ debug = config.getboolean('DEFAULT', 'debug')
 debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
 
 keywords = []
+devices = []
 ######################################
 # initialise modules
 x=0
@@ -50,12 +53,13 @@ for module in modules:
    if debug:
       print "Module uses command: %s, and is of type %s at address %s" % (command, mod_type, address)
    if mod_type == "lcd":
-      modules[x] = "test"
       print "LCD %s %s" % (command, address)
    elif mod_type == "teecee":
       print "teecee %s %s" % (command, address)
    elif mod_type == "servo":
       servoconfig = config.get(module, 'config_file')
+      print "Servo %s %s %s" % (command, address, servoconfig)
+      devices.append(ServoControl(address, servoconfig))
       print "Servo %s %s" % (command, address)
    x += 1
 

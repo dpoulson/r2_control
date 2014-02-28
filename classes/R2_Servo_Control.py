@@ -25,13 +25,17 @@ import time
 import csv
 import collections
 
-servo_config_file = "servo.conf"
-pipePath = "/tmp/r2_commands.pipe"
-servo_list = []
+class ServoControl :
 
-Servos = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax, servoHome, servoCurrent')
+  servo_list = []
 
-def init_config():
+  Servos = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax, servoHome, servoCurrent')
+
+  def __init__(self, address, servo_config_file):
+    self = PWM(address, debug=False)
+    self.setPWMFreq(60)
+
+  def init_config():
    # Load in CSV of Servo definitions
    ifile = open(servo_config_file, "rb")
    reader = csv.reader(ifile)
@@ -52,8 +56,8 @@ def init_config():
    os.chmod(pipePath,0666)
    
 
-# Send a command over i2c to turn a servo to a given position (percentage) over a set duration (seconds)
-def servo_command(servo_name, position, duration):
+  # Send a command over i2c to turn a servo to a given position (percentage) over a set duration (seconds)
+  def servo_command(servo_name, position, duration):
    current_servo = []
    try:
       position = float(position)
@@ -69,50 +73,9 @@ def servo_command(servo_name, position, duration):
       print "Setting servo %s(%s) to position = %s(%s) with duration = %s" % (servo_name, current_servo.channel, actual_position, position, duration)
       pwm.setPWM(current_servo.channel, 0, actual_position)
 
-# Set all servos to home position
-def servo_home():
+  # Set all servos to home position
+  def servo_home():
    for servo in servo_list:
       pwm.setPWM(servo.channel, 0, servo.servoHome)
-
-# Initialise servo controllers
-pwm = PWM(0x40, debug=False)
-pwm.setPWMFreq(60)  
-
-# Main loop
-
-init_config()
-servo_home()
-
-rp = open(pipePath, 'r')
-
-# Listen for commands on the pipe
-while(True):
-   response = rp.readline()
-   command = response.rstrip('\r\n ')
-   if command != "":
-      print "Processing command..."
-      if command == "RELOAD":
-         print "Reloading config file"
-         servo_list = []
-         init_config()
-         servo_home()
-      elif command == "QUIT":
-         print "Quitting..."
-         break
-      elif command == "HOME":
-         servo_home()
-      else: 
-         command_name = command.split(',')[0]
-         command_position = command.split(',')[1]
-         try:
-            command_duration = command.split(',')[2]
-         except:
-            command_duration = 0
-	 try:
-            thread.start_new_thread( servo_command, (command_name, command_position, command_duration) )
-         except:
-            print "Error: unable to start thread"
-
-rp.close()
 
 

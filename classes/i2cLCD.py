@@ -95,22 +95,17 @@ class i2cLCD:
     self.writeFourBits(value>>4)
     self.writeFourBits(value&0xf)
 
-  def __init__(self):
-    self.__bus=smbus.SMBus(1)
-    self.__bus.write_byte_data(0x20,0x00,0x00)
-    self.__displayfunction = self.__4BITMODE | self.__2LINE | self.__5x8DOTS
+  def __init__(self, address=0x20, debug=False):
+    self.i2c = Adafruit_I2C(address, 1)
+    self.address = address
+    self.debug = debug
+    self.__displayfunction = self.__8BITMODE | self.__2LINE | self.__5x8DOTS
     self.__displaycontrol = self.__DISPLAYCONTROL | self.__DISPLAYON | self.__CURSORON | self.__BLINKON
     self.__data = 0
-    self.writeFourBits(0x03)
-    time.sleep(0.005)
-    self.writeFourBits(0x03)
-    time.sleep(0.00015)
-    self.writeFourBits(0x03)
-    self.writeFourBits(0x02)
-    self.writeCommand(self.__FUNCTIONSET | self.__displayfunction)
-    self.writeCommand(self.__displaycontrol)
-    self.writeCommand(0x6)
-    self.clear()
+    if (self.debug):
+      print "Clearing Screen"
+    self.i2c.write8(self.__CLEARDISPLAY, 0x00)
+
 
   def backlight(self,on):
     if on:
