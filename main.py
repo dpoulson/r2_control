@@ -87,13 +87,14 @@ def run_module(keyword, data):
       try:
          thread.start_new_thread( current_device.device_object.servo_command(servo_name, servo_position, servo_duration) )
       except:
-         if debug:
-            print "Error: unable to start thread"
+         print "Error: unable to start thread"
    elif current_device.mod_type == "lcd":
       print "LCD: Coming soon"
    elif current_device.mod_type == "teecee":
-      print "TEECEE: Coming soon" 
-      current_device.device_object.TriggerEffect(int(data))
+      try:
+         thread.start_new_thread( current_device.device_object.TriggerEffect(int(data)) )
+      except:
+         print "Error: unable to start thread"
    elif current_device.mod_type == "audio":
       print "Audio: Coming soon"
 
