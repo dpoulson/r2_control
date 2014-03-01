@@ -50,9 +50,20 @@ class Adafruit_I2C :
     print "Error accessing 0x%02X: Check your I2C address" % self.address
     return -1
 
+  def write4(self, value):
+    "Writes a single 8-bit value to a specified address" 
+    try:
+      print "I2C: Wrote 0x%02X to address 0x%s " % (value, self.address)
+      self.bus.write_byte(self.address, value)
+      if self.debug:
+        print "I2C: Wrote 0x%02X to address 0x%02X" % (value, self.address)
+    except IOError, err:
+      return self.errMsg()
+
   def write8(self, reg, value):
     "Writes an 8-bit value to the specified register/address"
     try:
+      print "I2C: Wrote 0x%02X to register 0x%02X to address 0x%s " % (value, reg, self.address)
       self.bus.write_byte_data(self.address, reg, value)
       if self.debug:
         print "I2C: Wrote 0x%02X to register 0x%02X" % (value, reg)

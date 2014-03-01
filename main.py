@@ -28,6 +28,7 @@ import collections
 # from i2cLCD import i2cLCD
 from Adafruit_PWM_Servo_Driver import PWM
 from R2_Servo_Control import ServoControl
+from TeeCee_I2C import TeeCeeI2C
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')
@@ -57,10 +58,13 @@ for module in modules:
    if mod_type == "lcd":
       print "LCD %s %s" % (command, address)
    elif mod_type == "teecee":
-      print "teecee %s %s" % (command, address)
+      if debug:
+         print "teecee %s %s" % (command, address)
+      devices_list.append(Devices(keyword = command, mod_type = mod_type, address = address, device_object = TeeCeeI2C(address)))
    elif mod_type == "servo":
       servoconfig = config.get(module, 'config_file')
-      print "Servo %s %s %s" % (command, address, servoconfig)
+      if debug:
+         print "Servo %s %s %s" % (command, address, servoconfig)
       devices_list.append(Devices(keyword = command, mod_type = mod_type, address = address, device_object = ServoControl(address, servoconfig)))
       #devices.append(ServoControl(address, servoconfig))
    elif mod_type == "audio":
@@ -89,6 +93,7 @@ def run_module(keyword, data):
       print "LCD: Coming soon"
    elif current_device.mod_type == "teecee":
       print "TEECEE: Coming soon" 
+      current_device.device_object.TriggerEffect(int(data))
    elif current_device.mod_type == "audio":
       print "Audio: Coming soon"
 
