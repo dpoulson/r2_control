@@ -38,8 +38,10 @@ pipePath = config.get('DEFAULT', 'pipe')
 debug = config.getboolean('DEFAULT', 'debug')
 debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
 
-keywords = []
-devices = []
+keywords = ['QUIT', 'RELOAD']
+devices_list = []
+Devices = collections.namedtuple('Device', 'keyword, mod_type, address, device_object')
+
 ######################################
 # initialise modules
 x=0
@@ -59,14 +61,37 @@ for module in modules:
    elif mod_type == "servo":
       servoconfig = config.get(module, 'config_file')
       print "Servo %s %s %s" % (command, address, servoconfig)
-      devices.append(ServoControl(address, servoconfig))
-      print "Servo %s %s" % (command, address)
+      devices_list.append(Devices(keyword = command, mod_type = mod_type, address = address, device_object = ServoControl(address, servoconfig)))
+      #devices.append(ServoControl(address, servoconfig))
+   elif mod_type == "audio":
+      print "Audio %s %s" % (command, address)
    x += 1
 
-
 def run_module(keyword, data):
-   devices[0].servo_command("P1", 0.5, 1)
-   print "Running........"
+   current_device = []
+   for device in devices_list:
+      if device.keyword == keyword:
+         current_device = device
+   if current_device.mod_type == "servo":
+      print "Data: %s" % data
+      servo_name = data.split(',')[0]
+      servo_position = data.split(',')[1]
+      try: 
+         servo_duration = data.split(',')[2]
+      except:
+         servo_duration = 0
+      try:
+         thread.start_new_thread( current_device.device_object.servo_command(servo_name, servo_position, servo_duration) )
+      except:
+         if debug:
+            print "Error: unable to start thread"
+   elif current_device.mod_type == "lcd":
+      print "LCD: Coming soon"
+   elif current_device.mod_type == "teecee":
+      print "TEECEE: Coming soon" 
+   elif current_device.mod_type == "audio":
+      print "Audio: Coming soon"
+
 
 ######################################
 # Create pipe
@@ -99,8 +124,6 @@ while(True):
          elif command_module == "QUIT":
             print "Quitting..."
             break
-         elif command_module == "HOME":
-            servo_home()
          else: 
             command_data = command.split(',',1)[1]
             if debug:

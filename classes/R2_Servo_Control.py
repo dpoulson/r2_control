@@ -29,20 +29,19 @@ class ServoControl :
 
   servo_list = []
 
-  Servos = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax, servoHome, servoCurrent')
+  Servos = collections.namedtuple('Servo', 'channel, name, servoMin, servoMax, servoHome, servoCurrent')
 
   def init_config(self, servo_config_file):
    "Load in CSV of Servo definitions"
    ifile = open('config/%s' % servo_config_file, "rb")
    reader = csv.reader(ifile)
    for row in reader:
-      servo_address = row[0]
-      servo_channel = int(row[1])
-      servo_name = row[2]
-      servo_servoMin = int(row[3])
-      servo_servoMax = int(row[4])
-      servo_home = int(row[5])
-      self.servo_list.append(self.Servos(address = servo_address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = servo_home))
+      servo_channel = int(row[0])
+      servo_name = row[1]
+      servo_servoMin = int(row[2])
+      servo_servoMax = int(row[3])
+      servo_home = int(row[4])
+      self.servo_list.append(self.Servos(channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = servo_home))
    ifile.close()
 
 
@@ -68,10 +67,5 @@ class ServoControl :
       actual_position = int(((current_servo.servoMax - current_servo.servoMin)*position) + current_servo.servoMin)
       print "Setting servo %s(%s) to position = %s(%s) with duration = %s" % (servo_name, current_servo.channel, actual_position, position, duration)
       self.i2c.setPWM(current_servo.channel, 0, actual_position)
-
-  # Set all servos to home position
-  def servo_home():
-   for servo in servo_list:
-      pwm.setPWM(servo.channel, 0, servo.servoHome)
 
 
