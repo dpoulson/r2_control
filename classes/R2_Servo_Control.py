@@ -25,6 +25,8 @@ import time
 import csv
 import collections
 
+tick_duration = 100
+
 class ServoControl :
 
   servo_list = []
@@ -41,7 +43,7 @@ class ServoControl :
       servo_servoMin = int(row[2])
       servo_servoMax = int(row[3])
       servo_home = int(row[4])
-      self.servo_list.append(self.Servos(channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = servo_home))
+      self.servo_list.append(self.Servos(channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = 0))
    ifile.close()
 
 
@@ -58,6 +60,10 @@ class ServoControl :
       position = float(position)
    except:
       print "Position not a float"
+   try:
+      duration = int(duration)
+   except:
+      print "Duration is not an int"
    for servo in self.servo_list:
       if servo.name == servo_name:
          current_servo = servo
@@ -65,7 +71,22 @@ class ServoControl :
       print "Invalid name or position (%s, %s)" % (servo_name, position)
    else: 
       actual_position = int(((current_servo.servoMax - current_servo.servoMin)*position) + current_servo.servoMin)
-      print "Setting servo %s(%s) to position = %s(%s) with duration = %s" % (servo_name, current_servo.channel, actual_position, position, duration)
-      self.i2c.setPWM(current_servo.channel, 0, actual_position)
+      print "Duration: %s " % duration
+      if duration > 0:
+         ticks = (duration * 1000)/tick_duration 
+         tick_position_shift = (actual_position - current_servo.servoCurrent )/ticks
+         tick_actual_position = current_servo.servoCurrent + tick_position_shift
+         print "Ticks:%s  Current Position: %s Position shift: %s Starting Position: %s" % (ticks, current_servo.servoCurrent, tick_position_shift, tick_actual_position)
+         for x in range(0, ticks):
+            print "Tick: %s Position: %s" % (x, tick_actual_position)
+            self.i2c.setPWM(current_servo.channel, 0, tick_actual_position) 
+            tick_actual_position += tick_position_shift
+         for servo in self.servo_list:
+           if servo.name == servo_name:
+             servo.servoCurrent = tick_actual_position
+      else:
+         print "Setting servo %s(%s) to position = %s(%s) with duration = %s" % (servo_name, current_servo.channel, actual_position, position, duration)
+         self.i2c.setPWM(current_servo.channel, 0, actual_position)
+         current_servo.servoCurrent = actual_position
 
 

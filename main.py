@@ -29,6 +29,7 @@ import collections
 from Adafruit_PWM_Servo_Driver import PWM
 from R2_Servo_Control import ServoControl
 from TeeCee_I2C import TeeCeeI2C
+from AudioLibrary import AudioLibrary
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')
@@ -66,11 +67,15 @@ for module in modules:
       if debug:
          print "Servo %s %s %s" % (command, address, servoconfig)
       devices_list.append(Devices(keyword = command, mod_type = mod_type, address = address, device_object = ServoControl(address, servoconfig)))
-      #devices.append(ServoControl(address, servoconfig))
    elif mod_type == "audio":
-      print "Audio %s %s" % (command, address)
+      audioconfig = config.get(module, 'config_file')
+      if debug:
+         print "Audio %s %s" % (command, address)
+      devices_list.append(Devices(keyword = command, mod_type = mod_type, address = address, device_object = AudioLibrary(audioconfig)))
    x += 1
 
+########################################
+# Main function
 def run_module(keyword, data):
    current_device = []
    for device in devices_list:
@@ -86,17 +91,20 @@ def run_module(keyword, data):
          servo_duration = 0
       try:
          thread.start_new_thread( current_device.device_object.servo_command(servo_name, servo_position, servo_duration) )
-      except:
+      except Exception:
          print "Error: unable to start thread"
    elif current_device.mod_type == "lcd":
       print "LCD: Coming soon"
    elif current_device.mod_type == "teecee":
       try:
          thread.start_new_thread( current_device.device_object.TriggerEffect(int(data)) )
-      except:
+      except Exception:
          print "Error: unable to start thread"
    elif current_device.mod_type == "audio":
-      print "Audio: Coming soon"
+      try:
+         thread.start_new_thread( current_device.device_object.TriggerSound(data) )
+      except Exception:
+         print "Error: unable to start thread"
 
 
 ######################################
