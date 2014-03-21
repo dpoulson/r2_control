@@ -9,8 +9,8 @@
 <h1>R2 Unit: Web control system</h1>
 <ul>
  <li><a href="dome.php">Dome control</a></li>
- <li>Scripting</li>
- <li>Audio</li>
+ <li><a herf="scripting.php">Scripting</a></li>
+ <li><a href="audio.php">Audio</a></li>
  <li>Debug</li>
 </ul>
 

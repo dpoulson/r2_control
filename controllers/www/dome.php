@@ -1,3 +1,8 @@
+<?
+
+include("includes/config.php");
+
+?>
 <html>
  <head>
   <title>R2 Unit: Web control system - Dome</title>
