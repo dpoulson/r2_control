@@ -19,3 +19,12 @@ Main process
 	Populate modules (eg. /teecee/0/ or /server/dome)
 
 
+APIs Implemented:
+
+/servo/list - lists all servos configured
+/servo/<name>/<position>/<duration> - sets servo <name> to <position> (from 0 to 1 of full configured swing) over <duration> (seconds)
+/audio/list - lists all audio files available
+/audio/<name> - Plays audio file <name>
+/teecee/<effect> - Triggers pre programmed Teecee <effect>
+/lcd - TBD
+

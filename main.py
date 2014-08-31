@@ -79,65 +79,79 @@ app = Flask(__name__)
 def index():
     return "<h1>Welcome to R2D2 REST API.</h1><p>Options: <ul><li>/teecee</li><li>/servo</li><li>/lcd</li><li>/audio</li></ul></p>"
 
-@app.route('/teecee/', methods=['POST'])
-def teecee():
-   if request.method == 'POST':
+@app.route('/teecee/<int:effect>', methods=['GET'])
+def teecee(effect):
+   if request.method == 'GET':
       for device in devices_list:
          if device.mod_type == "teecee":
             try:
-               thread.start_new_thread( device.device_object.TriggerEffect(int(request.data)) )
+               thread.start_new_thread( device.device_object.TriggerEffect(int(effect)) )
             except Exception:
                print "Error: unable to start thread"
       return "Teecee"
 
 
-@app.route('/servo/', methods=['GET', 'POST'])
-def servo():
+@app.route('/servo/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
+def servo(servo_name, servo_position, servo_duration):
+   if request.method == 'GET':
+      for device in devices_list:
+         if device.mod_type == "servo":
+            #servo_name = request.data.split(',')[0]
+            #servo_position = request.data.split(',')[1]
+            #try:
+            #   servo_duration = request.data.split(',')[2]
+            #except:
+            #   servo_duration = 0
+            try:
+               thread.start_new_thread( device.device_object.servo_command(servo_name, servo_position, servo_duration) )
+            except Exception:
+               print "Error: unable to start thread"
+      return "Ok"
+
+@app.route('/servo/list', methods=['GET'])
+def servo_list():
    if request.method == 'GET':
       message = ""
       for device in devices_list:
          if device.mod_type == "servo":
              message += device.device_object.list_servos(device.address)
       return message
-   elif request.method == 'POST':
-      for device in devices_list:
-         if device.mod_type == "servo":
-            servo_name = request.data.split(',')[0]
-            servo_position = request.data.split(',')[1]
-            try:
-               servo_duration = request.data.split(',')[2]
-            except:
-               servo_duration = 0
-            try:
-               thread.start_new_thread( device.device_object.servo_command(servo_name, servo_position, servo_duration) )
-            except Exception:
-               print "Error: unable to start thread"
-      return "servo"
+
        
 
-@app.route('/lcd/', methods=['POST'])
-def lcd():
-   if request.method == 'POST':
+@app.route('/lcd/<message>', methods=['GET'])
+def lcd(message):
+   if request.method == 'GET':
       for device in devices_list:
          if device.mod_type == "lcd":
             try:
-               thread.start_new_thread( device.device_object.TriggerLCD(int(request.data)) )
+               thread.start_new_thread( device.device_object.TriggerLCD(int(message)) )
             except Exception:
                print "Error: unable to start thread"
-      return "LCD"
+      return "Ok"
 
-@app.route('/audio/', methods=['GET', 'POST'])
-def lcd():
+@app.route('/audio/<name>', methods=['GET'])
+def audio(name):
    if request.method == 'GET':
-      return "Audio"
-   elif request.method == 'POST':
       for device in devices_list:
          if device.mod_type == "audio":
+            if debug:
+               print "Audio %s " % (name)
             try:
-               thread.start_new_thread( device.device_object.TriggerSound(int(request.data)) )
+               thread.start_new_thread( device.device_object.TriggerSound(name) )
             except Exception:
                print "Error: unable to start thread"
-      return "Audio"
+      return "Ok"
+
+@app.route('/audio/list', methods=['GET'])
+def audio_list():
+   if request.method == 'GET':
+      message = ""
+      for device in devices_list:
+         if device.mod_type == "audio":
+             message += device.device_object.ListSounds()
+      return message
+
 
 
 
