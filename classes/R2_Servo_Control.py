@@ -31,9 +31,9 @@ class ServoControl :
 
   servo_list = []
 
-  Servos = collections.namedtuple('Servo', 'channel, name, servoMin, servoMax, servoHome, servoCurrent')
+  Servos = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax, servoHome, servoCurrent')
 
-  def init_config(self, servo_config_file):
+  def init_config(self, address, servo_config_file):
    "Load in CSV of Servo definitions"
    ifile = open('config/%s' % servo_config_file, "rb")
    reader = csv.reader(ifile)
@@ -43,14 +43,21 @@ class ServoControl :
       servo_servoMin = int(row[2])
       servo_servoMax = int(row[3])
       servo_home = int(row[4])
-      self.servo_list.append(self.Servos(channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = 0))
+      self.servo_list.append(self.Servos(address = address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = 0))
    ifile.close()
 
 
   def __init__(self, address, servo_config_file):
     self.i2c = PWM(0x40, debug=False)
     self.i2c.setPWMFreq(60)
-    self.init_config(servo_config_file)
+    self.init_config(address, servo_config_file)
+
+  def list_servos(self, address):
+    message = "%s <br/>" % ( address )
+    for servo in self.servo_list:
+       if servo.address == address:
+          message += "%s, %s, %s <br/>" % ( servo.name, servo.channel, servo.servoCurrent )
+    return message
 
 
   # Send a command over i2c to turn a servo to a given position (percentage) over a set duration (seconds)

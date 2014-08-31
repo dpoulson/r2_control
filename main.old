@@ -18,7 +18,7 @@
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 #===============================================================================
 
-from flask import Flask, request
+
 import ConfigParser
 import os, sys
 sys.path.append("./classes/")
@@ -40,9 +40,9 @@ pipePath = config.get('DEFAULT', 'pipe')
 debug = config.getboolean('DEFAULT', 'debug')
 debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
 
+keywords = ['QUIT', 'RELOAD']
 devices_list = []
 Devices = collections.namedtuple('Device', 'keyword, mod_type, address, device_object')
-
 
 ######################################
 # initialise modules
@@ -53,6 +53,7 @@ for module in modules:
    command = config.get(module, 'command')
    mod_type = config.get(module, 'type')
    address = config.get(module, 'address')
+   keywords.append(command)
    if debug:
       print "Module uses command: %s, and is of type %s at address %s" % (command, mod_type, address)
    if mod_type == "lcd":
@@ -73,76 +74,80 @@ for module in modules:
       devices_list.append(Devices(keyword = command, mod_type = mod_type, address = address, device_object = AudioLibrary(audioconfig)))
    x += 1
 
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return "<h1>Welcome to R2D2 REST API.</h1><p>Options: <ul><li>/teecee</li><li>/servo</li><li>/lcd</li><li>/audio</li></ul></p>"
-
-@app.route('/teecee/', methods=['POST'])
-def teecee():
-   if request.method == 'POST':
-      for device in devices_list:
-         if device.mod_type == "teecee":
-            try:
-               thread.start_new_thread( device.device_object.TriggerEffect(int(request.data)) )
-            except Exception:
-               print "Error: unable to start thread"
-      return "Teecee"
-
-
-@app.route('/servo/', methods=['GET', 'POST'])
-def servo():
-   if request.method == 'GET':
-      message = ""
-      for device in devices_list:
-         if device.mod_type == "servo":
-             message += device.device_object.list_servos(device.address)
-      return message
-   elif request.method == 'POST':
-      for device in devices_list:
-         if device.mod_type == "servo":
-            servo_name = request.data.split(',')[0]
-            servo_position = request.data.split(',')[1]
-            try:
-               servo_duration = request.data.split(',')[2]
-            except:
-               servo_duration = 0
-            try:
-               thread.start_new_thread( device.device_object.servo_command(servo_name, servo_position, servo_duration) )
-            except Exception:
-               print "Error: unable to start thread"
-      return "servo"
-       
-
-@app.route('/lcd/', methods=['POST'])
-def lcd():
-   if request.method == 'POST':
-      for device in devices_list:
-         if device.mod_type == "lcd":
-            try:
-               thread.start_new_thread( device.device_object.TriggerLCD(int(request.data)) )
-            except Exception:
-               print "Error: unable to start thread"
-      return "LCD"
-
-@app.route('/audio/', methods=['GET', 'POST'])
-def lcd():
-   if request.method == 'GET':
-      return "Audio"
-   elif request.method == 'POST':
-      for device in devices_list:
-         if device.mod_type == "audio":
-            try:
-               thread.start_new_thread( device.device_object.TriggerSound(int(request.data)) )
-            except Exception:
-               print "Error: unable to start thread"
-      return "Audio"
+########################################
+# Main function
+def run_module(keyword, data):
+   current_device = []
+   for device in devices_list:
+      if device.keyword == keyword:
+         current_device = device
+   if current_device.mod_type == "servo":
+      print "Data: %s" % data
+      servo_name = data.split(',')[0]
+      servo_position = data.split(',')[1]
+      try: 
+         servo_duration = data.split(',')[2]
+      except:
+         servo_duration = 0
+      try:
+         thread.start_new_thread( current_device.device_object.servo_command(servo_name, servo_position, servo_duration) )
+      except Exception:
+         print "Error: unable to start thread"
+   elif current_device.mod_type == "lcd":
+      print "LCD: Coming soon"
+   elif current_device.mod_type == "teecee":
+      try:
+         thread.start_new_thread( current_device.device_object.TriggerEffect(int(data)) )
+      except Exception:
+         print "Error: unable to start thread"
+   elif current_device.mod_type == "audio":
+      try:
+         thread.start_new_thread( current_device.device_object.TriggerSound(data) )
+      except Exception:
+         print "Error: unable to start thread"
 
 
+######################################
+# Create pipe
+# Check the pipe file exists, if it doesn't, create it.
+try:
+   os.mkfifo(pipePath)
+except:
+   if debug: 
+      print "FIFO already exists"
+os.chmod(pipePath,0666)
 
+rp = open(pipePath, 'r')
 
+######################################
+# Main loop
+while(True):
+   response = rp.readline()
+   command = response.rstrip('\r\n ')
+   command_module = command.split(',')[0]
+   if command_module != "":
+      if debug: 
+         print "Processing command..."
+      if command_module in keywords:
+         if debug:
+            print "In keywords" 
+         if command_module == "RELOAD":
+            if debug:
+               print "Reloading config file"
+   	    config_reload()
+         elif command_module == "QUIT":
+            print "Quitting..."
+            break
+         else: 
+            command_data = command.split(',',1)[1]
+            if debug:
+	       print "Module called: %s\tData Sent: %s" % (command_module, command_data)
+	    run_module(command_module, command_data)
+      else:
+         if debug:
+            print "Invalid Keyword"
+	
 
-if __name__ == '__main__':
-  app.run(host='0.0.0.0', debug=True)
+rp.close()
+
 
