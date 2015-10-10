@@ -1,6 +1,6 @@
 <?
 
-include("includes/config.php");
+include("include/config.php");
 
 ?>
 <html>
@@ -11,14 +11,24 @@ include("includes/config.php");
 
 <?php
 
- $panels = array("PP1", "PP2", "PP4", "PP5", "PP6", "P1", "P2", "P3", "P4", "P7");
+ $panels = array("PP1", "PP2", "PERI", "PP5", "PP6", "P1", "P2", "P3", "P4", "P7", "P10");
+ $servo_list = file_get_contents("http://localhost:5000/servo/list");
+ $convert = explode("\n", $servo_list);
+
+ for ($i=0;$i<count($convert);$i++)  
+ {
+    $data = str_getcsv($convert[$i]);
+    $list[$i] = $data[0];
+ }
 
  $servo_name=$_GET["servo_name"];
  $value=$_GET["value"];
 
  if (isset($servo_name)) {
-   system('echo DOME,'.$servo_name.','.$value.' > /tmp/r2_commands.pipe &');
+   $url = "http://r2d2:5000/servo/".$servo_name."/".$value."/0";
+   $handle = fopen($url, "r");
  }
+
 
 ?>
 
@@ -39,11 +49,18 @@ include("includes/config.php");
   <?
 
     foreach ($panels as $panel) {
-      echo "<tr>\n";
-      echo " <td>$panel</td>\n";
-      echo " <td><a href=\"http://r2d2/dome.php?servo_name=$panel&value=0.9\">Open</a></td>\n";
-      echo " <td><a href=\"http://r2d2/dome.php?servo_name=$panel&value=0\">Close</a></td>\n";
-      echo "</tr>\n";
+      if (in_array($panel, $list)) {
+         echo "<tr>\n";
+         echo " <td>$panel</td>\n";
+         echo " <td><a href=\"http://r2d2/dome.php?servo_name=$panel&value=0.9\">Open</a></td>\n";
+         echo " <td><a href=\"http://r2d2/dome.php?servo_name=$panel&value=0\">Close</a></td>\n";
+         echo "</tr>\n";
+      } else {
+         echo "<tr>\n";
+         echo " <td><i>$panel</i></td>\n";
+         echo " <td>-</td><td>-</td>\n";
+         echo "</tr>\n";
+      }
     }
   ?>
  </div>

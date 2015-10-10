@@ -53,10 +53,10 @@ class ServoControl :
     self.init_config(address, servo_config_file)
 
   def list_servos(self, address):
-    message = "%s <br/>" % ( address )
+    message = ""
     for servo in self.servo_list:
        if servo.address == address:
-          message += "%s, %s, %s <br/>" % ( servo.name, servo.channel, servo.servoCurrent )
+          message += "%s,%s,%s\n" % ( servo.name, servo.channel, servo.servoCurrent )
     return message
 
 

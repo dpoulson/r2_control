@@ -41,7 +41,7 @@ debug = config.getboolean('DEFAULT', 'debug')
 debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
 
 devices_list = []
-Devices = collections.namedtuple('Device', 'keyword, mod_type, address, device_object')
+Devices = collections.namedtuple('Device', 'mod_type, address, device_object')
 
 
 ######################################
@@ -50,34 +50,33 @@ x=0
 for module in modules:
    if debug:
       print "Initialising module: %s" % module
-   command = config.get(module, 'command')
    mod_type = config.get(module, 'type')
    address = config.get(module, 'address')
    if debug:
-      print "Module uses command: %s, and is of type %s at address %s" % (command, mod_type, address)
+      print "Module is of type %s at address %s" % (mod_type, address)
    if mod_type == "lcd":
-      print "LCD %s %s" % (command, address)
+      print "LCD %s" % (address)
    elif mod_type == "teecee":
       if debug:
-         print "teecee %s %s" % (command, address)
-      devices_list.append(Devices(keyword = command, mod_type = mod_type, address = address, device_object = TeeCeeI2C(address)))
+         print "teecee %s" % (address)
+      devices_list.append(Devices(mod_type = mod_type, address = address, device_object = TeeCeeI2C(address)))
    elif mod_type == "servo":
       servoconfig = config.get(module, 'config_file')
       if debug:
-         print "Servo %s %s %s" % (command, address, servoconfig)
-      devices_list.append(Devices(keyword = command, mod_type = mod_type, address = address, device_object = ServoControl(address, servoconfig)))
+         print "Servo %s %s" % (address, servoconfig)
+      devices_list.append(Devices(mod_type = mod_type, address = address, device_object = ServoControl(address, servoconfig)))
    elif mod_type == "audio":
       audioconfig = config.get(module, 'config_file')
       if debug:
-         print "Audio %s %s" % (command, address)
-      devices_list.append(Devices(keyword = command, mod_type = mod_type, address = address, device_object = AudioLibrary(audioconfig)))
+         print "Audio %s" % (address)
+      devices_list.append(Devices(mod_type = mod_type, address = address, device_object = AudioLibrary(audioconfig)))
    x += 1
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "<h1>Welcome to R2D2 REST API.</h1><p>Options: <ul><li>/teecee</li><li>/servo</li><li>/lcd</li><li>/audio</li></ul></p>"
+    return "<h1>Welcome to R2D2 REST API.</h1><p>Endpoints: <ul><li>/teecee</li><li><a href=\"/servo/list\">/servo</a></li><li>/lcd</li><li><a href=\"/audio/list\">/audio</a></li></ul></p>"
 
 @app.route('/teecee/<int:effect>', methods=['GET'])
 def teecee(effect):
