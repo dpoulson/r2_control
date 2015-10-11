@@ -29,9 +29,9 @@ tick_duration = 100
 
 class ServoControl :
 
-  servo_list = []
+  servo_list = [] # All servos, listed here.
 
-  Servos = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax, servoHome, servoCurrent')
+  Servo = collections.namedtuple('Servo', 'address, channel, name, servoMin, servoMax, servoHome, servoCurrent')
 
   def init_config(self, address, servo_config_file):
    "Load in CSV of Servo definitions"
@@ -43,7 +43,8 @@ class ServoControl :
       servo_servoMin = int(row[2])
       servo_servoMax = int(row[3])
       servo_home = int(row[4])
-      self.servo_list.append(self.Servos(address = address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = 0))
+      self.servo_list.append(self.Servo(address = address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = servo_servoMin))
+      print "Added servo: %s %s %s %s %s" % (servo_channel, servo_name, servo_servoMin, servo_servoMax, servo_home)
    ifile.close()
 
 
@@ -81,19 +82,24 @@ class ServoControl :
       print "Duration: %s " % duration
       if duration > 0:
          ticks = (duration * 1000)/tick_duration 
-         tick_position_shift = (actual_position - current_servo.servoCurrent )/ticks
+         tick_position_shift = (actual_position - current_servo.servoCurrent )/float(ticks)
          tick_actual_position = current_servo.servoCurrent + tick_position_shift
-         print "Ticks:%s  Current Position: %s Position shift: %s Starting Position: %s" % (ticks, current_servo.servoCurrent, tick_position_shift, tick_actual_position)
+         print "Ticks:%s  Current Position: %s Position shift: %s Starting Position: %s End Position %s" % (ticks, current_servo.servoCurrent, tick_position_shift, tick_actual_position, actual_position)
          for x in range(0, ticks):
             print "Tick: %s Position: %s" % (x, tick_actual_position)
-            self.i2c.setPWM(current_servo.channel, 0, tick_actual_position) 
+            self.i2c.setPWM(current_servo.channel, 0, int(tick_actual_position)) 
             tick_actual_position += tick_position_shift
-         for servo in self.servo_list:
-           if servo.name == servo_name:
-             servo.servoCurrent = tick_actual_position
+         print "Finished move: Position: %s" % tick_actual_position
       else:
          print "Setting servo %s(%s) to position = %s(%s) with duration = %s" % (servo_name, current_servo.channel, actual_position, position, duration)
          self.i2c.setPWM(current_servo.channel, 0, actual_position)
-         current_servo.servoCurrent = actual_position
+      # Save current position of servo
+      for servo in self.servo_list:
+        if servo.name == servo_name:
+          idx = self.servo_list.index(servo)
+          print "Servo move finished. Servo.name: %s ServoCurrent %s Tick %s Index %s" % (servo.name, servo.servoCurrent, actual_position, idx)
+          self.servo_list[idx] = self.servo_list[idx]._replace(servoCurrent=actual_position)
+          print "New current: %s" % self.servo_list[idx].servoCurrent
+
 
 
