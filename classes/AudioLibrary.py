@@ -5,6 +5,7 @@ import thread
 import time
 import glob
 import collections
+import random
 from pygame import mixer # Load the required library
 
 Random_Sounds = ['alarm', 'happy', 'hum', 'misc', 'quote', 'razz', 'sad', 'sent', 'ooh', 'proc', 'whistle']
@@ -38,9 +39,14 @@ class AudioLibrary :
       print "Play"
 
   def TriggerRandomSound(self, data):
+    idx=Random_Sounds.index(data)
+    prefix=Random_Files[idx]
+    print "Random index: %s, prefix=%s" % (idx, prefix)
+    file_list=glob.glob("./sounds/"+prefix+"*.mp3")
+    file_idx=len(file_list)-1
+    audio_file = file_list[random.randint(0, file_idx)]
     if __debug__:
       print "Playing %s" % data
-    audio_file = "./sounds/" + data + ".mp3"
     mixer.init()
     if __debug__:
       print "Init mixer"
@@ -58,10 +64,8 @@ class AudioLibrary :
     return files
 
   def ListRandomSounds(self):
-    files = ', '.join(glob.glob("./sounds/*.mp3"))
-    files = files.replace("./sounds/" ,"", -1)
-    files = files.replace(".mp3", "", -1)
-    return files
+    types = ', '.join(Random_Sounds)
+    return types
 
 
 

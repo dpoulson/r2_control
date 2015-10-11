@@ -22,7 +22,7 @@ from flask import Flask, request, render_template
 import ConfigParser
 import os, sys
 sys.path.append("./classes/")
-import thread
+import threading
 import time
 import collections
 # from i2cLCD import i2cLCD
@@ -90,7 +90,9 @@ def teecee(effect):
       for device in devices_list:
          if device.mod_type == "teecee":
             try:
-               thread.start_new_thread( device.device_object.TriggerEffect(int(effect)) )
+               t=threading.Thread(target=device.device_object.TriggerEffect(int(effect)) )
+               t.daemon = True
+               t.start()
             except Exception:
                print "Error: unable to start thread"
       return "Teecee"
@@ -119,7 +121,9 @@ def servo_move(servo_name, servo_position, servo_duration):
       for device in devices_list:
          if device.mod_type == "servo":
             try:
-               thread.start_new_thread( device.device_object.servo_command(servo_name, servo_position, servo_duration) )
+               t=threading.Thread(target=device.device_object.servo_command(servo_name, servo_position, servo_duration) )
+               t.daemon = True
+               t.start()
             except Exception:
                print "Error: unable to start thread"
       return "Ok"
@@ -152,7 +156,9 @@ def lcd(message):
       for device in devices_list:
          if device.mod_type == "lcd":
             try:
-               thread.start_new_thread( device.device_object.TriggerLCD(int(message)) )
+               t=threading.Thread(target=device.device_object.TriggerLCD(int(message)) )
+               t.daemon = True
+               t.start()
             except Exception:
                print "Error: unable to start thread"
       return "Ok"
@@ -182,7 +188,9 @@ def audio(name):
             if __debug__:
                print "Audio %s " % (name)
             try:
-               thread.start_new_thread( device.device_object.TriggerSound(name) )
+               t=threading.Thread(target=device.device_object.TriggerSound(name) )
+               t.daemon=True
+               t.start()
             except Exception:
                print "Error: unable to start thread"
       return "Ok"
@@ -206,7 +214,9 @@ def random_audio(name):
             if __debug__:
                print "Audio %s " % (name)
             try:
-               thread.start_new_thread( device.device_object.TriggerRandomSound(name) )
+               t=threading.Thread(target=device.device_object.TriggerRandomSound(name) )
+               t.daemon=True
+               t.start()
             except Exception:
                print "Error: unable to start thread"
       return "Ok"
