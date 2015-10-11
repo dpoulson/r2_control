@@ -52,8 +52,8 @@ include("include/config.php");
       if (in_array($panel, $list)) {
          echo "<tr>\n";
          echo " <td>$panel</td>\n";
-         echo " <td><a href=\"http://r2d2/dome.php?servo_name=$panel&value=0.9\">Open</a></td>\n";
-         echo " <td><a href=\"http://r2d2/dome.php?servo_name=$panel&value=0\">Close</a></td>\n";
+         echo " <td><a href=\"dome.php?servo_name=$panel&value=0.9\">Open</a></td>\n";
+         echo " <td><a href=\"dome.php?servo_name=$panel&value=0\">Close</a></td>\n";
          echo "</tr>\n";
       } else {
          echo "<tr>\n";

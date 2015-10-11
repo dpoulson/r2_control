@@ -27,6 +27,7 @@ import collections
 
 tick_duration = 100
 
+
 class ServoControl :
 
   servo_list = [] # All servos, listed here.
@@ -44,22 +45,40 @@ class ServoControl :
       servo_servoMax = int(row[3])
       servo_home = int(row[4])
       self.servo_list.append(self.Servo(address = address, channel = servo_channel, name = servo_name, servoMin = servo_servoMin, servoMax = servo_servoMax, servoHome = servo_home, servoCurrent = servo_servoMin))
-      print "Added servo: %s %s %s %s %s" % (servo_channel, servo_name, servo_servoMin, servo_servoMax, servo_home)
+      if __debug__:
+         print "Added servo: %s %s %s %s %s" % (servo_channel, servo_name, servo_servoMin, servo_servoMax, servo_home)
    ifile.close()
 
 
   def __init__(self, address, servo_config_file):
-    self.i2c = PWM(0x40, debug=False)
+    self.i2c = PWM(int(address, 16), debug=False)
     self.i2c.setPWMFreq(60)
     self.init_config(address, servo_config_file)
 
   def list_servos(self, address):
     message = ""
+    if __debug__:
+       print "Listing servos for address: %s" % address
     for servo in self.servo_list:
        if servo.address == address:
           message += "%s,%s,%s\n" % ( servo.name, servo.channel, servo.servoCurrent )
     return message
 
+  def close_all_servos(self, address):
+    if __debug__:
+       print "Closing all servos for address: %s" % address
+    for servo in self.servo_list:
+       if servo.address == address:
+          self.i2c.setPWM(servo.channel, 0, servo.servoMin)
+    return 
+
+  def open_all_servos(self, address):
+    if __debug__:
+       print "Closing all servos for address: %s" % address
+    for servo in self.servo_list:
+       if servo.address == address:
+          self.i2c.setPWM(servo.channel, 0, servo.servoMax)
+    return
 
   # Send a command over i2c to turn a servo to a given position (percentage) over a set duration (seconds)
   def servo_command(self, servo_name, position, duration):
@@ -79,27 +98,34 @@ class ServoControl :
       print "Invalid name or position (%s, %s)" % (servo_name, position)
    else: 
       actual_position = int(((current_servo.servoMax - current_servo.servoMin)*position) + current_servo.servoMin)
-      print "Duration: %s " % duration
+      if __debug__:
+         print "Duration: %s " % duration
       if duration > 0:
          ticks = (duration * 1000)/tick_duration 
          tick_position_shift = (actual_position - current_servo.servoCurrent )/float(ticks)
          tick_actual_position = current_servo.servoCurrent + tick_position_shift
-         print "Ticks:%s  Current Position: %s Position shift: %s Starting Position: %s End Position %s" % (ticks, current_servo.servoCurrent, tick_position_shift, tick_actual_position, actual_position)
+         if __debug__:
+            print "Ticks:%s  Current Position: %s Position shift: %s Starting Position: %s End Position %s" % (ticks, current_servo.servoCurrent, tick_position_shift, tick_actual_position, actual_position)
          for x in range(0, ticks):
-            print "Tick: %s Position: %s" % (x, tick_actual_position)
+            if __debug__:
+               print "Tick: %s Position: %s" % (x, tick_actual_position)
             self.i2c.setPWM(current_servo.channel, 0, int(tick_actual_position)) 
             tick_actual_position += tick_position_shift
-         print "Finished move: Position: %s" % tick_actual_position
+         if __debug__:
+            print "Finished move: Position: %s" % tick_actual_position
       else:
-         print "Setting servo %s(%s) to position = %s(%s) with duration = %s" % (servo_name, current_servo.channel, actual_position, position, duration)
+         if __debug__:
+            print "Setting servo %s(%s) to position = %s(%s) with duration = %s" % (servo_name, current_servo.channel, actual_position, position, duration)
          self.i2c.setPWM(current_servo.channel, 0, actual_position)
       # Save current position of servo
       for servo in self.servo_list:
         if servo.name == servo_name:
           idx = self.servo_list.index(servo)
-          print "Servo move finished. Servo.name: %s ServoCurrent %s Tick %s Index %s" % (servo.name, servo.servoCurrent, actual_position, idx)
+          if __debug__:
+             print "Servo move finished. Servo.name: %s ServoCurrent %s Tick %s Index %s" % (servo.name, servo.servoCurrent, actual_position, idx)
           self.servo_list[idx] = self.servo_list[idx]._replace(servoCurrent=actual_position)
-          print "New current: %s" % self.servo_list[idx].servoCurrent
+          if __debug__:
+             print "New current: %s" % self.servo_list[idx].servoCurrent
 
 
 

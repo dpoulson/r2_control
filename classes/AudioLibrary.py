@@ -16,18 +16,23 @@ class AudioLibrary :
     config.read('config/%s' % audio_config_file)
 
   def __init__(self, audio_config_file):
-    print "Initiating audio"
+    if __debug__:
+      print "Initiating audio"
     self.init_config(audio_config_file)
 
   def TriggerSound(self, data):
-    print "Playing %s" % data
+    if __debug__:
+      print "Playing %s" % data
     audio_file = "./sounds/" + data + ".mp3"
     mixer.init()
-    print "Init mixer"
+    if __debug__:
+      print "Init mixer"
     mixer.music.load(audio_file) # % (audio_dir, data))
-    print "%s Loaded" % audio_file
+    if __debug__:
+      print "%s Loaded" % audio_file
     mixer.music.play()
-    print "Play"
+    if __debug__:
+      print "Play"
     
 
   def ListSounds(self):

@@ -1,0 +1,9 @@
+<!doctype html>
+<h1>Welcome to R2D2 REST API.</h1>
+<dl>
+  {% for path, docstr in urls|dictsort(false, 'key') %}
+  <dt><a href="{{ path }}">{{ path }}</a></dt>
+  <dd><pre>{{ docstr }}</pre></dd>
+  {% endfor %}
+</dl>
+
