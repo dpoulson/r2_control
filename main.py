@@ -163,6 +163,16 @@ def lcd(message):
 def script(name):
    """GET to trigger the named script"""
 
+@app.route('/audio/', methods=['GET'])
+@app.route('/audio/list', methods=['GET'])
+def audio_list():
+   """GET gives a comma separated list of available sounds"""
+   if request.method == 'GET':
+      message = ""
+      for device in devices_list:
+         if device.mod_type == "audio":
+             message += device.device_object.ListSounds()
+      return message
 
 @app.route('/audio/<name>', methods=['GET'])
 def audio(name):
@@ -177,14 +187,31 @@ def audio(name):
                print "Error: unable to start thread"
       return "Ok"
 
-@app.route('/audio/list', methods=['GET'])
-def audio_list():
+@app.route('/audio/random/', methods=['GET'])
+@app.route('/audio/random/list', methods=['GET'])
+def random_audio_list():
+   """GET returns types of sounds available at random"""
    if request.method == 'GET':
       message = ""
       for device in devices_list:
          if device.mod_type == "audio":
-             message += device.device_object.ListSounds()
+             message += device.device_object.ListRandomSounds()
       return message
+
+@app.route('/audio/random/<name>', methods=['GET'])
+def random_audio(name):
+   if request.method == 'GET':
+      for device in devices_list:
+         if device.mod_type == "audio":
+            if __debug__:
+               print "Audio %s " % (name)
+            try:
+               thread.start_new_thread( device.device_object.TriggerRandomSound(name) )
+            except Exception:
+               print "Error: unable to start thread"
+      return "Ok"
+
+
 
 
 if __name__ == '__main__':
