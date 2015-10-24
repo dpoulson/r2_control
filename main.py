@@ -30,6 +30,9 @@ from Adafruit_PWM_Servo_Driver import PWM
 from R2_Servo_Control import ServoControl
 from TeeCee_I2C import TeeCeeI2C
 from AudioLibrary import AudioLibrary
+from Adafruit_MCP230xx import MCP230XX_GPIO
+from Adafruit_CharLCD import Adafruit_CharLCD
+
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')
@@ -57,6 +60,11 @@ for module in modules:
    if mod_type == "lcd":
       if __debug__:
          print "LCD %s" % (address)
+      bus=1
+      address=0x20
+      bits=8
+      mcp = MCP230XX_GPIO(bus, address, bits)
+      devices_list.append(Devices(mod_type = mod_type, address = address, device_object = Adafruit_CharLCD(pin_rs=1, pin_e=2, pins_db=[3,4,5,6], GPIO=mcp)))
    elif mod_type == "teecee":
       if __debug__:
          print "teecee %s" % (address)

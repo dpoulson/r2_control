@@ -126,6 +126,9 @@ class ServoControl :
           self.servo_list[idx] = self.servo_list[idx]._replace(servoCurrent=actual_position)
           if __debug__:
              print "New current: %s" % self.servo_list[idx].servoCurrent
+   time.sleep(0.5)
+   self.i2c.setPWM(current_servo.channel, 4096, 0)
+
 
 
 

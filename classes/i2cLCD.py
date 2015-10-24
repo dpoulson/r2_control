@@ -20,7 +20,7 @@ import smbus,time
 from subprocess import * 
 from time import sleep, strftime
 from datetime import datetime
-
+from Adafruit_I2C import Adafruit_I2C
 
 
 
@@ -102,9 +102,10 @@ class i2cLCD:
     self.__displayfunction = self.__8BITMODE | self.__2LINE | self.__5x8DOTS
     self.__displaycontrol = self.__DISPLAYCONTROL | self.__DISPLAYON | self.__CURSORON | self.__BLINKON
     self.__data = 0
-    if (self.debug):
+    if __debug__:
       print "Clearing Screen"
-    self.i2c.write8(self.__CLEARDISPLAY, 0x00)
+    #self.i2c.write8(self.__CLEARDISPLAY, 0x00)
+    self.clear()
 
 
   def backlight(self,on):
