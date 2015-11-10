@@ -14,15 +14,15 @@ Random_Files = ['ALARM', 'Happy', 'HUM__', 'MISC_', 'Quote', 'RAZZ_', 'Sad__', '
 class AudioLibrary :
 
 
-  def init_config(self, audio_config_file):
-    "Load in CSV of Servo definitions"
-    config = ConfigParser.RawConfigParser()
-    config.read('config/%s' % audio_config_file)
+  def init_config(self, sounds_dir):
+    "Load in CSV of Audio definitions"
+    if __debug__:
+      print "Setting sounds directory to %s" % sounds_dir
 
-  def __init__(self, audio_config_file):
+  def __init__(self, sounds_dir):
     if __debug__:
       print "Initiating audio"
-    self.init_config(audio_config_file)
+    self.init_config(sounds_dir)
 
   def TriggerSound(self, data):
     if __debug__:

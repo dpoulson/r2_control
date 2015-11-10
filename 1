@@ -1,0 +1,17 @@
+#!/usr/bin/python
+import threading
+import time
+
+class ServoThread(threading.Thread):
+
+  def __init__(self, ):
+        threading.Thread.__init__(self, group=group, target=target, name=name, verbose=verbose)
+        self.args = args
+        self.kwargs = kwargs
+        print "Starting thread "
+        return
+
+  def run(self):
+     print "Test %s " % self.args
+     return
+

@@ -27,7 +27,7 @@ import time
 import collections
 # from i2cLCD import i2cLCD
 from Adafruit_PWM_Servo_Driver import PWM
-from R2_Servo_Control import ServoControl
+from ServoControl import ServoControl
 from TeeCee_I2C import TeeCeeI2C
 from AudioLibrary import AudioLibrary
 from Adafruit_MCP230xx import MCP230XX_GPIO
@@ -36,11 +36,11 @@ from Adafruit_CharLCD import Adafruit_CharLCD
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')
+sounds_dir = config.get('audio', 'sounds_dir')
 
 modules = config.sections()
 i2c_bus = config.getint('DEFAULT', 'busid')
 pipePath = config.get('DEFAULT', 'pipe')
-# debug = config.getboolean('DEFAULT', 'debug')
 debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
 
 devices_list = []
@@ -49,6 +49,16 @@ Devices = collections.namedtuple('Device', 'mod_type, address, device_object')
 
 ######################################
 # initialise modules
+# Initialise server controllers
+pwm_body = ServoControl(int(config.get('body', 'address'), 16), config.get('body', 'config_file'))
+pwm_dome = ServoControl(int(config.get('dome', 'address'), 16), config.get('dome', 'config_file'))
+# Initialise LCD
+lcd = Adafruit_CharLCD(pin_rs=1, pin_e=2, pins_db=[3,4,5,6], GPIO=MCP230XX_GPIO(1, int(config.get('lcd', 'address'), 16), int(config.get('lcd', 'bit'))))
+lcd.message("R2 Control\nBy Darren Poulson")
+# Initialise Audio
+r2audio = AudioLibrary(sounds_dir)
+
+'''
 x=0
 for module in modules:
    if __debug__:
@@ -80,6 +90,7 @@ for module in modules:
          print "Audio %s" % (address)
       devices_list.append(Devices(mod_type = mod_type, address = address, device_object = AudioLibrary(audioconfig)))
    x += 1
+'''
 
 app = Flask(__name__, template_folder='templates')
 
@@ -117,24 +128,16 @@ def servo_list():
       print "Listing servos"
    if request.method == 'GET':
       message = ""
-      for device in devices_list:
-         if device.mod_type == "servo":
-             message += device.device_object.list_servos(device.address)
-      return message
+      message += pwm_body.list_servos()
+      message += pwm_dome.list_servos()
+   return message
 
-@app.route('/servo/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
-def servo_move(servo_name, servo_position, servo_duration):
+@app.route('/servo/<location>/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
+def servo_move(location, servo_name, servo_position, servo_duration):
    """GET will move a selected servo to the required position over a set duration"""
    if request.method == 'GET':
-      for device in devices_list:
-         if device.mod_type == "servo":
-            try:
-               t=threading.Thread(target=device.device_object.servo_command(servo_name, servo_position, servo_duration) )
-               t.daemon = True
-               t.start()
-            except Exception:
-               print "Error: unable to start thread"
-      return "Ok"
+     pwm_body.servo_command(servo_name, servo_position, servo_duration) 
+   return "Ok"
 
 @app.route('/servo/close', methods=['GET'])
 def servo_close():
@@ -183,25 +186,14 @@ def audio_list():
    """GET gives a comma separated list of available sounds"""
    if request.method == 'GET':
       message = ""
-      for device in devices_list:
-         if device.mod_type == "audio":
-             message += device.device_object.ListSounds()
-      return message
+      message += r2audio.ListSounds()
+   return message
 
 @app.route('/audio/<name>', methods=['GET'])
 def audio(name):
    if request.method == 'GET':
-      for device in devices_list:
-         if device.mod_type == "audio":
-            if __debug__:
-               print "Audio %s " % (name)
-            try:
-               t=threading.Thread(target=device.device_object.TriggerSound(name) )
-               t.daemon=True
-               t.start()
-            except Exception:
-               print "Error: unable to start thread"
-      return "Ok"
+      r2audio.TriggerSound(name) 
+   return "Ok"
 
 @app.route('/audio/random/', methods=['GET'])
 @app.route('/audio/random/list', methods=['GET'])
@@ -209,25 +201,14 @@ def random_audio_list():
    """GET returns types of sounds available at random"""
    if request.method == 'GET':
       message = ""
-      for device in devices_list:
-         if device.mod_type == "audio":
-             message += device.device_object.ListRandomSounds()
-      return message
+      message += r2audio.ListRandomSounds()
+   return message
 
 @app.route('/audio/random/<name>', methods=['GET'])
 def random_audio(name):
    if request.method == 'GET':
-      for device in devices_list:
-         if device.mod_type == "audio":
-            if __debug__:
-               print "Audio %s " % (name)
-            try:
-               t=threading.Thread(target=device.device_object.TriggerRandomSound(name) )
-               t.daemon=True
-               t.start()
-            except Exception:
-               print "Error: unable to start thread"
-      return "Ok"
+      r2audio.TriggerRandomSound(name) 
+   return "Ok"
 
 
 
