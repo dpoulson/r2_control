@@ -28,6 +28,7 @@ import collections
 # from i2cLCD import i2cLCD
 from Adafruit_PWM_Servo_Driver import PWM
 from ServoControl import ServoControl
+from ScriptControl import ScriptControl
 from TeeCee_I2C import TeeCeeI2C
 from AudioLibrary import AudioLibrary
 from Adafruit_MCP230xx import MCP230XX_GPIO
@@ -36,7 +37,6 @@ from Adafruit_CharLCD import Adafruit_CharLCD
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')
-sounds_dir = config.get('audio', 'sounds_dir')
 
 modules = config.sections()
 i2c_bus = config.getint('DEFAULT', 'busid')
@@ -44,7 +44,6 @@ pipePath = config.get('DEFAULT', 'pipe')
 debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
 
 devices_list = []
-Devices = collections.namedtuple('Device', 'mod_type, address, device_object')
 
 
 ######################################
@@ -56,41 +55,9 @@ pwm_dome = ServoControl(int(config.get('dome', 'address'), 16), config.get('dome
 lcd = Adafruit_CharLCD(pin_rs=1, pin_e=2, pins_db=[3,4,5,6], GPIO=MCP230XX_GPIO(1, int(config.get('lcd', 'address'), 16), int(config.get('lcd', 'bit'))))
 lcd.message("R2 Control\nBy Darren Poulson")
 # Initialise Audio
-r2audio = AudioLibrary(sounds_dir)
-
-'''
-x=0
-for module in modules:
-   if __debug__:
-      print "Initialising module: %s" % module
-   mod_type = config.get(module, 'type')
-   address = config.get(module, 'address')
-   if __debug__:
-      print "Module is of type %s at address %s" % (mod_type, address)
-   if mod_type == "lcd":
-      if __debug__:
-         print "LCD %s" % (address)
-      bus=1
-      address=0x20
-      bits=8
-      mcp = MCP230XX_GPIO(bus, address, bits)
-      devices_list.append(Devices(mod_type = mod_type, address = address, device_object = Adafruit_CharLCD(pin_rs=1, pin_e=2, pins_db=[3,4,5,6], GPIO=mcp)))
-   elif mod_type == "teecee":
-      if __debug__:
-         print "teecee %s" % (address)
-      devices_list.append(Devices(mod_type = mod_type, address = address, device_object = TeeCeeI2C(address)))
-   elif mod_type == "servo":
-      servoconfig = config.get(module, 'config_file')
-      if __debug__:
-         print "Servo %s %s" % (address, servoconfig)
-      devices_list.append(Devices(mod_type = mod_type, address = address, device_object = ServoControl(address, servoconfig)))
-   elif mod_type == "audio":
-      audioconfig = config.get(module, 'config_file')
-      if __debug__:
-         print "Audio %s" % (address)
-      devices_list.append(Devices(mod_type = mod_type, address = address, device_object = AudioLibrary(audioconfig)))
-   x += 1
-'''
+r2audio = AudioLibrary(config.get('audio', 'sounds_dir'))
+# Initialise script object
+scripts = ScriptControl(config.get('scripts', 'script_dir'))
 
 app = Flask(__name__, template_folder='templates')
 
@@ -106,14 +73,6 @@ def index():
 def teecee(effect):
    """GET to fire off dome lighting effect """
    if request.method == 'GET':
-      for device in devices_list:
-         if device.mod_type == "teecee":
-            try:
-               t=threading.Thread(target=device.device_object.TriggerEffect(int(effect)) )
-               t.daemon = True
-               t.start()
-            except Exception:
-               print "Error: unable to start thread"
       return "Teecee"
 
 #############################
@@ -132,8 +91,8 @@ def servo_list():
       message += pwm_dome.list_servos()
    return message
 
-@app.route('/servo/<location>/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
-def servo_move(location, servo_name, servo_position, servo_duration):
+@app.route('/servo/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
+def servo_move(servo_name, servo_position, servo_duration):
    """GET will move a selected servo to the required position over a set duration"""
    if request.method == 'GET':
      pwm_body.servo_command(servo_name, servo_position, servo_duration) 
@@ -144,9 +103,8 @@ def servo_close():
    """GET to close all servos"""
    if request.method == 'GET':
       message = ""
-      for device in devices_list:
-         if device.mod_type == "servo":
-             device.device_object.close_all_servos(device.address)
+      pwm_body.close_all_servos()
+      pwm_dome.close_all_servos() 
       return "Ok"
 
 @app.route('/servo/open', methods=['GET'])
@@ -154,9 +112,8 @@ def servo_open():
    """GET to open all servos"""
    if request.method == 'GET':
       message = ""
-      for device in devices_list:
-         if device.mod_type == "servo":
-             device.device_object.open_all_servos(device.address)
+      pwm_body.open_all_servos()
+      pwm_dome.open_all_servos()
       return "Ok"
 
 
@@ -164,21 +121,32 @@ def servo_open():
 @app.route('/lcd/<message>', methods=['GET'])
 def lcd(message):
    if request.method == 'GET':
-      for device in devices_list:
-         if device.mod_type == "lcd":
-            try:
-               t=threading.Thread(target=device.device_object.TriggerLCD(int(message)) )
-               t.daemon = True
-               t.start()
-            except Exception:
-               print "Error: unable to start thread"
       return "Ok"
 
 @app.route('/script/', methods=['GET'])
 @app.route('/script/list', methods=['GET'])
+@app.route('/script/running', methods=['GET'])
+def running_scripts():
+   if request.method == 'GET':
+     message = ""
+     message += scripts.list_running()
+   return message
+
+@app.route('/script/stop/<script_id>', methods=['GET'])
+def stop_script(script_id):
+   if request.method == 'GET':
+     message = ""
+     message += scripts.stop_script(script_id)
+   return message
+
+
 @app.route('/script/<name>', methods=['GET'])
-def script(name):
+def start_script(name):
    """GET to trigger the named script"""
+   if request.method == 'GET':
+     message = ""
+     message += scripts.run_script(name)
+   return message
 
 @app.route('/audio/', methods=['GET'])
 @app.route('/audio/list', methods=['GET'])

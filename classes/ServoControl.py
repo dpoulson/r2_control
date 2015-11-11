@@ -71,14 +71,14 @@ class ServoControl :
 
   def close_all_servos(self):
     if __debug__:
-       print "Closing all servos for address: %s" % address
+       print "Closing all servos"
     for servo in self.servo_list:
        servo.queue.put([0, 0])
     return 
 
   def open_all_servos(self):
     if __debug__:
-       print "Closing all servos for address: %s" % address
+       print "Opening all servos"
     for servo in self.servo_list:
        servo.queue.put([1, 0])
     return
