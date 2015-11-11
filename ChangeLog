@@ -1,0 +1,19 @@
+ChangeLog
+=========
+
+0.1 - 2014 Darren Poulson <darren.poulson@gmail.com>
+
+This version used named pipes
+
+0.5 - 2015 Darren Poulson <darren.poulson@gmail.com>
+
+Changed to use Flask REST API implementation
+
+0.8 - 10/11/15 Darren Poulson <darren.poulson@gmail.com>
+
+Added threading support to allow multiple servos to move at once
+
+0.81 - 11/11/15 Darren Poulson <darren.poulson@gmail.com>
+
+Added scripting support
+

@@ -49,15 +49,20 @@ devices_list = []
 ######################################
 # initialise modules
 # Initialise server controllers
-pwm_body = ServoControl(int(config.get('body', 'address'), 16), config.get('body', 'config_file'))
-pwm_dome = ServoControl(int(config.get('dome', 'address'), 16), config.get('dome', 'config_file'))
+if "body" in modules:
+  pwm_body = ServoControl(int(config.get('body', 'address'), 16), config.get('body', 'config_file'))
+if "dome" in modules:
+  pwm_dome = ServoControl(int(config.get('dome', 'address'), 16), config.get('dome', 'config_file'))
 # Initialise LCD
-lcd = Adafruit_CharLCD(pin_rs=1, pin_e=2, pins_db=[3,4,5,6], GPIO=MCP230XX_GPIO(1, int(config.get('lcd', 'address'), 16), int(config.get('lcd', 'bit'))))
-lcd.message("R2 Control\nBy Darren Poulson")
+if "lcd" in modules:
+  lcd = Adafruit_CharLCD(pin_rs=1, pin_e=2, pins_db=[3,4,5,6], GPIO=MCP230XX_GPIO(1, int(config.get('lcd', 'address'), 16), int(config.get('lcd', 'bit'))))
+  lcd.write("R2 Control\nBy Darren Poulson")
 # Initialise Audio
-r2audio = AudioLibrary(config.get('audio', 'sounds_dir'))
+if "audio" in modules:
+  r2audio = AudioLibrary(config.get('audio', 'sounds_dir'))
 # Initialise script object
-scripts = ScriptControl(config.get('scripts', 'script_dir'))
+if "scripts" in modules:
+  scripts = ScriptControl(config.get('scripts', 'script_dir'))
 
 app = Flask(__name__, template_folder='templates')
 
@@ -119,14 +124,17 @@ def servo_open():
 
 
 @app.route('/lcd/<message>', methods=['GET'])
-def lcd(message):
+def lcd_write(message):
+   """GET to write a message to the LCD screen"""
    if request.method == 'GET':
-      return "Ok"
+     lcd.write("%s" % message)     
+   return "Ok"
 
 @app.route('/script/', methods=['GET'])
 @app.route('/script/list', methods=['GET'])
 @app.route('/script/running', methods=['GET'])
 def running_scripts():
+   """GET a list of all running scripts and their ID"""
    if request.method == 'GET':
      message = ""
      message += scripts.list_running()
@@ -134,6 +142,7 @@ def running_scripts():
 
 @app.route('/script/stop/<script_id>', methods=['GET'])
 def stop_script(script_id):
+   """GET a script ID to stop that script"""
    if request.method == 'GET':
      message = ""
      message += scripts.stop_script(script_id)
@@ -159,6 +168,7 @@ def audio_list():
 
 @app.route('/audio/<name>', methods=['GET'])
 def audio(name):
+   """GET to trigger the given sound"""
    if request.method == 'GET':
       r2audio.TriggerSound(name) 
    return "Ok"
@@ -174,6 +184,7 @@ def random_audio_list():
 
 @app.route('/audio/random/<name>', methods=['GET'])
 def random_audio(name):
+   """GET to play a random sound of a given type"""
    if request.method == 'GET':
       r2audio.TriggerRandomSound(name) 
    return "Ok"

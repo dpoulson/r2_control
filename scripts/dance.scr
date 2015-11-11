@@ -1,0 +1,6 @@
+body,LLD,1,0
+body,TopArm,1,0
+sleep,2
+body,LLD,0,0
+body,TopArm,0,0
+sleep,2

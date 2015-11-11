@@ -196,7 +196,7 @@ class Adafruit_CharLCD(object):
         self.GPIO.output(self.pin_e, False)
         self.delayMicroseconds(1)       # commands need > 37us to settle
 
-    def message(self, text):
+    def write(self, text):
         """ Send string to LCD. Newline wraps to second line"""
         LCD_LINES               = [ 0x80, 0xC0, 0x94, 0xD4 ]
         x=1

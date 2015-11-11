@@ -7,7 +7,7 @@ import urllib2
 
 script = ""
 
-keywords = ['dome', 'body', 'lights', 'sound', 'sleep']
+keywords = ['dome', 'body', 'lights', 'sound', 'sleep', 'end']
 
 class ScriptThread(threading.Thread):
 
@@ -47,4 +47,6 @@ class ScriptThread(threading.Thread):
             urllib2.urlopen("http://localhost:5000/audio/random/%s" % row[2] )
           else:
             urllib2.urlopen("http://localhost:5000/audio/%s" % row[1] )
+        if row[0] == "end":
+          self._stopevent.set()
     return
