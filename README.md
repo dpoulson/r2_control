@@ -9,6 +9,8 @@ Rewriting to use HTTP and REST.
 
 Flask
 
+Check out the wiki: https://github.com/dpoulson/r2_control/wiki
+
 Main process
 * Read config
 * Create objects
