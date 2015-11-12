@@ -149,12 +149,12 @@ def stop_script(script_id):
    return message
 
 
-@app.route('/script/<name>', methods=['GET'])
-def start_script(name):
+@app.route('/script/<name>/<loop>', methods=['GET'])
+def start_script(name, loop):
    """GET to trigger the named script"""
    if request.method == 'GET':
      message = ""
-     message += scripts.run_script(name)
+     message += scripts.run_script(name, loop)
    return message
 
 @app.route('/audio/', methods=['GET'])

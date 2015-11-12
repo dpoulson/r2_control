@@ -54,16 +54,26 @@ class ScriptControl :
     return "Ok"
 
 
-  def run_script(self, script):
-    self.running_scripts.append(self.Scripts(name = script, script_id = self.script_id, thread = ScriptThread(script)))
+  def run_script(self, script, loop):
+    idx = 0
+    current_id = 0
+    self.running_scripts.append(self.Scripts(name = script, script_id = self.script_id, thread = ScriptThread(script, loop)))
     if __debug__:
        print "ID %s" % self.script_id
     for scripts in self.running_scripts:
       if scripts.script_id == self.script_id:
+        current_id = scripts.script_id 
         scripts.thread.daemon=True
         scripts.thread.start()
     if __debug__:
        print "Starting script %s" % script
+    if loop == "1":
+       print "Looping"
+    else:
+      for script in self.running_scripts:
+        if int(script.script_id) == int(current_id):
+          self.running_scripts.pop(idx)
+        idx += 1
     self.script_id += 1
     return "Ok"
 
