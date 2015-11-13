@@ -5,53 +5,31 @@ include("include/config.php");
 ?>
 <html>
  <head>
-  <title>R2 Unit: Web control system - Audio</title>
+  <title>R2 Unit: Web control system - Scripts</title>
   <link href="r2d2.css" rel="stylesheet" type="text/css">
  </head>
 
  <body>
 <div id="container">
  <div id="header">
-  R2 Unit: Web control system - Audio
+  R2 Unit: Web control system - Scripts
  </div>
  <div>
 <?
 
 $play = $_GET["play"];
-$random = $_GET["random"];
+$loop = $_GET["loop"];
 
 if(isset($play)) {
    echo "Playing.... $play\n";
-   $url = "http://localhost:5000/audio/".$play;
+   $url = "http://localhost:5000/script/".$play."/".$loop;
    $handle = fopen($url, "r");
 }
 
-if(isset($random)) {
-   echo "Playing.... $play\n";
-   $url = "http://localhost:5000/audio/random/".$random;
-   $handle = fopen($url, "r");
-}
-
-
-$files = array_diff(scandir($sound_dir), array('..', '.'));
+$files = array_diff(scandir($script_dir), array('..', '.'));
 $num_files=sizeof($files);
 $num_rows=($num_files/$num_cols)+1;
 
-echo "<table cols=11>\n";
-echo "<tr>\n";
-echo " <td><a href=\"?random=alarm\">Alarm</a></td>\n";
-echo " <td><a href=\"?random=happy\">Happy</a></td>\n";
-echo " <td><a href=\"?random=hum\">Hum</a></td>\n";
-echo " <td><a href=\"?random=misc\">Misc</a></td>\n";
-echo " <td><a href=\"?random=quote\">Quotes</a></td>\n";
-echo " <td><a href=\"?random=razz\">Razz</a></td>\n";
-echo " <td><a href=\"?random=sad\">Sad</a></td>\n";
-echo " <td><a href=\"?random=sent\">Sent</a></td>\n";
-echo " <td><a href=\"?random=ooh\">Oooh</a></td>\n";
-echo " <td><a href=\"?random=proc\">Proc</a></td>\n";
-echo " <td><a href=\"?random=whistle\">Whistle</a></td>\n";
-echo "</tr>\n";
-echo "</table>\n";
 
 echo "<table cols=$num_cols>\n";
 
