@@ -12,7 +12,7 @@ include("include/config.php");
  <body>
 <div id="container">
  <div id="header">
-  R2 Unit: Web control system - Audio
+  <a href="/index.php">R2 Unit: Web control system</a> - Audio
  </div>
  <div>
 <?
@@ -32,8 +32,12 @@ if(isset($random)) {
    $handle = fopen($url, "r");
 }
 
-
-$files = array_diff(scandir($sound_dir), array('..', '.'));
+$url = "http://localhost:5000/audio/list";
+$fh = fopen($url, "r");
+$files = str_getcsv(str_replace(" ", "", stream_get_contents($fh)), ",");
+//$files = str_getcsv($filelist, ",");
+sort($files);
+# $files = array_diff(scandir($sound_dir), array('..', '.'));
 $num_files=sizeof($files);
 $num_rows=($num_files/$num_cols)+1;
 
@@ -58,12 +62,12 @@ echo "<table cols=$num_cols>\n";
 for ($i = 0 ; $i < $num_rows ; $i++) {
    $start_num = $i*$num_cols;
    echo "<tr>\n";
-   echo " <td><a href=\"?play=".substr($files[$start_num], 0, -4)."\">".substr($files[$start_num], 0, -4)."</a></td>\n";
-   echo " <td><a href=\"?play=".substr($files[$start_num+1], 0, -4)."\">".substr($files[$start_num+1], 0, -4)."</a></td>\n";
-   echo " <td><a href=\"?play=".substr($files[$start_num+2], 0, -4)."\">".substr($files[$start_num+2], 0, -4)."</a></td>\n";
-   echo " <td><a href=\"?play=".substr($files[$start_num+3], 0, -4)."\">".substr($files[$start_num+3], 0, -4)."</a></td>\n";
-   echo " <td><a href=\"?play=".substr($files[$start_num+4], 0, -4)."\">".substr($files[$start_num+4], 0, -4)."</a></td>\n";
-   echo " <td><a href=\"?play=".substr($files[$start_num+5], 0, -4)."\">".substr($files[$start_num+5], 0, -4)."</a></td>\n";
+   echo " <td><a href=\"?play=".$files[$start_num]."\">".$files[$start_num]."</a></td>\n";
+   echo " <td><a href=\"?play=".$files[$start_num+1]."\">".$files[$start_num+1]."</a></td>\n";
+   echo " <td><a href=\"?play=".$files[$start_num+2]."\">".$files[$start_num+2]."</a></td>\n";
+   echo " <td><a href=\"?play=".$files[$start_num+3]."\">".$files[$start_num+3]."</a></td>\n";
+   echo " <td><a href=\"?play=".$files[$start_num+4]."\">".$files[$start_num+4]."</a></td>\n";
+   echo " <td><a href=\"?play=".$files[$start_num+5]."\">".$files[$start_num+5]."</a></td>\n";
    echo "</td>\n";
 } 
 

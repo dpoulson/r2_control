@@ -23,6 +23,7 @@ from ScriptThread import ScriptThread
 import threading
 import Queue
 import time
+import glob
 import csv
 import collections
 
@@ -33,8 +34,16 @@ class ScriptControl :
   def __init__(self, script_dir):
     self.running_scripts = []
     self.script_id = 1
+    self.script_dir = script_dir
     if __debug__:
       print "Starting script object with path: %s" % script_dir
+
+  def list(self):
+    files = ', '.join(glob.glob("./scripts/*.scr"))
+    files = files.replace("./scripts/" ,"", -1)
+    files = files.replace(".scr", "", -1)
+    return files
+
 
   def list_running(self):
     message = ""

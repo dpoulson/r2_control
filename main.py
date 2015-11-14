@@ -19,6 +19,7 @@
 #===============================================================================
 
 from flask import Flask, request, render_template
+from flask.ext.classy import FlaskView
 import ConfigParser
 import os, sys
 sys.path.append("./classes/")
@@ -45,6 +46,7 @@ debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
 
 devices_list = []
 
+app = Flask(__name__, template_folder='templates')
 
 ######################################
 # initialise modules
@@ -73,6 +75,11 @@ def index():
                  for r in app.url_map.iter_rules()
                  if not r.rule.startswith('/static')])
     return render_template('index.html', urls=urls)
+
+#############################
+# Lights API calls
+#
+
 
 @app.route('/teecee/<int:effect>', methods=['GET'])
 def teecee(effect):
@@ -121,6 +128,9 @@ def servo_open():
       pwm_dome.open_all_servos()
       return "Ok"
 
+#############################
+# LCD API calls
+#
 
 
 @app.route('/lcd/<message>', methods=['GET'])
@@ -130,8 +140,20 @@ def lcd_write(message):
      lcd.write("%s" % message)     
    return "Ok"
 
+
+#############################
+# Script API calls
+#
+
 @app.route('/script/', methods=['GET'])
 @app.route('/script/list', methods=['GET'])
+def script_list():
+   """GET gives a comma separated list of available scripts"""
+   if request.method == 'GET':
+      message = ""
+      message += scripts.list()
+   return message
+
 @app.route('/script/running', methods=['GET'])
 def running_scripts():
    """GET a list of all running scripts and their ID"""
@@ -156,6 +178,11 @@ def start_script(name, loop):
      message = ""
      message += scripts.run_script(name, loop)
    return message
+
+
+#############################
+# Audio API calls
+#
 
 @app.route('/audio/', methods=['GET'])
 @app.route('/audio/list', methods=['GET'])

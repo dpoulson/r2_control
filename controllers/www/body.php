@@ -35,7 +35,7 @@ include("include/config.php");
  <body>
 <div id="container">
  <div id="header">
-  R2 Unit: Web control system - Dome
+  <a href="/index.php">R2 Unit: Web control system</a> - Body
  </div>
  <div id="diagram">
   <img width=400 border=0 src="Body.jpg">

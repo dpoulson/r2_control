@@ -30,7 +30,7 @@ import collections
 tick_duration = 100
 
 
-class ServoControl :
+class ServoControl() :
 
   # servo_list = [] # All servos, listed here.
 
