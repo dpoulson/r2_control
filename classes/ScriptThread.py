@@ -2,6 +2,7 @@
 import threading
 import Queue
 import time
+import random
 import csv
 import urllib2
 
@@ -46,8 +47,16 @@ class ScriptThread(threading.Thread):
     if len(row) != 0:
       if row[0] in keywords:
         if row[0] == "sleep":
-          time.sleep(float(row[1]))
+          if row[1] == "random":
+            stime = random.randint(int(row[2]), int(row[3]))
+            if __debug__:
+              print "Random sleep time: %s" % stime
+            time.sleep(float(stime)) 
+          else:
+            time.sleep(float(row[1]))
         if row[0] == "body":
+          urllib2.urlopen("http://localhost:5000/servo/%s/%s/%s" % ( row[1], row[2], row[3] ) )
+        if row[0] == "dome":
           urllib2.urlopen("http://localhost:5000/servo/%s/%s/%s" % ( row[1], row[2], row[3] ) )
         if row[0] == "sound":
           if row[1] == "random":
