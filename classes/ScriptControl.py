@@ -61,6 +61,15 @@ class ScriptControl :
         self.running_scripts.pop(idx)
       idx += 1  
     return "Ok"
+  
+  def stop_all(self):
+    idx = 0
+    if __debug__:
+      print "Trying to stop all scripts"
+    for script in self.running_scripts:
+      self.stop_script(script.script_id)
+    idx += 1
+    return "Ok"
 
 
   def run_script(self, script, loop):

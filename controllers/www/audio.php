@@ -19,6 +19,13 @@ include("include/config.php");
 
 $play = $_GET["play"];
 $random = $_GET["random"];
+$vol = $_GET["vol"];
+
+if(isset($vol)) {
+   $url = "http://localhost:5000/audio/volume/".$vol;
+   $handle = fopen($url, "r");
+}
+
 
 if(isset($play)) {
    echo "Playing.... $play\n";
@@ -31,6 +38,11 @@ if(isset($random)) {
    $url = "http://localhost:5000/audio/random/".$random;
    $handle = fopen($url, "r");
 }
+
+$url = "http://localhost:5000/audio/volume";
+$fh = fopen($url, "r");
+echo "Current Volume: ".round(stream_get_contents($fh), 2)."<br />";
+echo "<a href=\"?vol=up\">Volume Up</a> | <a href=\"?vol=down\">Volume Down</a>";
 
 $url = "http://localhost:5000/audio/list";
 $fh = fopen($url, "r");

@@ -167,7 +167,10 @@ def stop_script(script_id):
    """GET a script ID to stop that script"""
    if request.method == 'GET':
      message = ""
-     message += scripts.stop_script(script_id)
+     if script_id == "all":
+        message += scripts.stop_all()
+     else: 
+        message += scripts.stop_script(script_id)
    return message
 
 
@@ -216,6 +219,19 @@ def random_audio(name):
       r2audio.TriggerRandomSound(name) 
    return "Ok"
 
+@app.route('/audio/volume', methods=['GET'])
+def get_volume():
+   if request.method == 'GET':
+     message = ""
+     message += r2audio.ShowVolume()
+   return message
+
+@app.route('/audio/volume/<level>', methods=['GET'])
+def set_volume(level):
+   if request.method == 'GET':
+     message = ""
+     message += r2audio.SetVolume(level)
+   return message
 
 
 

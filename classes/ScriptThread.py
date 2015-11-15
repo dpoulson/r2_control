@@ -8,13 +8,15 @@ import urllib2
 
 script = ""
 loop = False
+lock = threading.Lock()
+
 
 keywords = ['dome', 'body', 'lights', 'sound', 'sleep']
 
 class ScriptThread(threading.Thread):
 
   def __init__(self, script, loop):
-    print "Initialising script thread"
+    print "Initialising script thread with looping set to: %s" % loop
     self.script = script
     self.loop = int(loop)
     self._stopevent = threading.Event()
@@ -26,8 +28,14 @@ class ScriptThread(threading.Thread):
     while not self._stopevent.isSet():
       ifile = open('scripts/%s.scr' % self.script, "rb")
       reader = csv.reader(ifile)
-      for row in reader:
-        self.parse_row(row)
+      if self.loop != 1:
+        with lock:
+          print "....With lock"
+          for row in reader:
+            self.parse_row(row)
+      else:
+        for row in reader:
+          self.parse_row(row)
       if self.loop == 1:
         if __debug__:
           print "Looping..."

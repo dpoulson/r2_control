@@ -11,6 +11,7 @@ from pygame import mixer # Load the required library
 Random_Sounds = ['alarm', 'happy', 'hum', 'misc', 'quote', 'razz', 'sad', 'sent', 'ooh', 'proc', 'whistle']
 Random_Files = ['ALARM', 'Happy', 'HUM__', 'MISC_', 'Quote', 'RAZZ_', 'Sad__', 'SENT_', 'OOH__', 'PROC_', 'WHIST']
 
+
 class AudioLibrary :
 
 
@@ -23,12 +24,14 @@ class AudioLibrary :
     if __debug__:
       print "Initiating audio"
     self.init_config(sounds_dir)
+    mixer.init()
+    mixer.music.set_volume(0.5)
 
   def TriggerSound(self, data):
     if __debug__:
       print "Playing %s" % data
     audio_file = "./sounds/" + data + ".mp3"
-    mixer.init()
+   # mixer.init()
     if __debug__:
       print "Init mixer"
     mixer.music.load(audio_file) # % (audio_dir, data))
@@ -66,7 +69,28 @@ class AudioLibrary :
   def ListRandomSounds(self):
     types = ', '.join(Random_Sounds)
     return types
+  
+  def ShowVolume(self):
+    cur_vol = str(mixer.music.get_volume())
+    return cur_vol    
 
-
-
+  def SetVolume(self, level):
+    if level == "up":
+      if __debug__:
+        print "Increasing volume"
+      new_level = mixer.music.get_volume() + 0.1
+    elif level == "down":
+      if __debug__:
+        print "Decreasing volume"
+      new_level = mixer.music.get_volume() - 0.1  
+    else:
+      if __debug__:
+        print "Volume level explicitly states"
+      new_level = level
+    if new_level < 0:
+      new_level = 0
+    if __debug__:
+      print "Setting volume to: %s" % new_level
+    mixer.music.set_volume(float(new_level)) 
+    return "Ok"
 
