@@ -66,6 +66,7 @@ echo " <td><a href=\"?random=sent\">Sent</a></td>\n";
 echo " <td><a href=\"?random=ooh\">Oooh</a></td>\n";
 echo " <td><a href=\"?random=proc\">Proc</a></td>\n";
 echo " <td><a href=\"?random=whistle\">Whistle</a></td>\n";
+echo " <td><a href=\"?random=scream\">Scream</a></td>\n";
 echo "</tr>\n";
 echo "</table>\n";
 

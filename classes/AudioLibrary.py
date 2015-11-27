@@ -8,8 +8,8 @@ import collections
 import random
 from pygame import mixer # Load the required library
 
-Random_Sounds = ['alarm', 'happy', 'hum', 'misc', 'quote', 'razz', 'sad', 'sent', 'ooh', 'proc', 'whistle']
-Random_Files = ['ALARM', 'Happy', 'HUM__', 'MISC_', 'Quote', 'RAZZ_', 'Sad__', 'SENT_', 'OOH__', 'PROC_', 'WHIST']
+Random_Sounds = ['alarm', 'happy', 'hum', 'misc', 'quote', 'razz', 'sad', 'sent', 'ooh', 'proc', 'whistle', 'scream']
+Random_Files = ['ALARM', 'Happy', 'HUM__', 'MISC_', 'Quote', 'RAZZ_', 'Sad__', 'SENT_', 'OOH__', 'PROC_', 'WHIST', 'SCREA']
 
 
 class AudioLibrary :
@@ -78,11 +78,11 @@ class AudioLibrary :
     if level == "up":
       if __debug__:
         print "Increasing volume"
-      new_level = mixer.music.get_volume() + 0.1
+      new_level = mixer.music.get_volume() + 0.025
     elif level == "down":
       if __debug__:
         print "Decreasing volume"
-      new_level = mixer.music.get_volume() - 0.1  
+      new_level = mixer.music.get_volume() - 0.025
     else:
       if __debug__:
         print "Volume level explicitly states"
