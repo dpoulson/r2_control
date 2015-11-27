@@ -25,7 +25,7 @@ class AudioLibrary :
       print "Initiating audio"
     self.init_config(sounds_dir)
     mixer.init()
-    mixer.music.set_volume(0.5)
+    mixer.music.set_volume(0.1)
 
   def TriggerSound(self, data):
     if __debug__:
