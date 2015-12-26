@@ -31,3 +31,11 @@ APIs Implemented:
  * /lights/<effect> - Triggers pre programmed Teecee <effect>
  * /lcd - TBD
 
+
+Install
+=======
+
+Needed packages:
+
+apt-get install apache2 php5 libapache2-mod-php5 python-flask python-smbus
+

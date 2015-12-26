@@ -1,4 +1,4 @@
-<?
+<?php
 
 include("include/config.php");
 
@@ -15,7 +15,7 @@ include("include/config.php");
   <a href="/index.php">R2 Unit: Web control system</a> - Scripts
  </div>
  <div>
-<?
+<?php
 
 $play = $_GET["play"];
 $loop = $_GET["loop"];

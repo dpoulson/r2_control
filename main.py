@@ -19,7 +19,7 @@
 #===============================================================================
 
 from flask import Flask, request, render_template
-from flask.ext.classy import FlaskView
+# from flask.ext.classy import FlaskView
 import ConfigParser
 import os, sys
 sys.path.append("./classes/")

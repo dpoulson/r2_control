@@ -1,4 +1,4 @@
-<?
+<?php
 
 include("include/config.php");
 
@@ -46,7 +46,7 @@ include("include/config.php");
     <th>Panel</th>
     <th colspan=2>Control</th>
    </tr>
-  <?
+  <?php
 
     foreach ($panels as $panel) {
       if (in_array($panel, $list)) {
