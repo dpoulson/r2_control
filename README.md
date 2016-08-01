@@ -37,5 +37,6 @@ Install
 
 Needed packages:
 
-apt-get install apache2 php5 libapache2-mod-php5 python-flask python-smbus
+apt-get install apache2 php5 libapache2-mod-php5 python-flask python-smbus hostapd dnsmasq
+
 
