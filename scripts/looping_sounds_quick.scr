@@ -1,0 +1,9 @@
+sound,random,happy
+sleep,random,15,30
+sound,random,proc
+sleep,random,15,30
+sound,random,misc
+sleep,random,15,30
+sound,random,razz
+sleep,random,15,30
+
