@@ -15,7 +15,7 @@ Random_Files = ['ALARM', 'Happy', 'HUM__', 'MISC_', 'Quote', 'RAZZ_', 'Sad__', '
 class AudioLibrary :
 
 
-  def init_config(self, sounds_dir):
+  def init_config(self, sounds_dir, volume):
     "Load in CSV of Audio definitions"
     if __debug__:
       print "Setting sounds directory to %s" % sounds_dir
@@ -25,7 +25,7 @@ class AudioLibrary :
       print "Initiating audio"
     self.init_config(sounds_dir)
     mixer.init()
-    mixer.music.set_volume(0.1)
+    mixer.music.set_volume(volume)
 
   def TriggerSound(self, data):
     if __debug__:

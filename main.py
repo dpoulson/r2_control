@@ -61,7 +61,7 @@ if "lcd" in modules:
   lcd.write("R2 Control\nBy Darren Poulson")
 # Initialise Audio
 if "audio" in modules:
-  r2audio = AudioLibrary(config.get('audio', 'sounds_dir'))
+  r2audio = AudioLibrary(config.get('audio', 'sounds_dir'), config.get('audio', 'volume'))
 # Initialise script object
 if "scripts" in modules:
   scripts = ScriptControl(config.get('scripts', 'script_dir'))
