@@ -12,7 +12,7 @@ include("include/config.php");
 <?php
 
  $panels = array("PP1", "PP2", "PERI", "PP5", "PP6", "P1", "P2", "P3", "P4", "P7", "P10");
- $servo_list = file_get_contents("http://localhost:5000/servo/list");
+ $servo_list = file_get_contents("http://localhost:5000/servo/dome/list");
  $convert = explode("\n", $servo_list);
 
  for ($i=0;$i<count($convert);$i++)  

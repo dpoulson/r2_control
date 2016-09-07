@@ -103,6 +103,28 @@ def servo_list():
       message += pwm_dome.list_servos()
    return message
 
+@app.route('/servo/dome/list', methods=['GET'])
+def servo_list_dome():
+   """GET to list all current servos and position"""
+   if __debug__:
+      print "Listing servos"
+   if request.method == 'GET':
+      message = ""
+      message += pwm_dome.list_servos()
+   return message
+
+@app.route('/servo/body/list', methods=['GET'])
+def servo_list_body():
+   """GET to list all current servos and position"""
+   if __debug__:
+      print "Listing servos"
+   if request.method == 'GET':
+      message = ""
+      message += pwm_body.list_servos()
+   return message
+
+
+
 @app.route('/servo/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
 def servo_move(servo_name, servo_position, servo_duration):
    """GET will move a selected servo to the required position over a set duration"""
