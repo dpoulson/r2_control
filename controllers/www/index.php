@@ -13,6 +13,7 @@
  <li><a href="scripts.php">Scripting</a></li>
  <li><a href="audio.php">Audio</a></li>
  <li>Debug</li>
+ <li><a href="shutdown.php">Shutdown</a></li>
 </ul>
 
 </body>

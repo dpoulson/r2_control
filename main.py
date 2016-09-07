@@ -233,6 +233,11 @@ def set_volume(level):
      message += r2audio.SetVolume(level)
    return message
 
+@app.route('/shutdown/now', methods=['GET'])
+def shutdown():
+   if request.method == 'GET':
+     os.system('shutdown now -h')
+   return "Shutting down"
 
 
 if __name__ == '__main__':
