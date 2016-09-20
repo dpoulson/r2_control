@@ -29,9 +29,10 @@ keys = {}
 with open('keys.csv', mode='r') as infile:
    reader = csv.reader(infile)
    for row in reader:
-      print "Row: %s | %s " % (row[0], row[1])
+      print "Row: %s | %s | %s" % (row[0], row[1], row[2])
       #keys += {row[0]:row[1]}
-      keys[row[0]] = row[1]
+      keys[row[0]][0] = row[1]
+      keys[row[0]][1] = row[2]
 
 # Main loop
 while True:
@@ -45,9 +46,14 @@ while True:
          combo = buf.getvalue()
          print "Buttons: %s" % combo
          try:
-            newurl = baseurl + keys[combo]
+            newurl = baseurl + keys[combo][0]
             print "URL: %s" % newurl
             r = requests.get(newurl)
+            if keys[combo][1] != "":
+               print "Running on button release option"
+               newurl = baseurl + keys[combo][0]
+               print "URL: %s" % newurl
+               r = requests.get(newurl)
          except:
             print "No combo"
 
