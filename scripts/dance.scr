@@ -1,6 +1,9 @@
 body,LLD,1,0
-body,TopArm,1,0
+body,BotArm,1,0
+body,BotArm,0.8,0
+body,BotArm,0.9,1
+body,BotArm,0.8,0
 sleep,2
 body,LLD,0,0
-body,TopArm,0,0
-sleep,2
+body,BotArm,0,0
+sleep,1
