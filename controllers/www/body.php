@@ -25,7 +25,7 @@ include("include/config.php");
  $value=$_GET["value"];
 
  if (isset($servo_name)) {
-   $url = "http://localhost:5000/servo/".$servo_name."/".$value."/0";
+   $url = "http://localhost:5000/servo/body/".$servo_name."/".$value."/0";
    $handle = fopen($url, "r");
  }
 

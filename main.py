@@ -125,11 +125,14 @@ def servo_list_body():
 
 
 
-@app.route('/servo/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
-def servo_move(servo_name, servo_position, servo_duration):
+@app.route('/servo/<part>/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
+def servo_move(part, servo_name, servo_position, servo_duration):
    """GET will move a selected servo to the required position over a set duration"""
    if request.method == 'GET':
-     pwm_body.servo_command(servo_name, servo_position, servo_duration) 
+     if part == 'body':
+        pwm_body.servo_command(servo_name, servo_position, servo_duration) 
+     if part == 'dome': 
+        pwm_dome.servo_command(servo_name, servo_position, servo_duration)
    return "Ok"
 
 @app.route('/servo/close', methods=['GET'])
