@@ -1,0 +1,10 @@
+dome,P1,1,20
+sleep,0.1
+dome,P2,1,20
+sleep,0.1
+dome,P3,1,20
+sleep,2 
+dome,P1,0,20
+dome,P2,0,20
+dome,P3,0,20
+

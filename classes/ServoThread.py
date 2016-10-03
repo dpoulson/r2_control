@@ -66,7 +66,7 @@ class ServoThread(threading.Thread):
          self.Current = actual_position 
          if __debug__:
            print "New current: %s" % self.Current
-       time.sleep(0.2)
+       time.sleep(0.3)
        self.i2c.setPWM(self.Channel, 4096, 0)
      return
 

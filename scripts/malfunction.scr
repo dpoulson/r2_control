@@ -1,10 +1,25 @@
-audio,failure
+sound,FAILURE
 dome,PP1,1,0
-body,LLD,1,0
+dome,PP2,1,0
 body,TopArm,0.4,0
-body,RLD,0.4,0
 sleep 0.1
 dome,PP1,0.5,0
-body,LLD,0.2,0
+dome,PP2,0.2,0
 body,TopArm,0.2,0
-body,RLD,0.7,0
+sleep 0.1
+dome,PP1,0.8,0
+dome,PP2,0.5,0
+body,TopArm,0.7,0
+sleep 0.1
+dome,PP1,0.9,0
+dome,PP2,0.2,0
+body,TopArm,0.1,0
+sleep 0.1
+dome,PP1,0.1,0
+dome,PP2,0.8,0
+body,TopArm,0.7,0
+sleep 2
+dome,PP1,0,0
+dome,PP2,0,0
+body,TopArm,0,0
+
