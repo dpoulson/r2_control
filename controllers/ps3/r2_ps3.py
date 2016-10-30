@@ -71,6 +71,26 @@ while True:
             print "Command done"
          except:
             print "No combo (released)"
+      if event.type == pygame.JOYAXISMOTION:
+         if (event.dict['axis'] < 3):
+            str = "Axis: %s; Value: %f" % (event.dict['axis'], event.dict['value'])
+	    print str
+            if (event.dict['axis'] == 1): 
+               x = ((1.01 + event.dict['value'])/2)
+               if (x > 1):
+                 x = 1
+               if (x < 0):
+                 x = 0
+               x_str = '%.5f' % x
+               print x_str
+               newurl = baseurl + "servo/body/DRIVE/" + x_str + "/0"
+               print "URL: %s" % newurl
+               try:
+                  r = requests.get(newurl)
+               except:
+                  print "Fail"
+               print "Command done"
+
 
 
 
