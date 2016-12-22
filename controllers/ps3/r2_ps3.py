@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 import sys
 import pygame
@@ -7,6 +9,19 @@ import csv
 import requests
 from collections import defaultdict
 from cStringIO import StringIO
+sys.path.append('/home/pi/r2_control/classes/')
+from Adafruit_PWM_Servo_Driver import PWM
+
+PS3_AXIS_LEFT_VERTICAL = 1
+PS3_AXIS_LEFT_HORIZONTAL = 0
+
+SERVO_DRIVE = 14
+SERVO_STEER = 13
+
+#PWM ranges
+SERVO_FULL_CW = 100
+SERVO_STOP = 400
+SERVO_FULL_CCW = 800
 
 baseurl = "http://localhost:5000/"
  
@@ -40,6 +55,22 @@ with open('keys.csv', mode='r') as infile:
 
 keys.items()
 
+def driveServo(channel, speed):
+   #calculate PWM pulse (32 is the range between SERVO_STOP and SERVO_FULL)
+   pulse = SERVO_STOP
+   if speed != 0:
+      pulse = (speed * 190) + SERVO_STOP
+
+   #tell servo what to do
+   pwm.setPWM(channel, 0, int(pulse))
+
+
+print "Initialised... entering main loop..."
+
+pwm = PWM(0x40, debug=True)
+pwm.setPWMFreq(50) # Set frequency to 60 Hz
+
+
 # Main loop
 while True:
    global previous
@@ -56,7 +87,10 @@ while True:
             print "Would run: %s" % keys[combo]
             newurl = baseurl + keys[combo][0]
             print "URL: %s" % newurl
-            r = requests.get(newurl)
+            try:
+               r = requests.get(newurl)
+            except:
+               print "No connection"
             print "Command done"
          except:
             print "No combo (pressed)"
@@ -67,31 +101,18 @@ while True:
             print "Would run: %s" % keys[previous][1]
             newurl = baseurl + keys[previous][1]
             print "URL: %s" % newurl
-            r = requests.get(newurl)
+            try:
+               r = requests.get(newurl)
+            except:
+               print "No connection"
             print "Command done"
          except:
             print "No combo (released)"
       if event.type == pygame.JOYAXISMOTION:
-         if (event.dict['axis'] < 3):
-            str = "Axis: %s; Value: %f" % (event.dict['axis'], event.dict['value'])
-	    print str
-            if (event.dict['axis'] == 1): 
-               x = ((1.01 + event.dict['value'])/2)
-               if (x > 1):
-                 x = 1
-               if (x < 0):
-                 x = 0
-               x_str = '%.5f' % x
-               print x_str
-               newurl = baseurl + "servo/body/DRIVE/" + x_str + "/0"
-               print "URL: %s" % newurl
-               try:
-                  r = requests.get(newurl)
-               except:
-                  print "Fail"
-               print "Command done"
-
-
-
+         if event.axis == PS3_AXIS_LEFT_VERTICAL:
+            print "Value: %s" % event.value
+            driveServo(SERVO_DRIVE, event.value)
+         elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
+            driveServo(SERVO_STEER, event.value)
 
 
