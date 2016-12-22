@@ -17,3 +17,6 @@ Added threading support to allow multiple servos to move at once
 
 Added scripting support
 
+0.82 - 22/12/16 Darren Poulson <darren.poulson@gmail.com>
+
+Added PS3 controller support with direct i2c control over main drive
