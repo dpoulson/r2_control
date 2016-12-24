@@ -264,6 +264,12 @@ def shutdown():
      os.system('shutdown now -h')
    return "Shutting down"
 
+@app.route('/controller/ps3/<js>', methods=['GET'])
+def controller(js):
+   if request.method == 'GET':
+     os.system('/home/pi/r2_control/controllers/ps3/r2_ps3.py -j 0');
+   return "Started Controller"
+
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', debug=True, use_reloader=False)
