@@ -14,7 +14,9 @@ from Adafruit_PWM_Servo_Driver import PWM
 
 PS3_AXIS_LEFT_VERTICAL = 1
 PS3_AXIS_LEFT_HORIZONTAL = 0
+PS3_AXIS_RIGHT_HORIZONTAL = 2
 
+SERVO_DOME = 15
 SERVO_DRIVE = 14
 SERVO_STEER = 13
 
@@ -110,10 +112,13 @@ while True:
             print "No combo (released)"
       if event.type == pygame.JOYAXISMOTION:
          if event.axis == PS3_AXIS_LEFT_VERTICAL:
-            #print "Value: %s" % event.value
+            #print "Value (Drive): %s" % event.value
             driveServo(SERVO_DRIVE, event.value)
          elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
-            print "Value: %s" % event.value
+            #print "Value (Steer): %s" % event.value
             driveServo(SERVO_STEER, event.value)
+         elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
+            print "Value (Dome): %s" % event.value
+            driveServo(SERVO_DOME, event.value)
 
 
