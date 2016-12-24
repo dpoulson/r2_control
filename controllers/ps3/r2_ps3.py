@@ -20,7 +20,7 @@ SERVO_STEER = 13
 
 #PWM ranges
 SERVO_FULL_CW = 100
-SERVO_STOP = 400
+SERVO_STOP = 340
 SERVO_FULL_CCW = 800
 
 baseurl = "http://localhost:5000/"
@@ -59,7 +59,7 @@ def driveServo(channel, speed):
    #calculate PWM pulse (32 is the range between SERVO_STOP and SERVO_FULL)
    pulse = SERVO_STOP
    if speed != 0:
-      pulse = (speed * 190) + SERVO_STOP
+      pulse = (speed * 100) + SERVO_STOP
 
    #tell servo what to do
    pwm.setPWM(channel, 0, int(pulse))
@@ -110,9 +110,10 @@ while True:
             print "No combo (released)"
       if event.type == pygame.JOYAXISMOTION:
          if event.axis == PS3_AXIS_LEFT_VERTICAL:
-            print "Value: %s" % event.value
+            #print "Value: %s" % event.value
             driveServo(SERVO_DRIVE, event.value)
          elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
+            print "Value: %s" % event.value
             driveServo(SERVO_STEER, event.value)
 
 
