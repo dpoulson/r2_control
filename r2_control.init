@@ -18,7 +18,7 @@ case "$1" in
   start)
     log_begin_msg "Starting r2_control"
     cd /home/pi/r2_control
-    python main.py
+    python -O main.py
     log_end_msg $?
     exit 0
     ;;

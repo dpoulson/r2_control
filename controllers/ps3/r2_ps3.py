@@ -29,12 +29,12 @@ baseurl = "http://localhost:5000/"
  
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-
 pygame.display.init()
 pygame.init()
 
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-print "Framebuffer size: %d x %d" % (size[0], size[1])
+if __debug__:
+  print "Framebuffer size: %d x %d" % (size[0], size[1])
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 screen.fill((0, 0, 0))        
 pygame.display.update()
@@ -48,12 +48,10 @@ keys = defaultdict(list)
 with open('keys.csv', mode='r') as infile:
    reader = csv.reader(infile)
    for row in reader:
-      print "Row: %s | %s | %s" % (row[0], row[1], row[2])
+      if __debug__:
+        print "Row: %s | %s | %s" % (row[0], row[1], row[2])
       keys[row[0]].append(row[1])
       keys[row[0]].append(row[2])
-#      keys.update({row[0]:row[1]})
-#      keys[row[0]][0] = row[1]
-#      keys[row[0]][1] = row[2]
 
 keys.items()
 
@@ -64,6 +62,8 @@ def driveServo(channel, speed):
       pulse = (speed * 100) + SERVO_STOP
 
    #tell servo what to do
+   if __debug__:
+      print "Channel %s : speed %5.5f : pulse %5.5f" % (channel,speed,pulse)
    pwm.setPWM(channel, 0, int(pulse))
 
 
@@ -84,41 +84,48 @@ while True:
             button = j.get_button(i)
             buf.write(str(button))
          combo = buf.getvalue()
-         print "Buttons pressed: %s" % combo
+         if __debug__:
+            print "Buttons pressed: %s" % combo
          try:
-            print "Would run: %s" % keys[combo]
             newurl = baseurl + keys[combo][0]
-            print "URL: %s" % newurl
+            if __debug__:
+               print "Would run: %s" % keys[combo]
+               print "URL: %s" % newurl
             try:
                r = requests.get(newurl)
             except:
                print "No connection"
-            print "Command done"
          except:
-            print "No combo (pressed)"
+            if __debug__:
+               print "No combo (pressed)"
          previous = combo 
       if event.type == pygame.JOYBUTTONUP:
-         print "Buttons released: %s" % previous
+         if __debug__:
+            print "Buttons released: %s" % previous
          try:
-            print "Would run: %s" % keys[previous][1]
             newurl = baseurl + keys[previous][1]
-            print "URL: %s" % newurl
+            if __debug__:
+               print "Would run: %s" % keys[previous][1]
+               print "URL: %s" % newurl
             try:
                r = requests.get(newurl)
             except:
                print "No connection"
-            print "Command done"
          except:
-            print "No combo (released)"
+            if __debug__:
+               print "No combo (released)"
       if event.type == pygame.JOYAXISMOTION:
          if event.axis == PS3_AXIS_LEFT_VERTICAL:
-            #print "Value (Drive): %s" % event.value
+            if __debug__:
+               print "Value (Drive): %s" % event.value
             driveServo(SERVO_DRIVE, event.value)
          elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
-            #print "Value (Steer): %s" % event.value
+            if __debug__:
+               print "Value (Steer): %s" % event.value
             driveServo(SERVO_STEER, event.value)
          elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
-            print "Value (Dome): %s" % event.value
+            if __debug__:
+               print "Value (Dome): %s" % event.value
             driveServo(SERVO_DOME, event.value)
 
 

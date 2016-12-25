@@ -267,7 +267,7 @@ def shutdown():
 @app.route('/controller/ps3/<js>', methods=['GET'])
 def controller(js):
    if request.method == 'GET':
-     os.system('/home/pi/r2_control/controllers/ps3/r2_ps3.py -j 0');
+     os.system('python -O /home/pi/r2_control/controllers/ps3/r2_ps3.py -j 0');
    return "Started Controller"
 
 

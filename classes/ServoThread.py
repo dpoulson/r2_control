@@ -18,7 +18,8 @@ Channel = 0
 class ServoThread(threading.Thread):
 
   def __init__(self, Address, Max, Min, Home, Channel, q):
-        print "Initialising thread"
+        if __debug__:
+          print "Initialising thread"
 	self.q = q
         self.Address = Address
         self.Max = Max
@@ -32,7 +33,8 @@ class ServoThread(threading.Thread):
         return
 
   def run(self):
-     print "Starting Thread"
+     if __debug__:
+       print "Starting Thread"
      while True:
        command = self.q.get()
        position = command[0]
@@ -63,9 +65,9 @@ class ServoThread(threading.Thread):
        # Save current position of servo
        if __debug__:
          print "Servo move finished. Servo.name: %s ServoCurrent %s Tick %s" % ("Test", self.Current, actual_position)
-         self.Current = actual_position 
-         if __debug__:
-           print "New current: %s" % self.Current
+       self.Current = actual_position 
+       if __debug__:
+         print "New current: %s" % self.Current
        time.sleep(0.3)
        self.i2c.setPWM(self.Channel, 4096, 0)
      return
