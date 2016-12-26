@@ -21,9 +21,9 @@ SERVO_DRIVE = 14
 SERVO_STEER = 13
 
 #PWM ranges
-SERVO_FULL_CW = 100
-SERVO_STOP = 340
-SERVO_FULL_CCW = 800
+SERVO_FULL_CW = 245
+SERVO_STOP = 370
+SERVO_FULL_CCW = 495
 
 baseurl = "http://localhost:5000/"
  
@@ -59,7 +59,7 @@ def driveServo(channel, speed):
    #calculate PWM pulse (32 is the range between SERVO_STOP and SERVO_FULL)
    pulse = SERVO_STOP
    if speed != 0:
-      pulse = (speed * 100) + SERVO_STOP
+      pulse = (speed * (SERVO_STOP - SERVO_FULL_CW)) + SERVO_STOP
 
    #tell servo what to do
    if __debug__:

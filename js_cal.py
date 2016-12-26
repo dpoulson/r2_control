@@ -8,15 +8,19 @@ import time
 import os
 
 channel = sys.argv[1]
-print "Channel %s" % channel
+freq = 60
+print "Channel %s : Frequency %s" % (channel,freq)
 
 def driveServo(channel, pulse):
+   period = 1/float(freq)
+   bit_duration = period/4096
+   pulse_duration = bit_duration*pulse*1000000
    if __debug__:
-      print "Channel %s : pulse %5.5f" % (channel,pulse)
+      print "Channel %s : pulse %5.5f : Duration: %s" % (channel,pulse,pulse_duration)
    pwm.setPWM(channel, 0, int(pulse))
 
 pwm = PWM(0x40, debug=True)
-pwm.setPWMFreq(50) # Set frequency to 60 Hz
+pwm.setPWMFreq(freq) # Set frequency to 60 Hz
 
 while True:
    global pulse
