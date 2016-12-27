@@ -12,6 +12,8 @@ from cStringIO import StringIO
 sys.path.append('/home/pi/r2_control/classes/')
 from Adafruit_PWM_Servo_Driver import PWM
 
+freq = 60
+
 PS3_AXIS_LEFT_VERTICAL = 1
 PS3_AXIS_LEFT_HORIZONTAL = 0
 PS3_AXIS_RIGHT_HORIZONTAL = 2
@@ -21,9 +23,8 @@ SERVO_DRIVE = 14
 SERVO_STEER = 13
 
 #PWM ranges
-SERVO_FULL_CW = 245
+SERVO_FULL_CW = 290
 SERVO_STOP = 370
-SERVO_FULL_CCW = 495
 
 baseurl = "http://localhost:5000/"
  
@@ -56,21 +57,26 @@ with open('keys.csv', mode='r') as infile:
 keys.items()
 
 def driveServo(channel, speed):
+
    #calculate PWM pulse (32 is the range between SERVO_STOP and SERVO_FULL)
    pulse = SERVO_STOP
    if speed != 0:
       pulse = (speed * (SERVO_STOP - SERVO_FULL_CW)) + SERVO_STOP
 
+   period = 1/float(freq)
+   bit_duration = period/4096
+   pulse_duration = bit_duration*pulse*1000000
+
    #tell servo what to do
    if __debug__:
-      print "Channel %s : speed %5.5f : pulse %5.5f" % (channel,speed,pulse)
+      print "Channel %s : speed %5.5f : pulse %5.5f : duration %5.5f" % (channel,speed,pulse,pulse_duration)
    pwm.setPWM(channel, 0, int(pulse))
 
 
 print "Initialised... entering main loop..."
 
 pwm = PWM(0x40, debug=True)
-pwm.setPWMFreq(50) # Set frequency to 60 Hz
+pwm.setPWMFreq(freq) # Set frequency to 60 Hz
 
 
 # Main loop
