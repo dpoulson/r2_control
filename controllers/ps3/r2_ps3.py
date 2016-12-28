@@ -46,7 +46,16 @@ screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 screen.fill((0, 0, 0))        
 pygame.display.update()
  
-j = pygame.joystick.Joystick(0)
+nojoystick = True
+while nojoystick:
+   try:
+      j = pygame.joystick.Joystick(0)
+      nojoystick = False
+   except:
+      if __debug__:
+        print "No joystick yet"
+      time.sleep(5)
+   
 j.init()
 buttons = j.get_numbuttons()
 

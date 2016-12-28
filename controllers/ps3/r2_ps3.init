@@ -18,7 +18,7 @@ case "$1" in
   start)
     log_begin_msg "Starting r2_ps3"
     cd /home/pi/r2_control/controllers/ps3
-    python ./r2_ps3.py
+    python -O ./r2_ps3.py
     log_end_msg $?
     exit 0
     ;;
