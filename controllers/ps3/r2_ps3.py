@@ -12,17 +12,23 @@ from cStringIO import StringIO
 sys.path.append('/home/pi/r2_control/classes/')
 from Adafruit_PWM_Servo_Driver import PWM
 
+# PWM Frequency
 freq = 60
+# Exponential curve constant. Set this to 0 < curve < 1 to give difference response curves for axis
+curve = 0.5
 
+# Set Axis definitions
 PS3_AXIS_LEFT_VERTICAL = 1
 PS3_AXIS_LEFT_HORIZONTAL = 0
 PS3_AXIS_RIGHT_HORIZONTAL = 2
 
+# Channel numbers on PWM controller
 SERVO_DOME = 15
 SERVO_DRIVE = 14
 SERVO_STEER = 13
 
 #PWM ranges
+# 245 will give full range on a Sabertooth controller (ie, 1000ms and 2000ms, with 1500ms as the centerpoint)
 SERVO_FULL_CW = 290
 SERVO_STOP = 370
 
@@ -58,10 +64,11 @@ keys.items()
 
 def driveServo(channel, speed):
 
-   #calculate PWM pulse (32 is the range between SERVO_STOP and SERVO_FULL)
    pulse = SERVO_STOP
    if speed != 0:
-      pulse = (speed * (SERVO_STOP - SERVO_FULL_CW)) + SERVO_STOP
+      # Use curve variable to decrease sensitivity at low end.
+      speed_adj = ((curve*(speed**3)) + ((1-curve)*speed))
+      pulse = (speed_adj * (SERVO_STOP - SERVO_FULL_CW)) + SERVO_STOP
 
    period = 1/float(freq)
    bit_duration = period/4096
@@ -69,7 +76,7 @@ def driveServo(channel, speed):
 
    #tell servo what to do
    if __debug__:
-      print "Channel %s : speed %5.5f : pulse %5.5f : duration %5.5f" % (channel,speed,pulse,pulse_duration)
+      print "Channel %s : speed %5.5f : Adjusted speed: %5.5f : pulse %5.5f : duration %5.5f" % (channel,speed,speed_adj,pulse,pulse_duration)
    pwm.setPWM(channel, 0, int(pulse))
 
 
