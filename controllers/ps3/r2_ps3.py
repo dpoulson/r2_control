@@ -43,20 +43,13 @@ size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
 if __debug__:
   print "Framebuffer size: %d x %d" % (size[0], size[1])
 
-global j
+num_joysticks = pygame.joystick.get_count()
+while num_joysticks == 0:
+   print "Waiting for joystick..."
+   time.sleep(5)
 
-while True:
-   global j
-   print "Waiting for joystick"
-   try:
-      j = pygame.joystick.Joystick(0)
-      print "Joystick!!!!"
-      break
-   except:
-      if __debug__:
-        print "No joystick yet"
-      time.sleep(5)
-   
+
+j = pygame.joystick.Joystick(0)
 j.init()
 buttons = j.get_numbuttons()
 
