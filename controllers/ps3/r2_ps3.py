@@ -42,15 +42,16 @@ pygame.init()
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
 if __debug__:
   print "Framebuffer size: %d x %d" % (size[0], size[1])
-screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
-screen.fill((0, 0, 0))        
-pygame.display.update()
- 
-nojoystick = True
-while nojoystick:
+
+global j
+
+while True:
+   global j
+   print "Waiting for joystick"
    try:
       j = pygame.joystick.Joystick(0)
-      nojoystick = False
+      print "Joystick!!!!"
+      break
    except:
       if __debug__:
         print "No joystick yet"
@@ -74,9 +75,9 @@ keys.items()
 def driveServo(channel, speed):
 
    pulse = SERVO_STOP
+   speed_adj = ((curve*(speed**3)) + ((1-curve)*speed))
    if speed != 0:
       # Use curve variable to decrease sensitivity at low end.
-      speed_adj = ((curve*(speed**3)) + ((1-curve)*speed))
       pulse = (speed_adj * (SERVO_STOP - SERVO_FULL_CW)) + SERVO_STOP
 
    period = 1/float(freq)
