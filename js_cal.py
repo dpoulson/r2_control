@@ -7,7 +7,8 @@ from Adafruit_PWM_Servo_Driver import PWM
 import time
 import os
 
-channel = sys.argv[1]
+channel = sys.argv[2]
+bus = int(sys.argv[1], 16)
 freq = 60
 print "Channel %s : Frequency %s" % (channel,freq)
 
@@ -19,7 +20,7 @@ def driveServo(channel, pulse):
       print "Channel %s : pulse %5.5f : Duration: %s" % (channel,pulse,pulse_duration)
    pwm.setPWM(channel, 0, int(pulse))
 
-pwm = PWM(0x40, debug=True)
+pwm = PWM(bus, debug=True)
 pwm.setPWMFreq(freq) # Set frequency to 60 Hz
 
 while True:
