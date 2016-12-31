@@ -37,16 +37,22 @@ baseurl = "http://localhost:5000/"
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 pygame.display.init()
-pygame.init()
 
+while True:
+   pygame.joystick.quit()
+   pygame.joystick.init()
+   num_joysticks = pygame.joystick.get_count()
+   if __debug__:
+      print "Waiting for joystick... (count: %s)" % num_joysticks
+   if num_joysticks != 0:
+      break
+   time.sleep(5)
+
+pygame.init()
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
 if __debug__:
   print "Framebuffer size: %d x %d" % (size[0], size[1])
 
-num_joysticks = pygame.joystick.get_count()
-while num_joysticks == 0:
-   print "Waiting for joystick..."
-   time.sleep(5)
 
 
 j = pygame.joystick.Joystick(0)
@@ -88,6 +94,11 @@ print "Initialised... entering main loop..."
 pwm = PWM(0x40, debug=True)
 pwm.setPWMFreq(freq) # Set frequency to 60 Hz
 
+url = baseurl + "audio/Happy007"
+try: 
+  r = requests.get(url)
+except:
+  print "Fail...."
 
 # Main loop
 while True:
