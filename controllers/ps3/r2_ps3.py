@@ -15,7 +15,7 @@ from Adafruit_PWM_Servo_Driver import PWM
 # PWM Frequency
 freq = 60
 # Exponential curve constant. Set this to 0 < curve < 1 to give difference response curves for axis
-curve = 0.5
+curve = 0.8
 
 # Set Axis definitions
 PS3_AXIS_LEFT_VERTICAL = 1
@@ -30,7 +30,7 @@ SERVO_STEER = 13
 #PWM ranges
 # 245 will give full range on a Sabertooth controller (ie, 1000ms and 2000ms, with 1500ms as the centerpoint)
 SERVO_FULL_CW = 290
-SERVO_STOP = 370
+SERVO_STOP = 369
 
 baseurl = "http://localhost:5000/"
  
