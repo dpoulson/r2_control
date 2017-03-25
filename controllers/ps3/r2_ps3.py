@@ -29,8 +29,10 @@ SERVO_STEER = 13
 
 #PWM ranges
 # 245 will give full range on a Sabertooth controller (ie, 1000ms and 2000ms, with 1500ms as the centerpoint)
-SERVO_FULL_CW = 290
-SERVO_STOP = 369
+SERVO_FULL_CW = 308
+SERVO_STOP = 380
+DOME_FULL_CW = 300
+DOME_STOP = 425
 
 baseurl = "http://localhost:5000/"
  
@@ -78,6 +80,23 @@ def driveServo(channel, speed):
    if speed != 0:
       # Use curve variable to decrease sensitivity at low end.
       pulse = (speed_adj * (SERVO_STOP - SERVO_FULL_CW)) + SERVO_STOP
+
+   period = 1/float(freq)
+   bit_duration = period/4096
+   pulse_duration = bit_duration*pulse*1000000
+
+   #tell servo what to do
+   if __debug__:
+      print "Channel %s : speed %5.5f : Adjusted speed: %5.5f : pulse %5.5f : duration %5.5f" % (channel,speed,speed_adj,pulse,pulse_duration)
+   pwm.setPWM(channel, 0, int(pulse))
+
+def driveDome(channel, speed):
+
+   pulse = DOME_STOP
+   speed_adj = ((curve*(speed**3)) + ((1-curve)*speed))
+   if speed != 0:
+      # Use curve variable to decrease sensitivity at low end.
+      pulse = (speed_adj * (DOME_STOP - DOME_FULL_CW)) + DOME_STOP
 
    period = 1/float(freq)
    bit_duration = period/4096
@@ -153,6 +172,7 @@ while True:
          elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
             if __debug__:
                print "Value (Dome): %s" % event.value
-            driveServo(SERVO_DOME, event.value)
+               newvalue = ((curve*(event.value**3)) + ((1-curve)*event.value))
+            driveDome(SERVO_DOME, (newvalue))
 
 
