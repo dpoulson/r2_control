@@ -40,6 +40,14 @@ os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 pygame.display.init()
 
+# Default to disabling the drives
+url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
+try:
+  r = requests.get(url)
+except:
+  print "Fail...."
+
+
 while True:
    pygame.joystick.quit()
    pygame.joystick.init()
