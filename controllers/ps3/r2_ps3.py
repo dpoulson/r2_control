@@ -31,7 +31,7 @@ SERVO_STEER = 13
 # 245 will give full range on a Sabertooth controller (ie, 1000ms and 2000ms, with 1500ms as the centerpoint)
 SERVO_FULL_CW = 308
 SERVO_STOP = 380
-DOME_FULL_CW = 300
+DOME_FULL_CW = 330
 DOME_STOP = 425
 
 baseurl = "http://localhost:5000/"
@@ -39,14 +39,6 @@ baseurl = "http://localhost:5000/"
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 pygame.display.init()
-
-# Default to disabling the drives
-url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
-try:
-  r = requests.get(url)
-except:
-  print "Fail...."
-
 
 while True:
    pygame.joystick.quit()
@@ -57,6 +49,14 @@ while True:
    if num_joysticks != 0:
       break
    time.sleep(5)
+
+# Default to disabling the drives
+url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
+try:
+  r = requests.get(url)
+except:
+  print "Fail...."
+
 
 pygame.init()
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
