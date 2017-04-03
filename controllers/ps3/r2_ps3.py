@@ -29,7 +29,7 @@ SERVO_STEER = 13
 
 #PWM ranges
 # 245 will give full range on a Sabertooth controller (ie, 1000ms and 2000ms, with 1500ms as the centerpoint)
-SERVO_FULL_CW = 308
+SERVO_FULL_CW = 300
 SERVO_STOP = 380
 DOME_FULL_CW = 330
 DOME_STOP = 425
@@ -49,13 +49,6 @@ while True:
    if num_joysticks != 0:
       break
    time.sleep(5)
-
-# Default to disabling the drives
-url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
-try:
-  r = requests.get(url)
-except:
-  print "Fail...."
 
 
 pygame.init()
@@ -180,7 +173,7 @@ while True:
          elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
             if __debug__:
                print "Value (Dome): %s" % event.value
-               newvalue = ((curve*(event.value**3)) + ((1-curve)*event.value))
+            newvalue = ((curve*(event.value**3)) + ((1-curve)*event.value))
             driveDome(SERVO_DOME, (newvalue))
 
 
