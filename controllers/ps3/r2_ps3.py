@@ -34,6 +34,8 @@ SERVO_STOP = 380
 DOME_FULL_CW = 330
 DOME_STOP = 425
 
+dome_previous_speed = 0
+
 baseurl = "http://localhost:5000/"
  
 os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -123,6 +125,7 @@ except:
 # Main loop
 while True:
    global previous
+   global dome_previous_speed
    events = pygame.event.get()
    for event in events:
       if event.type == pygame.JOYBUTTONDOWN:
@@ -174,6 +177,14 @@ while True:
             if __debug__:
                print "Value (Dome): %s" % event.value
             newvalue = ((curve*(event.value**3)) + ((1-curve)*event.value))
-            driveDome(SERVO_DOME, (newvalue))
+            if newvalue > dome_previous_speed:
+               if __debug__:
+                  print "Increase speed"
+               dome_new_speed = dome_previous_speed + (newvalue/100)
+            if newvalue < dome_previous_speed:
+               if __debug__:
+                  print "Decrease speed"
+               dome_new_speed = dome_previous_speed - (newvalue/100)
+            driveDome(SERVO_DOME, (dome_new_speed))
 
 
