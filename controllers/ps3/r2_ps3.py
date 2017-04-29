@@ -126,7 +126,26 @@ except:
 while True:
    global previous
    global dome_previous_speed
-   events = pygame.event.get()
+   try:
+      events = pygame.event.get()
+   except:
+      if __debug__:
+        print "Something went wrong!"
+      driveServo(SERVO_DRIVE, 0)
+      driveServo(SERVO_STEER, 0)
+      driveDome(SERVO_DOME, 0)
+      # Send motor disable command
+      url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
+      try:
+         r = requests.get(url)
+      except:
+         print "Fail...."
+      # Play a sound to alert about a problem
+      url = baseurl + "audio/Happy007"
+      try:
+         r = requests.get(url)
+      except:
+         print "Fail...."
    for event in events:
       if event.type == pygame.JOYBUTTONDOWN:
          buf = StringIO()
@@ -187,4 +206,21 @@ while True:
                dome_new_speed = dome_previous_speed - (newvalue/100)
             driveDome(SERVO_DOME, (dome_new_speed))
 
+
+
+# If the while loop quits, make sure that the motors are reset.
+driveServo(SERVO_DRIVE, 0)
+driveServo(SERVO_STEER, 0)
+driveDome(SERVO_DOME, 0)
+# Turn off motors
+url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
+  try:
+     r = requests.get(url)
+  except:
+     print "Fail...."
+url = baseurl + "servo/body/ENABLE_DOME/0/0"
+  try:
+     r = requests.get(url)
+  except:
+     print "Fail...."
 
