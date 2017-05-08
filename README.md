@@ -24,11 +24,15 @@ Main process
 
 APIs Implemented:
 
- * /servo/list - lists all servos configured
- * /servo/\<time\>/<position>/<duration> - sets servo <name> to <position> (from 0 to 1 of full configured swing) over <duration> (seconds)
+ * /servo/\<body|dome\>/list - lists all servos configured
+ * /servo/\<body|dome\>/\<name\>/\<position\>/\<duration\> - sets servo \<name\> to \<position\> (from 0 to 1 of full configured swing) over \<duration\> (seconds)
+ * /servo/close - Close all servos
  * /audio/list - lists all audio files available
- * /audio/<name> - Plays audio file <name>
- * /lights/<effect> - Triggers pre programmed Teecee <effect>
+ * /audio/\<name\> - Plays audio file \<name\>
+ * /audio/random/\<type\> - Plays random audio file of \<type\>. If \<type\> is omitted, any random sound is played
+ * /audio/volume - Returns current volume
+ * /audio/volume/\<up|down|value\> - Turns volume up/down or sets to level 0-1
+ * /lights/\<effect\> - Triggers pre programmed Teecee \<effect\>
  * /lcd - TBD
 
 
