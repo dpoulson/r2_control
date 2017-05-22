@@ -29,8 +29,12 @@ SERVO_STEER = 13
 
 #PWM ranges
 # 245 will give full range on a Sabertooth controller (ie, 1000ms and 2000ms, with 1500ms as the centerpoint)
-SERVO_FULL_CW = 290
-SERVO_STOP = 369
+SERVO_FULL_CW = 300
+SERVO_STOP = 380
+DOME_FULL_CW = 330
+DOME_STOP = 425
+
+dome_previous_speed = 0
 
 baseurl = "http://localhost:5000/"
  
@@ -47,6 +51,7 @@ while True:
    if num_joysticks != 0:
       break
    time.sleep(5)
+
 
 pygame.init()
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
@@ -88,6 +93,23 @@ def driveServo(channel, speed):
       print "Channel %s : speed %5.5f : Adjusted speed: %5.5f : pulse %5.5f : duration %5.5f" % (channel,speed,speed_adj,pulse,pulse_duration)
    pwm.setPWM(channel, 0, int(pulse))
 
+def driveDome(channel, speed):
+
+   pulse = DOME_STOP
+   speed_adj = ((curve*(speed**3)) + ((1-curve)*speed))
+   if speed != 0:
+      # Use curve variable to decrease sensitivity at low end.
+      pulse = (speed_adj * (DOME_STOP - DOME_FULL_CW)) + DOME_STOP
+
+   period = 1/float(freq)
+   bit_duration = period/4096
+   pulse_duration = bit_duration*pulse*1000000
+
+   #tell servo what to do
+   if __debug__:
+      print "Channel %s : speed %5.5f : Adjusted speed: %5.5f : pulse %5.5f : duration %5.5f" % (channel,speed,speed_adj,pulse,pulse_duration)
+   pwm.setPWM(channel, 0, int(pulse))
+
 
 print "Initialised... entering main loop..."
 
@@ -103,7 +125,27 @@ except:
 # Main loop
 while True:
    global previous
-   events = pygame.event.get()
+   global dome_previous_speed
+   try:
+      events = pygame.event.get()
+   except:
+      if __debug__:
+        print "Something went wrong!"
+      driveServo(SERVO_DRIVE, 0)
+      driveServo(SERVO_STEER, 0)
+      driveDome(SERVO_DOME, 0)
+      # Send motor disable command
+      url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
+      try:
+         r = requests.get(url)
+      except:
+         print "Fail...."
+      # Play a sound to alert about a problem
+      url = baseurl + "audio/Happy007"
+      try:
+         r = requests.get(url)
+      except:
+         print "Fail...."
    for event in events:
       if event.type == pygame.JOYBUTTONDOWN:
          buf = StringIO()
@@ -159,6 +201,32 @@ while True:
          elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
             if __debug__:
                print "Value (Dome): %s" % event.value
-            driveServo(SERVO_DOME, event.value)
+            newvalue = ((curve*(event.value**3)) + ((1-curve)*event.value))
+            if newvalue > dome_previous_speed:
+               if __debug__:
+                  print "Increase speed"
+               dome_new_speed = dome_previous_speed + (newvalue/100)
+            if newvalue < dome_previous_speed:
+               if __debug__:
+                  print "Decrease speed"
+               dome_new_speed = dome_previous_speed - (newvalue/100)
+            driveDome(SERVO_DOME, (dome_new_speed))
 
+
+
+# If the while loop quits, make sure that the motors are reset.
+driveServo(SERVO_DRIVE, 0)
+driveServo(SERVO_STEER, 0)
+driveDome(SERVO_DOME, 0)
+# Turn off motors
+url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
+  try:
+     r = requests.get(url)
+  except:
+     print "Fail...."
+url = baseurl + "servo/body/ENABLE_DOME/0/0"
+  try:
+     r = requests.get(url)
+  except:
+     print "Fail...."
 
