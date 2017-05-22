@@ -113,6 +113,12 @@ while True:
          combo = buf.getvalue()
          if __debug__:
             print "Buttons pressed: %s" % combo
+         # Special key press (Select) to switch speeds of drive
+         if combo == "1000000000000000000"
+            if __debug__:
+               print "Switching drive speeds"
+            # When detected, will switch between two speeds. Also, will give audio feedback
+            print "Do shit"
          try:
             newurl = baseurl + keys[combo][0]
             if __debug__:
