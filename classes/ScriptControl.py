@@ -56,7 +56,7 @@ class ScriptControl :
     if __debug__:
       print "Trying to stop script ID %s" % kill_id
     for script in self.running_scripts:
-      if int(script.script_id) == int(kill_id):
+      if (int(script.script_id) == int(kill_id)) or (script.name == kill_id):
         script.thread.stop()
         self.running_scripts.pop(idx)
       idx += 1  
