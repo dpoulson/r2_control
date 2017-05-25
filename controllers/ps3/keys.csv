@@ -32,6 +32,7 @@
 "0100000011010000000",audio/ANNOYED,
 "0010000011010000000",audio/CHORTLE,
 "0001000010000000000",script/looping_sounds_quick/1,
+"0000000011110010000",script/stop/looping_sounds_quick,
 "0000000001011000000",script/open_body/0,
 "0000000001010100000",servo/body/DATA/1/0,servo/body/DATA/0/0
 "0000000001010010000",servo/body/AUX/1/0,servo/body/AUX/0/0
@@ -58,3 +59,10 @@
 "0001000011110000000",shutdown/now,
 "0000100011110000000",audio/volume/up,
 "0000001011110000000",audio/volume/down,
+"0000000010011000000",audio/birthday,
+"0000000010010100000",audio/buffy,
+"0000000010010010000",audio/canton,
+"0000000010010001000",audio/firefly,
+"0000100010010000000",audio/Mhana,
+"0000010010010000000",audio/Gangnam,
+"0000001010010000000",audio/StayinAl,
