@@ -1,10 +1,8 @@
-dome,P1,1,3
-dome,P2,1,3
-dome,P3,1,3
-dome,P4,1,3
-sleep 2
-dome,P1,0,0
-dome,P2,0,0
-dome,P3,0,0
-dome,P4,0,0
+dome,P2,1,50
+dome,P3,1,50
+dome,P4,1,50
+sleep,2
+dome,P2,0,50
+dome,P3,0,50
+dome,P4,0,50
 

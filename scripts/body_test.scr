@@ -1,0 +1,6 @@
+body,LLD,1,10
+sleep,0.1
+body,RLD,1,10
+sleep,1
+body,LLD,0,0
+body,RLD,0,0
