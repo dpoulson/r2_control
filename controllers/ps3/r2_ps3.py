@@ -34,8 +34,6 @@ SERVO_STOP = 380
 DOME_FULL_CW = 330
 DOME_STOP = 425
 
-dome_previous_speed = 0
-
 baseurl = "http://localhost:5000/"
  
 os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -125,7 +123,6 @@ except:
 # Main loop
 while True:
    global previous
-   global dome_previous_speed
    try:
       events = pygame.event.get()
    except:
@@ -202,15 +199,7 @@ while True:
             if __debug__:
                print "Value (Dome): %s" % event.value
             newvalue = ((curve*(event.value**3)) + ((1-curve)*event.value))
-            if newvalue > dome_previous_speed:
-               if __debug__:
-                  print "Increase speed"
-               dome_new_speed = dome_previous_speed + (newvalue/100)
-            if newvalue < dome_previous_speed:
-               if __debug__:
-                  print "Decrease speed"
-               dome_new_speed = dome_previous_speed - (newvalue/100)
-            driveDome(SERVO_DOME, (dome_new_speed))
+            driveDome(SERVO_DOME, (newvalue))
 
 
 
@@ -220,13 +209,13 @@ driveServo(SERVO_STEER, 0)
 driveDome(SERVO_DOME, 0)
 # Turn off motors
 url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
-  try:
-     r = requests.get(url)
-  except:
-     print "Fail...."
+try:
+   r = requests.get(url)
+except:
+   print "Fail...."
 url = baseurl + "servo/body/ENABLE_DOME/0/0"
-  try:
-     r = requests.get(url)
-  except:
-     print "Fail...."
+try:
+   r = requests.get(url)
+except:
+   print "Fail...."
 
