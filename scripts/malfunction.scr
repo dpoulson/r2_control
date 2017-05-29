@@ -1,25 +1,52 @@
 sound,FAILURE
-dome,PP1,1,0
-dome,PP2,1,0
-body,TopArm,0.4,0
-sleep 0.1
-dome,PP1,0.5,0
-dome,PP2,0.2,0
-body,TopArm,0.2,0
-sleep 0.1
-dome,PP1,0.8,0
-dome,PP2,0.5,0
-body,TopArm,0.7,0
-sleep 0.1
-dome,PP1,0.9,0
-dome,PP2,0.2,0
-body,TopArm,0.1,0
-sleep 0.1
-dome,PP1,0.1,0
-dome,PP2,0.8,0
-body,TopArm,0.7,0
-sleep 2
-dome,PP1,0,0
-dome,PP2,0,0
-body,TopArm,0,0
+dome,all,open
+sleep,0.15
+dome,all,close
+sleep,0.1
+dome,all,open
+sleep,0.1
+dome,all,close
+sleep,0.15
+dome,all,open
+sleep,0.05
+dome,all,close
+sleep,0.05
+dome,all,open
+sleep,0.1
+dome,all,close
+sleep,0.15
+dome,all,open
+sleep,0.05
+dome,all,close
+sleep,0.1
+dome,all,open
+sleep,0.5
+dome,all,close
+sleep,0.15
+dome,all,open
+sleep,0.1
+dome,all,close
+sleep,0.15
+dome,all,open
+sleep,0.1
+dome,all,close
+sleep,0.05
+dome,all,open
+sleep,0.1
+dome,all,close
+sleep,0.05
+dome,all,open
+sleep,0.1
+dome,all,close
+sleep,0.1
+dome,all,open
+sleep,3
+dome,PP1,0,100
+dome,PP2,0,100
+dome,PP5,0,100
+dome,PP6,0,100
+dome,P1,0,100
+dome,P2,0,100
+dome,P3,0,100
+dome,P4,0,100
 

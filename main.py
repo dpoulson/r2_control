@@ -144,6 +144,23 @@ def servo_close():
       pwm_dome.close_all_servos() 
       return "Ok"
 
+@app.route('/servo/dome/close', methods=['GET'])
+def servo_close():
+   """GET to close all servos"""
+   if request.method == 'GET':
+      message = ""
+      pwm_dome.close_all_servos()
+      return "Ok"
+
+@app.route('/servo/body/close', methods=['GET'])
+def servo_close():
+   """GET to close all servos"""
+   if request.method == 'GET':
+      message = ""
+      pwm_body.close_all_servos()
+      return "Ok"
+
+
 @app.route('/servo/open', methods=['GET'])
 def servo_open():
    """GET to open all servos"""
@@ -152,6 +169,24 @@ def servo_open():
       pwm_body.open_all_servos()
       pwm_dome.open_all_servos()
       return "Ok"
+
+@app.route('/servo/dome/open', methods=['GET'])
+def servo_close():
+   """GET to close all servos"""
+   if request.method == 'GET':
+      message = ""
+      pwm_dome.open_all_servos()
+      return "Ok"
+
+@app.route('/servo/body/open', methods=['GET'])
+def servo_close():
+   """GET to close all servos"""
+   if request.method == 'GET':
+      message = ""
+      pwm_body.open_all_servos()
+      return "Ok"
+
+
 
 #############################
 # LCD API calls
