@@ -1,0 +1,10 @@
+dome,PP1,1,50
+dome,PP2,1,50
+dome,PP5,1,50
+dome,PP6,1,50
+dome,P1,1,50
+dome,P2,1,50
+dome,P3,1,50
+dome,P4,1,50
+sleep,3
+dome,all,close
