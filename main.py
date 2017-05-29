@@ -145,16 +145,16 @@ def servo_close():
       return "Ok"
 
 @app.route('/servo/dome/close', methods=['GET'])
-def servo_close():
-   """GET to close all servos"""
+def servo_dome_close():
+   """GET to close all dome servos"""
    if request.method == 'GET':
       message = ""
       pwm_dome.close_all_servos()
       return "Ok"
 
 @app.route('/servo/body/close', methods=['GET'])
-def servo_close():
-   """GET to close all servos"""
+def servo_body_close():
+   """GET to close all body servos"""
    if request.method == 'GET':
       message = ""
       pwm_body.close_all_servos()
@@ -171,16 +171,16 @@ def servo_open():
       return "Ok"
 
 @app.route('/servo/dome/open', methods=['GET'])
-def servo_close():
-   """GET to close all servos"""
+def servo_dome_open():
+   """GET to open all dome servos"""
    if request.method == 'GET':
       message = ""
       pwm_dome.open_all_servos()
       return "Ok"
 
 @app.route('/servo/body/open', methods=['GET'])
-def servo_close():
-   """GET to close all servos"""
+def servo_body_open():
+   """GET to open all body servos"""
    if request.method == 'GET':
       message = ""
       pwm_body.open_all_servos()

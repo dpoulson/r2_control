@@ -64,12 +64,12 @@ class ScriptThread(threading.Thread):
             time.sleep(float(row[1]))
         if row[0] == "body":
           if row[1] == "all":
-             urllib2.urlopen("http://localhost:5000/servo/body/%s" % $row[2] )
+             urllib2.urlopen("http://localhost:5000/servo/body/%s" % row[2] )
           else:
              urllib2.urlopen("http://localhost:5000/servo/body/%s/%s/%s" % ( row[1], row[2], row[3] ) )
         if row[0] == "dome":
           if row[1] == "all":
-             urllib2.urlopen("http://localhost:5000/servo/dome/%s" % $row[2] )
+             urllib2.urlopen("http://localhost:5000/servo/dome/%s" % row[2] )
           else:
              urllib2.urlopen("http://localhost:5000/servo/dome/%s/%s/%s" % ( row[1], row[2], row[3] ) )
         if row[0] == "sound":
