@@ -66,8 +66,6 @@ if "audio" in modules:
 if "scripts" in modules:
   scripts = ScriptControl(config.get('scripts', 'script_dir'))
 # Initialise telegram client
-if "telegram" in modules:
-  telegram = TelegramClient('R2DJP', 
 
 app = Flask(__name__, template_folder='templates')
 
