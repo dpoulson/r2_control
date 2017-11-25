@@ -65,7 +65,6 @@ if "audio" in modules:
 # Initialise script object
 if "scripts" in modules:
   scripts = ScriptControl(config.get('scripts', 'script_dir'))
-# Initialise telegram client
 
 app = Flask(__name__, template_folder='templates')
 
@@ -299,6 +298,13 @@ def shutdown():
    if request.method == 'GET':
      os.system('shutdown now -h')
    return "Shutting down"
+
+@app.route('/status', methods=['GET'])
+def shutdown():
+   if request.method == 'GET':
+     message = "Running..."
+   return message
+
 
 @app.route('/controller/ps3/<js>', methods=['GET'])
 def controller(js):

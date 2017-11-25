@@ -32,9 +32,3 @@ volume=0.3
 [scripts]
 script_dir=./scripts
 
-[telegram]
-botname=r2d2_bot
-api_id=XXXXXXXXX
-api_hash=ABCDEFGHIJKLMNOPQRSTUVWXYZ
-
-
