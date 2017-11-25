@@ -300,7 +300,7 @@ def shutdown():
    return "Shutting down"
 
 @app.route('/status', methods=['GET'])
-def shutdown():
+def status():
    if request.method == 'GET':
      message = "Running..."
    return message
