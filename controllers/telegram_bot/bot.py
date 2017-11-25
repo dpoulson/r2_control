@@ -3,18 +3,22 @@
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
+import ConfigParser
 import requests
 import logging
 
+config = ConfigParser.RawConfigParser()
+config.read('config.cfg')
+
 baseurl = "http://localhost:5000/"
-updater = Updater(token='367756606:AAFr5YEN1w2A9VEHcDaxCvoGolrMgz4CPsA')
+updater = Updater(token=config.get('DEFAULT', 'token'))
 
 dispatcher = updater.dispatcher
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def volmute(bot, update):
-    url = baseurl + "/audio/volume/0"
+    url = baseurl + "audio/volume/0"
     try:
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
@@ -23,7 +27,7 @@ def volmute(bot, update):
         bot.send_message(chat_id=update.message.chat_id, text="Failed to Mute")
 
 def volmax(bot, update):
-    url = baseurl + "/audio/volume/1"
+    url = baseurl + "audio/volume/1"
     try:
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
@@ -34,12 +38,16 @@ def volmax(bot, update):
 
 def sounds(bot, update, args):
     url = baseurl + "audio/"
+    if len(args) == 0:
+        url += "list"
+    else:
+        url += args[0]
     try:
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
     except:
         print "Fail...."
-        bot.send_message(chat_id=update.message.chat_id, text="Failed to deafen")
+        bot.send_message(chat_id=update.message.chat_id, text="Failed...")
 
 
 def status(bot, update):
