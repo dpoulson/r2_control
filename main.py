@@ -26,6 +26,9 @@ sys.path.append("./classes/")
 import threading
 import time
 import collections
+import socket
+from datetime import timedelta
+
 # from i2cLCD import i2cLCD
 from Adafruit_PWM_Servo_Driver import PWM
 from ServoControl import ServoControl
@@ -65,6 +68,31 @@ if "audio" in modules:
 # Initialise script object
 if "scripts" in modules:
   scripts = ScriptControl(config.get('scripts', 'script_dir'))
+
+
+def system_status():
+   with open('/proc/uptime', 'r') as f:
+      uptime_seconds = float(f.readline().split()[0])
+      uptime_string = str(timedelta(seconds = uptime_seconds))
+   try:
+      host = socket.gethostbyname("www.google.com")
+      s = socket.create_connection((host, 80), 2)
+      internet_connection = True
+   except:
+      internet_connection = False
+   status = "Current Status\n"
+   status += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
+   status += "Uptime: \t\t%s\n" % uptime_string
+   status += "Main Battery: \t\n"
+   status += "Remote Battery: \t\n"
+   status += "Wifi: \t\t\n"
+   status += "Internet: \t%s \n" % internet_connection
+   status += "Location: \t\n"
+   status += "Volume: \t\t%s\n" % r2audio.ShowVolume()
+   status += "--------------\n"
+   status += "Scripts Running:\n"
+   status += scripts.list_running()
+   return status
 
 app = Flask(__name__, template_folder='templates')
 
@@ -302,15 +330,8 @@ def shutdown():
 @app.route('/status', methods=['GET'])
 def status():
    if request.method == 'GET':
-     message = "Running..."
+     message = system_status()
    return message
-
-
-@app.route('/controller/ps3/<js>', methods=['GET'])
-def controller(js):
-   if request.method == 'GET':
-     os.system('python -O /home/pi/r2_control/controllers/ps3/r2_ps3.py -j 0');
-   return "Started Controller"
 
 
 if __name__ == '__main__':
