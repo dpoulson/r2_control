@@ -20,3 +20,7 @@ Added scripting support
 0.82 - 22/12/16 Darren Poulson <darren.poulson@gmail.com>
 
 Added PS3 controller support with direct i2c control over main drive
+
+0.99 - 25/11/17 Darren Poulson <darren.poulson@gmail.com>
+
+Many updates. Interfaces now include telegram bot
