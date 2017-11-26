@@ -73,7 +73,7 @@ if "scripts" in modules:
   scripts = ScriptControl(config.get('scripts', 'script_dir'))
 # Monitoring
 if "monitoring" in modules:
-  monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), int(config.get('monitoring', 'interval')), config.get('monitoring', 'logdir'))
+  monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')), config.get('monitoring', 'logdir'))
 
 
 def system_status():
