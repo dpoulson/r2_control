@@ -28,8 +28,11 @@ import time
 import collections
 import socket
 from datetime import timedelta
+from threading import Thread
+from time import sleep
 
 # from i2cLCD import i2cLCD
+from i2cMonitor import i2cMonitor
 from Adafruit_PWM_Servo_Driver import PWM
 from ServoControl import ServoControl
 from ScriptControl import ScriptControl
@@ -68,6 +71,9 @@ if "audio" in modules:
 # Initialise script object
 if "scripts" in modules:
   scripts = ScriptControl(config.get('scripts', 'script_dir'))
+# Monitoring
+if "monitoring" in modules:
+  monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), int(config.get('monitoring', 'interval')), config.get('monitoring', 'logdir'))
 
 
 def system_status():
@@ -83,7 +89,7 @@ def system_status():
    status = "Current Status\n"
    status += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
    status += "Uptime: \t\t%s\n" % uptime_string
-   status += "Main Battery: \t\n"
+   status += "Main Battery: \t%5.3f (balance: %5.3f)\n" % (monitor.queryBattery(), monitor.queryBatteryBalance())
    status += "Remote Battery: \t\n"
    status += "Wifi: \t\t\n"
    status += "Internet: \t%s \n" % internet_connection
