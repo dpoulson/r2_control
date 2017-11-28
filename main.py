@@ -18,26 +18,16 @@
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
 
-from flask import Flask, request, render_template
-# from flask.ext.classy import FlaskView
 import ConfigParser
-import os, sys
-
-sys.path.append("./classes/")
-import threading
-import time
-import collections
+import os
+import sys
 import socket
+sys.path.append("./classes/")
+from flask import Flask, request, render_template
 from datetime import timedelta
-from threading import Thread
-from time import sleep
-
-# from i2cLCD import i2cLCD
 from i2cMonitor import i2cMonitor
-from Adafruit_PWM_Servo_Driver import PWM
 from ServoControl import ServoControl
 from ScriptControl import ScriptControl
-from TeeCee_I2C import TeeCeeI2C
 from AudioLibrary import AudioLibrary
 from Adafruit_MCP230xx import MCP230XX_GPIO
 from Adafruit_CharLCD import Adafruit_CharLCD
@@ -113,18 +103,6 @@ def index():
                  for r in app.url_map.iter_rules()
                  if not r.rule.startswith('/static')])
     return render_template('index.html', urls=urls)
-
-
-#############################
-# Lights API calls
-#
-
-
-@app.route('/teecee/<int:effect>', methods=['GET'])
-def teecee(effect):
-    """GET to fire off dome lighting effect """
-    if request.method == 'GET':
-        return "Teecee"
 
 
 #############################
