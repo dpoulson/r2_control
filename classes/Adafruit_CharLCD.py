@@ -10,49 +10,48 @@ from time import sleep
 
 
 class Adafruit_CharLCD(object):
-
     # commands
-    LCD_CLEARDISPLAY        = 0x01
-    LCD_RETURNHOME          = 0x02
-    LCD_ENTRYMODESET        = 0x04
-    LCD_DISPLAYCONTROL      = 0x08
-    LCD_CURSORSHIFT         = 0x10
-    LCD_FUNCTIONSET         = 0x20
-    LCD_SETCGRAMADDR        = 0x40
-    LCD_SETDDRAMADDR        = 0x80
+    LCD_CLEARDISPLAY = 0x01
+    LCD_RETURNHOME = 0x02
+    LCD_ENTRYMODESET = 0x04
+    LCD_DISPLAYCONTROL = 0x08
+    LCD_CURSORSHIFT = 0x10
+    LCD_FUNCTIONSET = 0x20
+    LCD_SETCGRAMADDR = 0x40
+    LCD_SETDDRAMADDR = 0x80
 
     # flags for display entry mode
-    LCD_ENTRYRIGHT          = 0x00
-    LCD_ENTRYLEFT           = 0x02
+    LCD_ENTRYRIGHT = 0x00
+    LCD_ENTRYLEFT = 0x02
     LCD_ENTRYSHIFTINCREMENT = 0x01
     LCD_ENTRYSHIFTDECREMENT = 0x00
 
     # flags for display on/off control
-    LCD_DISPLAYON           = 0x04
-    LCD_DISPLAYOFF          = 0x00
-    LCD_CURSORON            = 0x02
-    LCD_CURSOROFF           = 0x00
-    LCD_BLINKON             = 0x01
-    LCD_BLINKOFF            = 0x00
+    LCD_DISPLAYON = 0x04
+    LCD_DISPLAYOFF = 0x00
+    LCD_CURSORON = 0x02
+    LCD_CURSOROFF = 0x00
+    LCD_BLINKON = 0x01
+    LCD_BLINKOFF = 0x00
 
     # flags for display/cursor shift
-    LCD_DISPLAYMOVE         = 0x08
-    LCD_CURSORMOVE          = 0x00
+    LCD_DISPLAYMOVE = 0x08
+    LCD_CURSORMOVE = 0x00
 
     # flags for display/cursor shift
-    LCD_DISPLAYMOVE         = 0x08
-    LCD_CURSORMOVE          = 0x00
-    LCD_MOVERIGHT           = 0x04
-    LCD_MOVELEFT            = 0x00
+    LCD_DISPLAYMOVE = 0x08
+    LCD_CURSORMOVE = 0x00
+    LCD_MOVERIGHT = 0x04
+    LCD_MOVELEFT = 0x00
 
     # flags for function set
-    LCD_8BITMODE            = 0x10
-    LCD_4BITMODE            = 0x00
-    LCD_4LINE               = 0x24
-    LCD_2LINE               = 0x08
-    LCD_1LINE               = 0x00
-    LCD_5x10DOTS            = 0x04
-    LCD_5x8DOTS             = 0x00
+    LCD_8BITMODE = 0x10
+    LCD_4BITMODE = 0x00
+    LCD_4LINE = 0x24
+    LCD_2LINE = 0x08
+    LCD_1LINE = 0x00
+    LCD_5x10DOTS = 0x04
+    LCD_5x8DOTS = 0x00
 
     def __init__(self, pin_rs=25, pin_e=24, pins_db=[23, 17, 21, 22], GPIO=None):
         # Emulate the old behavior of using RPi.GPIO if we haven't been given
@@ -181,7 +180,7 @@ class Adafruit_CharLCD(object):
             self.GPIO.output(pin, False)
         for i in range(4, 8):
             if bits[i] == "1":
-                self.GPIO.output(self.pins_db[::-1][i-4], True)
+                self.GPIO.output(self.pins_db[::-1][i - 4], True)
         self.pulseEnable()
 
     def delayMicroseconds(self, microseconds):
@@ -190,16 +189,16 @@ class Adafruit_CharLCD(object):
 
     def pulseEnable(self):
         self.GPIO.output(self.pin_e, False)
-        self.delayMicroseconds(1)       # 1 microsecond pause - enable pulse must be > 450ns
+        self.delayMicroseconds(1)  # 1 microsecond pause - enable pulse must be > 450ns
         self.GPIO.output(self.pin_e, True)
-        self.delayMicroseconds(1)       # 1 microsecond pause - enable pulse must be > 450ns
+        self.delayMicroseconds(1)  # 1 microsecond pause - enable pulse must be > 450ns
         self.GPIO.output(self.pin_e, False)
-        self.delayMicroseconds(1)       # commands need > 37us to settle
+        self.delayMicroseconds(1)  # commands need > 37us to settle
 
     def write(self, text):
         """ Send string to LCD. Newline wraps to second line"""
-        LCD_LINES               = [ 0x80, 0xC0, 0x94, 0xD4 ]
-        x=1
+        LCD_LINES = [0x80, 0xC0, 0x94, 0xD4]
+        x = 1
         for char in text:
             if char == '\n':
                 self.write4bits(LCD_LINES[x])  # next line
