@@ -10,7 +10,7 @@ import smbus
 class Adafruit_I2C(object):
     @staticmethod
     def getPiRevision():
-        "Gets the version number of the Raspberry Pi board"
+        """Gets the version number of the Raspberry Pi board"""
         # Revision list available at: http://elinux.org/RPi_HardwareHistory#Board_Revision_History
         try:
             with open('/proc/cpuinfo', 'r') as infile:
@@ -44,7 +44,7 @@ class Adafruit_I2C(object):
         self.debug = debug
 
     def reverseByteOrder(self, data):
-        "Reverses the byte order of an int (16-bit) or long (32-bit) value"
+        """Reverses the byte order of an int (16-bit) or long (32-bit) value"""
         # Courtesy Vishal Sapre
         byteCount = len(hex(data)[2:].replace('L', '')[::2])
         val = 0
@@ -58,7 +58,7 @@ class Adafruit_I2C(object):
         return -1
 
     def write8(self, reg, value):
-        "Writes an 8-bit value to the specified register/address"
+        """Writes an 8-bit value to the specified register/address"""
         try:
             self.bus.write_byte_data(self.address, reg, value)
             if self.debug:
@@ -67,7 +67,7 @@ class Adafruit_I2C(object):
             return self.errMsg()
 
     def write16(self, reg, value):
-        "Writes a 16-bit value to the specified register/address pair"
+        """Writes a 16-bit value to the specified register/address pair"""
         try:
             self.bus.write_word_data(self.address, reg, value)
             if self.debug:
@@ -77,7 +77,7 @@ class Adafruit_I2C(object):
             return self.errMsg()
 
     def writeRaw8(self, value):
-        "Writes an 8-bit value on the bus"
+        """Writes an 8-bit value on the bus"""
         try:
             self.bus.write_byte(self.address, value)
             if self.debug:
@@ -86,7 +86,7 @@ class Adafruit_I2C(object):
             return self.errMsg()
 
     def writeList(self, reg, list):
-        "Writes an array of bytes using I2C format"
+        """Writes an array of bytes using I2C format"""
         try:
             if self.debug:
                 print "I2C: Writing list to register 0x%02X:" % reg
@@ -96,7 +96,7 @@ class Adafruit_I2C(object):
             return self.errMsg()
 
     def readList(self, reg, length):
-        "Read a list of bytes from the I2C device"
+        """Read a list of bytes from the I2C device"""
         try:
             results = self.bus.read_i2c_block_data(self.address, reg, length)
             if self.debug:
@@ -108,7 +108,7 @@ class Adafruit_I2C(object):
             return self.errMsg()
 
     def readU8(self, reg):
-        "Read an unsigned byte from the I2C device"
+        """Read an unsigned byte from the I2C device"""
         try:
             result = self.bus.read_byte_data(self.address, reg)
             if self.debug:
@@ -119,7 +119,7 @@ class Adafruit_I2C(object):
             return self.errMsg()
 
     def readS8(self, reg):
-        "Reads a signed byte from the I2C device"
+        """Reads a signed byte from the I2C device"""
         try:
             result = self.bus.read_byte_data(self.address, reg)
             if result > 127: result -= 256
@@ -131,21 +131,21 @@ class Adafruit_I2C(object):
             return self.errMsg()
 
     def readU16(self, reg, little_endian=True):
-        "Reads an unsigned 16-bit value from the I2C device"
+        """Reads an unsigned 16-bit value from the I2C device"""
         try:
             result = self.bus.read_word_data(self.address, reg)
             # Swap bytes if using big endian because read_word_data assumes little
             # endian on ARM (little endian) systems.
             if not little_endian:
                 result = ((result << 8) & 0xFF00) + (result >> 8)
-            if (self.debug):
+            if self.debug:
                 print "I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, result & 0xFFFF, reg)
             return result
         except IOError, err:
             return self.errMsg()
 
     def readS16(self, reg, little_endian=True):
-        "Reads a signed 16-bit value from the I2C device"
+        """Reads a signed 16-bit value from the I2C device"""
         try:
             result = self.readU16(reg, little_endian)
             if result > 32767: result -= 65536

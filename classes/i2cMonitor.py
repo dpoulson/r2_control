@@ -10,7 +10,7 @@ class i2cMonitor(threading.Thread):
         f = open(self.logdir + '/power.log', 'wt')
         while True:
             try:
-                data = self.bus.read_i2c_block_data(0x04, 0);
+                data = self.bus.read_i2c_block_data(0x04, 0)
             except:
                 if __debug__:
                     print "Failed to read i2c data"

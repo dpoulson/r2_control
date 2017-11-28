@@ -9,7 +9,7 @@ Random_Files = ['ALARM', 'Happy', 'HUM__', 'MISC_', 'Quote', 'RAZZ_', 'Sad__', '
 
 class AudioLibrary:
     def init_config(self, sounds_dir):
-        "Load in CSV of Audio definitions"
+        """Load in CSV of Audio definitions"""
         if __debug__:
             print "Setting sounds directory to %s" % sounds_dir
 

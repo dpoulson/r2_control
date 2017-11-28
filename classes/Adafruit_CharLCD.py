@@ -37,10 +37,6 @@ class Adafruit_CharLCD(object):
     # flags for display/cursor shift
     LCD_DISPLAYMOVE = 0x08
     LCD_CURSORMOVE = 0x00
-
-    # flags for display/cursor shift
-    LCD_DISPLAYMOVE = 0x08
-    LCD_CURSORMOVE = 0x00
     LCD_MOVERIGHT = 0x04
     LCD_MOVELEFT = 0x00
 
@@ -89,7 +85,7 @@ class Adafruit_CharLCD(object):
         self.clear()
 
     def begin(self, cols, lines):
-        if (lines > 1):
+        if lines > 1:
             self.numlines = lines
             self.displayfunction |= self.LCD_2LINE
 

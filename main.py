@@ -42,8 +42,6 @@ debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
 
 devices_list = []
 
-app = Flask(__name__, template_folder='templates')
-
 ######################################
 # initialise modules
 # Initialise server controllers
@@ -113,10 +111,10 @@ def index():
 @app.route('/servo/list', methods=['GET'])
 def servo_list():
     """GET to list all current servos and position"""
+    message = ""
     if __debug__:
         print "Listing servos"
     if request.method == 'GET':
-        message = ""
         message += pwm_body.list_servos()
         message += pwm_dome.list_servos()
     return message
@@ -125,10 +123,10 @@ def servo_list():
 @app.route('/servo/dome/list', methods=['GET'])
 def servo_list_dome():
     """GET to list all current servos and position"""
+    message = ""
     if __debug__:
         print "Listing servos"
     if request.method == 'GET':
-        message = ""
         message += pwm_dome.list_servos()
     return message
 
@@ -136,10 +134,10 @@ def servo_list_dome():
 @app.route('/servo/body/list', methods=['GET'])
 def servo_list_body():
     """GET to list all current servos and position"""
+    message = ""
     if __debug__:
         print "Listing servos"
     if request.method == 'GET':
-        message = ""
         message += pwm_body.list_servos()
     return message
 
@@ -159,7 +157,6 @@ def servo_move(part, servo_name, servo_position, servo_duration):
 def servo_close():
     """GET to close all servos"""
     if request.method == 'GET':
-        message = ""
         pwm_body.close_all_servos()
         pwm_dome.close_all_servos()
         return "Ok"
@@ -169,7 +166,6 @@ def servo_close():
 def servo_dome_close():
     """GET to close all dome servos"""
     if request.method == 'GET':
-        message = ""
         pwm_dome.close_all_servos()
         return "Ok"
 
@@ -178,7 +174,6 @@ def servo_dome_close():
 def servo_body_close():
     """GET to close all body servos"""
     if request.method == 'GET':
-        message = ""
         pwm_body.close_all_servos()
         return "Ok"
 
@@ -187,7 +182,6 @@ def servo_body_close():
 def servo_open():
     """GET to open all servos"""
     if request.method == 'GET':
-        message = ""
         pwm_body.open_all_servos()
         pwm_dome.open_all_servos()
         return "Ok"
@@ -197,7 +191,6 @@ def servo_open():
 def servo_dome_open():
     """GET to open all dome servos"""
     if request.method == 'GET':
-        message = ""
         pwm_dome.open_all_servos()
         return "Ok"
 
@@ -206,7 +199,6 @@ def servo_dome_open():
 def servo_body_open():
     """GET to open all body servos"""
     if request.method == 'GET':
-        message = ""
         pwm_body.open_all_servos()
         return "Ok"
 
@@ -232,8 +224,8 @@ def lcd_write(message):
 @app.route('/script/list', methods=['GET'])
 def script_list():
     """GET gives a comma separated list of available scripts"""
+    message = ""
     if request.method == 'GET':
-        message = ""
         message += scripts.list()
     return message
 
@@ -241,8 +233,8 @@ def script_list():
 @app.route('/script/running', methods=['GET'])
 def running_scripts():
     """GET a list of all running scripts and their ID"""
+    message = ""
     if request.method == 'GET':
-        message = ""
         message += scripts.list_running()
     return message
 
@@ -250,8 +242,8 @@ def running_scripts():
 @app.route('/script/stop/<script_id>', methods=['GET'])
 def stop_script(script_id):
     """GET a script ID to stop that script"""
+    message = ""
     if request.method == 'GET':
-        message = ""
         if script_id == "all":
             message += scripts.stop_all()
         else:
@@ -262,8 +254,8 @@ def stop_script(script_id):
 @app.route('/script/<name>/<loop>', methods=['GET'])
 def start_script(name, loop):
     """GET to trigger the named script"""
+    message = ""
     if request.method == 'GET':
-        message = ""
         message += scripts.run_script(name, loop)
     return message
 
@@ -276,8 +268,8 @@ def start_script(name, loop):
 @app.route('/audio/list', methods=['GET'])
 def audio_list():
     """GET gives a comma separated list of available sounds"""
+    message = ""
     if request.method == 'GET':
-        message = ""
         message += r2audio.ListSounds()
     return message
 
@@ -294,8 +286,8 @@ def audio(name):
 @app.route('/audio/random/list', methods=['GET'])
 def random_audio_list():
     """GET returns types of sounds available at random"""
+    message = ""
     if request.method == 'GET':
-        message = ""
         message += r2audio.ListRandomSounds()
     return message
 
@@ -310,29 +302,34 @@ def random_audio(name):
 
 @app.route('/audio/volume', methods=['GET'])
 def get_volume():
+    """GET returns current volume level"""
+    message = ""
     if request.method == 'GET':
-        message = ""
         message += r2audio.ShowVolume()
     return message
 
 
 @app.route('/audio/volume/<level>', methods=['GET'])
 def set_volume(level):
+    """GET to set a specific volume level"""
+    message = ""
     if request.method == 'GET':
-        message = ""
         message += r2audio.SetVolume(level)
     return message
 
 
 @app.route('/shutdown/now', methods=['GET'])
 def shutdown():
+    """GET to shutdown Raspberry Pi"""
     if request.method == 'GET':
         os.system('shutdown now -h')
     return "Shutting down"
 
 
 @app.route('/status', methods=['GET'])
-def status():
+def sysstatus():
+    """GET to display system status"""
+    message = ""
     if request.method == 'GET':
         message = system_status()
     return message

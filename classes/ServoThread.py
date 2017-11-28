@@ -40,7 +40,7 @@ class ServoThread(threading.Thread):
             position = command[0]
             duration = command[1]
             if position > 1 or position < 0:
-                print "Invalid position (%s)" % (position)
+                print "Invalid position (%s)" % position
             else:
                 actual_position = int(((self.Max - self.Min) * position) + self.Min)
             if __debug__:

@@ -26,13 +26,13 @@ import collections
 tick_duration = 100
 
 
-class ServoControl():
+class ServoControl:
     # servo_list = [] # All servos, listed here.
 
     Servo = collections.namedtuple('Servo', 'name, queue, thread')
 
     def init_config(self, address, servo_config_file):
-        "Load in CSV of Servo definitions"
+        """Load in CSV of Servo definitions"""
         ifile = open('config/%s' % servo_config_file, "rb")
         reader = csv.reader(ifile)
         for row in reader:
