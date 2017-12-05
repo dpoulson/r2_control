@@ -41,12 +41,12 @@ dome,all,close
 sleep,0.1
 dome,all,open
 sleep,3
-dome,PP1,0,100
-dome,PP2,0,100
-dome,PP5,0,100
-dome,PP6,0,100
-dome,P1,0,100
-dome,P2,0,100
-dome,P3,0,100
-dome,P4,0,100
+dome,PP1,0,0
+dome,PP2,0,0
+dome,PP5,0,0
+dome,PP6,0,0
+dome,P1,0,0
+dome,P2,0,0
+dome,P3,0,0
+dome,P4,0,0
 
