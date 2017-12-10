@@ -50,3 +50,8 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+main.cfg
+config.cfg
+logs/*.log
+.idea/

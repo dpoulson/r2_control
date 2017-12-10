@@ -1,0 +1,14 @@
+[Unit]
+Description=R2 Telegram Bot
+ 
+[Service]
+ExecStart=/usr/bin/python -O /home/pi/r2_control/controllers/telegram_bot/bot.py
+WorkingDirectory=/home/pi/r2_control/controllers/telegram_bot
+StandardOutput=null
+Restart=on-failure
+ 
+[Install]
+WantedBy=multi-user.target
+Alias=r2_telegram.service
+
+

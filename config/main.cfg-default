@@ -31,3 +31,7 @@ volume=0.3
 
 [scripts]
 script_dir=./scripts
+
+[monitoring]
+logdir=./logs
+address=0x04

@@ -1,0 +1,14 @@
+[Unit]
+Description=R2 Control
+ 
+[Service]
+ExecStart=/usr/bin/python -O /home/pi/r2_control/main.py
+WorkingDirectory=/home/pi/r2_control
+StandardOutput=null
+Restart=on-failure
+ 
+[Install]
+WantedBy=multi-user.target
+Alias=r2_control.service
+
+

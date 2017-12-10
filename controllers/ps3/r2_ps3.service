@@ -1,0 +1,14 @@
+[Unit]
+Description=R2 PS3
+ 
+[Service]
+ExecStart=/usr/bin/python -O /home/pi/r2_control/controllers/ps3/r2_ps3.py
+WorkingDirectory=/home/pi/r2_control/controllers/ps3
+StandardOutput=null
+Restart=on-failure
+ 
+[Install]
+WantedBy=multi-user.target
+Alias=r2_ps3.service
+
+

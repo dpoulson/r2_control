@@ -1,21 +1,57 @@
 #!/usr/bin/python
 # 
-import smbus,time
-from subprocess import * 
-from time import sleep, strftime
-from datetime import datetime
-from Adafruit_I2C import Adafruit_I2C
+import smbus, time, threading, struct, csv
+from threading import Thread
+from time import sleep
 
 
+class i2cMonitor(threading.Thread):
+    def monitor_loop(self):
+        f = open(self.logdir + '/power.log', 'wt')
+        while True:
+            try:
+                data = self.bus.read_i2c_block_data(0x04, 0)
+            except:
+                if __debug__:
+                    print "Failed to read i2c data"
+                sleep(1)
+            self.extracted[0] = time.time()
+            for i in range(0, 8):
+                bytes = data[4 * i:4 * i + 4]
+                self.extracted[i + 1] = struct.unpack('f', "".join(map(chr, bytes)))[0]
+            if __debug__:
+                print "Writing csv row"
+            writer = csv.writer(f)
+            writer.writerow(self.extracted)
+            f.flush()
+            sleep(self.interval)
+        f.close()
 
-class i2cMonitor:
+    def __init__(self, address, interval, logdir):
+        self.address = address
+        self.interval = interval
+        self.bus = smbus.SMBus(1)
+        self.logdir = logdir
+        self.extracted = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        if __debug__:
+            print "Monitoring...."
+        loop = Thread(target=self.monitor_loop)
+        loop.start()
 
-  def __init__(self, address=0x04, debug=False):
-    self.i2c = Adafruit_I2C(address, 1)
-    self.address = address
-    self.debug = debug
-    if __debug__:
-      print "Monitoring...."
-    self.clear()
+    def queryBattery(self):
+        return self.extracted[5]
 
+    def queryBatteryBalance(self):
+        return self.extracted[7] - self.extracted[6]
 
+    def queryCurrentMain(self):
+        return self.extracted[1]
+
+    def queryCurrentLeft(self):
+        return self.extracted[2]
+
+    def queryCurrentRight(self):
+        return self.extracted[3]
+
+    def queryCurrentDome(self):
+        return self.extracted[4]

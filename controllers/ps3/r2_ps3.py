@@ -1,14 +1,13 @@
 #!/usr/bin/python
-
+import pygame
+import requests
+import csv
 import os
 import sys
-import pygame
 import time
-import random
-import csv
-import requests
-from collections import defaultdict
 from cStringIO import StringIO
+from collections import defaultdict
+
 sys.path.append('/home/pi/r2_control/classes/')
 from Adafruit_PWM_Servo_Driver import PWM
 
@@ -27,7 +26,7 @@ SERVO_DOME = 15
 SERVO_DRIVE = 14
 SERVO_STEER = 13
 
-#PWM ranges
+# PWM ranges
 # 245 will give full range on a Sabertooth controller (ie, 1000ms and 2000ms, with 1500ms as the centerpoint)
 SERVO_FULL_CW = 300
 SERVO_STOP = 380
@@ -35,28 +34,25 @@ DOME_FULL_CW = 330
 DOME_STOP = 425
 
 baseurl = "http://localhost:5000/"
- 
+
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 pygame.display.init()
 
 while True:
-   pygame.joystick.quit()
-   pygame.joystick.init()
-   num_joysticks = pygame.joystick.get_count()
-   if __debug__:
-      print "Waiting for joystick... (count: %s)" % num_joysticks
-   if num_joysticks != 0:
-      break
-   time.sleep(5)
-
+    pygame.joystick.quit()
+    pygame.joystick.init()
+    num_joysticks = pygame.joystick.get_count()
+    if __debug__:
+        print "Waiting for joystick... (count: %s)" % num_joysticks
+    if num_joysticks != 0:
+        break
+    time.sleep(5)
 
 pygame.init()
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
 if __debug__:
-  print "Framebuffer size: %d x %d" % (size[0], size[1])
-
-
+    print "Framebuffer size: %d x %d" % (size[0], size[1])
 
 j = pygame.joystick.Joystick(0)
 j.init()
@@ -65,143 +61,143 @@ buttons = j.get_numbuttons()
 # Read in key combos from csv file
 keys = defaultdict(list)
 with open('keys.csv', mode='r') as infile:
-   reader = csv.reader(infile)
-   for row in reader:
-      if __debug__:
-        print "Row: %s | %s | %s" % (row[0], row[1], row[2])
-      keys[row[0]].append(row[1])
-      keys[row[0]].append(row[2])
+    reader = csv.reader(infile)
+    for row in reader:
+        if __debug__:
+            print "Row: %s | %s | %s" % (row[0], row[1], row[2])
+        keys[row[0]].append(row[1])
+        keys[row[0]].append(row[2])
 
 keys.items()
 
+
 def driveServo(channel, speed):
+    pulse = SERVO_STOP
+    speed_adj = ((curve * (speed ** 3)) + ((1 - curve) * speed))
+    if speed != 0:
+        # Use curve variable to decrease sensitivity at low end.
+        pulse = (speed_adj * (SERVO_STOP - SERVO_FULL_CW)) + SERVO_STOP
 
-   pulse = SERVO_STOP
-   speed_adj = ((curve*(speed**3)) + ((1-curve)*speed))
-   if speed != 0:
-      # Use curve variable to decrease sensitivity at low end.
-      pulse = (speed_adj * (SERVO_STOP - SERVO_FULL_CW)) + SERVO_STOP
+    period = 1 / float(freq)
+    bit_duration = period / 4096
+    pulse_duration = bit_duration * pulse * 1000000
 
-   period = 1/float(freq)
-   bit_duration = period/4096
-   pulse_duration = bit_duration*pulse*1000000
+    # tell servo what to do
+    if __debug__:
+        print "Channel %s : speed %5.5f : Adjusted speed: %5.5f : pulse %5.5f : duration %5.5f" % (
+        channel, speed, speed_adj, pulse, pulse_duration)
+    pwm.setPWM(channel, 0, int(pulse))
 
-   #tell servo what to do
-   if __debug__:
-      print "Channel %s : speed %5.5f : Adjusted speed: %5.5f : pulse %5.5f : duration %5.5f" % (channel,speed,speed_adj,pulse,pulse_duration)
-   pwm.setPWM(channel, 0, int(pulse))
 
 def driveDome(channel, speed):
+    pulse = DOME_STOP
+    speed_adj = ((curve * (speed ** 3)) + ((1 - curve) * speed))
+    if speed != 0:
+        # Use curve variable to decrease sensitivity at low end.
+        pulse = (speed_adj * (DOME_STOP - DOME_FULL_CW)) + DOME_STOP
 
-   pulse = DOME_STOP
-   speed_adj = ((curve*(speed**3)) + ((1-curve)*speed))
-   if speed != 0:
-      # Use curve variable to decrease sensitivity at low end.
-      pulse = (speed_adj * (DOME_STOP - DOME_FULL_CW)) + DOME_STOP
+    period = 1 / float(freq)
+    bit_duration = period / 4096
+    pulse_duration = bit_duration * pulse * 1000000
 
-   period = 1/float(freq)
-   bit_duration = period/4096
-   pulse_duration = bit_duration*pulse*1000000
-
-   #tell servo what to do
-   if __debug__:
-      print "Channel %s : speed %5.5f : Adjusted speed: %5.5f : pulse %5.5f : duration %5.5f" % (channel,speed,speed_adj,pulse,pulse_duration)
-   pwm.setPWM(channel, 0, int(pulse))
+    # tell servo what to do
+    if __debug__:
+        print "Channel %s : speed %5.5f : Adjusted speed: %5.5f : pulse %5.5f : duration %5.5f" % (
+        channel, speed, speed_adj, pulse, pulse_duration)
+    pwm.setPWM(channel, 0, int(pulse))
 
 
 print "Initialised... entering main loop..."
 
 pwm = PWM(0x40, debug=True)
-pwm.setPWMFreq(freq) # Set frequency to 60 Hz
+pwm.setPWMFreq(freq)  # Set frequency to 60 Hz
 
 url = baseurl + "audio/Happy007"
-try: 
-  r = requests.get(url)
+try:
+    r = requests.get(url)
 except:
-  print "Fail...."
+    print "Fail...."
 
 # Main loop
 while True:
-   global previous
-   try:
-      events = pygame.event.get()
-   except:
-      if __debug__:
-        print "Something went wrong!"
-      driveServo(SERVO_DRIVE, 0)
-      driveServo(SERVO_STEER, 0)
-      driveDome(SERVO_DOME, 0)
-      # Send motor disable command
-      url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
-      try:
-         r = requests.get(url)
-      except:
-         print "Fail...."
-      # Play a sound to alert about a problem
-      url = baseurl + "audio/Happy007"
-      try:
-         r = requests.get(url)
-      except:
-         print "Fail...."
-   for event in events:
-      if event.type == pygame.JOYBUTTONDOWN:
-         buf = StringIO()
-         for i in range ( buttons ):
-            button = j.get_button(i)
-            buf.write(str(button))
-         combo = buf.getvalue()
-         if __debug__:
-            print "Buttons pressed: %s" % combo
-         # Special key press (Select) to switch speeds of drive
-         #if combo == "1000000000000000000"
-         #   if __debug__:
-         #      print "Switching drive speeds"
-         #   # When detected, will switch between two speeds. Also, will give audio feedback
-         #   print "Do shit"
-         try:
-            newurl = baseurl + keys[combo][0]
+    global previous
+    try:
+        events = pygame.event.get()
+    except:
+        if __debug__:
+            print "Something went wrong!"
+        driveServo(SERVO_DRIVE, 0)
+        driveServo(SERVO_STEER, 0)
+        driveDome(SERVO_DOME, 0)
+        # Send motor disable command
+        url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
+        try:
+            r = requests.get(url)
+        except:
+            print "Fail...."
+        # Play a sound to alert about a problem
+        url = baseurl + "audio/Happy007"
+        try:
+            r = requests.get(url)
+        except:
+            print "Fail...."
+    for event in events:
+        if event.type == pygame.JOYBUTTONDOWN:
+            buf = StringIO()
+            for i in range(buttons):
+                button = j.get_button(i)
+                buf.write(str(button))
+            combo = buf.getvalue()
             if __debug__:
-               print "Would run: %s" % keys[combo]
-               print "URL: %s" % newurl
+                print "Buttons pressed: %s" % combo
+            # Special key press (Select) to switch speeds of drive
+            # if combo == "1000000000000000000"
+            #   if __debug__:
+            #      print "Switching drive speeds"
+            #   # When detected, will switch between two speeds. Also, will give audio feedback
+            #   print "Do shit"
             try:
-               r = requests.get(newurl)
+                newurl = baseurl + keys[combo][0]
+                if __debug__:
+                    print "Would run: %s" % keys[combo]
+                    print "URL: %s" % newurl
+                try:
+                    r = requests.get(newurl)
+                except:
+                    print "No connection"
             except:
-               print "No connection"
-         except:
+                if __debug__:
+                    print "No combo (pressed)"
+            previous = combo
+        if event.type == pygame.JOYBUTTONUP:
             if __debug__:
-               print "No combo (pressed)"
-         previous = combo 
-      if event.type == pygame.JOYBUTTONUP:
-         if __debug__:
-            print "Buttons released: %s" % previous
-         try:
-            newurl = baseurl + keys[previous][1]
-            if __debug__:
-               print "Would run: %s" % keys[previous][1]
-               print "URL: %s" % newurl
+                print "Buttons released: %s" % previous
             try:
-               r = requests.get(newurl)
+                newurl = baseurl + keys[previous][1]
+                if __debug__:
+                    print "Would run: %s" % keys[previous][1]
+                    print "URL: %s" % newurl
+                try:
+                    r = requests.get(newurl)
+                except:
+                    print "No connection"
             except:
-               print "No connection"
-         except:
-            if __debug__:
-               print "No combo (released)"
-      if event.type == pygame.JOYAXISMOTION:
-         if event.axis == PS3_AXIS_LEFT_VERTICAL:
-            if __debug__:
-               print "Value (Drive): %s" % event.value
-            driveServo(SERVO_DRIVE, event.value)
-         elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
-            if __debug__:
-               print "Value (Steer): %s" % event.value
-            driveServo(SERVO_STEER, event.value)
-         elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
-            if __debug__:
-               print "Value (Dome): %s" % event.value
-            newvalue = ((curve*(event.value**3)) + ((1-curve)*event.value))
-            driveDome(SERVO_DOME, (newvalue))
-
-
+                if __debug__:
+                    print "No combo (released)"
+        if event.type == pygame.JOYAXISMOTION:
+            if event.axis == PS3_AXIS_LEFT_VERTICAL:
+                if __debug__:
+                    print "Value (Drive): %s" % event.value
+                driveServo(SERVO_DRIVE, event.value)
+            elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
+                if __debug__:
+                    print "Value (Steer): %s" % event.value
+                driveServo(SERVO_STEER, event.value)
+            elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
+                if __debug__:
+                    print "Value (Dome): %s" % event.value
+                newvalue = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
+                driveDome(SERVO_DOME, newvalue)
 
 # If the while loop quits, make sure that the motors are reset.
 driveServo(SERVO_DRIVE, 0)
@@ -210,12 +206,11 @@ driveDome(SERVO_DOME, 0)
 # Turn off motors
 url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
 try:
-   r = requests.get(url)
+    r = requests.get(url)
 except:
-   print "Fail...."
+    print "Fail...."
 url = baseurl + "servo/body/ENABLE_DOME/0/0"
 try:
-   r = requests.get(url)
+    r = requests.get(url)
 except:
-   print "Fail...."
-
+    print "Fail...."
