@@ -1,10 +1,11 @@
 [Unit]
 Description=R2 Telegram Bot
+After=network.target r2_control.service
  
 [Service]
 ExecStart=/usr/bin/python -O /home/pi/r2_control/controllers/telegram_bot/bot.py
 WorkingDirectory=/home/pi/r2_control/controllers/telegram_bot
-StandardOutput=null
+StandardOutput=syslog
 Restart=on-failure
  
 [Install]
