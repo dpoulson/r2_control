@@ -1,8 +1,8 @@
 [DEFAULT]
 busid=1
-pipe=/tmp/r2_commands.pipe
 debug=true
 debug_lcd=true
+logdir=./logs
 
 [body]
 type=servo
@@ -33,5 +33,4 @@ volume=0.3
 script_dir=./scripts
 
 [monitoring]
-logdir=./logs
 address=0x04

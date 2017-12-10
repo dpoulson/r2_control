@@ -37,8 +37,8 @@ config.read('config/main.cfg')
 
 modules = config.sections()
 i2c_bus = config.getint('DEFAULT', 'busid')
-pipePath = config.get('DEFAULT', 'pipe')
 debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
+logdir = config.getboolean('DEFAULT', 'logdir')
 
 devices_list = []
 
@@ -62,12 +62,8 @@ if "scripts" in modules:
     scripts = ScriptControl(config.get('scripts', 'script_dir'))
 # Monitoring
 if "monitoring" in modules:
-<<<<<<< HEAD
-  monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')), config.get('monitoring', 'logdir'))
-=======
     monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')),
-                         config.get('monitoring', 'logdir'))
->>>>>>> cb737ad300b47a5a42cbe79263d4428494ddca62
+                         logdir)
 
 
 def system_status():
