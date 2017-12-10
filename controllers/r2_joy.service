@@ -1,0 +1,14 @@
+[Unit]
+Description=R2 Joystick
+ 
+[Service]
+ExecStart=/home/pi/r2_control/controllers/joystick_wrapper.sh
+WorkingDirectory=/home/pi/r2_control/controllers
+StandardOutput=syslog
+Restart=on-failure
+ 
+[Install]
+WantedBy=multi-user.target
+Alias=r2_joy.service
+
+

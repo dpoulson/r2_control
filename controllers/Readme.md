@@ -8,4 +8,9 @@ Ideas are:
 * Telegram - Instant messaging interface for getting more detailed information whilst driving with a remote
 
 
+==Joystick Wrapper==
+There is a joystick wrapper script and systemd service file available here. This will allow easy switch of which control
+method is used on startup. There is a file called .current with a single line describing the directory of the control 
+software. The script called will be r2_<joystick>.py, from the selected directory.
+
 
