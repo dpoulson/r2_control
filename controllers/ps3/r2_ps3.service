@@ -2,9 +2,9 @@
 Description=R2 PS3
  
 [Service]
-ExecStart=/usr/bin/python -O /home/pi/r2_control/controllers/ps3/r2_ps3.py
+ExecStart=/usr/bin/python /home/pi/r2_control/controllers/ps3/r2_ps3.py
 WorkingDirectory=/home/pi/r2_control/controllers/ps3
-StandardOutput=null
+StandardOutput=syslog
 Restart=on-failure
  
 [Install]

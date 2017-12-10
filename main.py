@@ -73,9 +73,9 @@ if "monitoring" in modules:
 # If logtofile is set, open log file
 if logtofile:
     if __debug__:
-        print "Opening log file"
+        print "Opening log file: Dir: %s - Filename: %s" % (logdir, logfile)
     f = open(logdir + '/' + logfile, 'at')
-    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + "****** r2_control started ******\n")
+    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** r2_control started ******\n")
     f.flush
 
 def system_status():

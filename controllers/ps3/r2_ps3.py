@@ -5,11 +5,18 @@ import csv
 import os
 import sys
 import time
+import datetime
 from cStringIO import StringIO
 from collections import defaultdict
 
 sys.path.append('/home/pi/r2_control/classes/')
 from Adafruit_PWM_Servo_Driver import PWM
+
+#### Open a log file
+#f = open('/home/pi/r2_control/logs/ps3.log', 'at')
+#f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
+#f.flush()
+
 
 # PWM Frequency
 freq = 60
@@ -32,6 +39,7 @@ SERVO_FULL_CW = 300
 SERVO_STOP = 380
 DOME_FULL_CW = 330
 DOME_STOP = 425
+
 
 baseurl = "http://localhost:5000/"
 
@@ -214,3 +222,4 @@ try:
     r = requests.get(url)
 except:
     print "Fail...."
+

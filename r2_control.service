@@ -2,9 +2,13 @@
 Description=R2 Control
  
 [Service]
-ExecStart=/usr/bin/python -O /home/pi/r2_control/main.py
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/python -u /home/pi/r2_control/main.py
 WorkingDirectory=/home/pi/r2_control
-StandardOutput=null
+StandardOutput=syslog
+StandardError=syslog
 Restart=on-failure
  
 [Install]
