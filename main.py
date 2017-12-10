@@ -82,6 +82,8 @@ def system_status():
     with open('/proc/uptime', 'r') as f:
         uptime_seconds = float(f.readline().split()[0])
         uptime_string = str(timedelta(seconds=uptime_seconds))
+    with open('/sys/class/power_supply/sony_controller_battery_00:19:c1:5f:78:b9/capacity', 'r') as b:
+        remote_battery = int(b.readline().split()[0])
     try:
         host = socket.gethostbyname("www.google.com")
         s = socket.create_connection((host, 80), 2)
@@ -90,13 +92,13 @@ def system_status():
         internet_connection = False
     status = "Current Status\n"
     status += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
-    status += "Uptime: \t\t%s\n" % uptime_string
+    status += "Uptime: \t%s\n" % uptime_string
     status += "Main Battery: \t%5.3f (balance: %5.3f)\n" % (monitor.queryBattery(), monitor.queryBatteryBalance())
-    status += "Remote Battery: \t\n"
+    status += "Remote Battery: %s%%\t\n" % remote_battery
     status += "Wifi: \t\t\n"
     status += "Internet: \t%s \n" % internet_connection
     status += "Location: \t\n"
-    status += "Volume: \t\t%s\n" % r2audio.ShowVolume()
+    status += "Volume: \t%s\n" % r2audio.ShowVolume()
     status += "--------------\n"
     status += "Scripts Running:\n"
     status += scripts.list_running()
