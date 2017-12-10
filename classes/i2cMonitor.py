@@ -8,7 +8,7 @@ from time import sleep
 class i2cMonitor(threading.Thread):
 
     def monitor_loop(self):
-        f = open(self.logdir + '/power.log', 'wt')
+        f = open(self.logdir + '/power.log', 'at')
         while True:
             try:
                 data = self.bus.read_i2c_block_data(0x04, 0)

@@ -21,6 +21,8 @@
 import ConfigParser
 import os
 import sys
+import time
+import datetime
 import socket
 sys.path.append("./classes/")
 from flask import Flask, request, render_template
@@ -38,7 +40,9 @@ config.read('config/main.cfg')
 modules = config.sections()
 i2c_bus = config.getint('DEFAULT', 'busid')
 debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
-logdir = config.getboolean('DEFAULT', 'logdir')
+logtofile = config.getboolean('DEFAULT', 'logtofile')
+logdir = config.get('DEFAULT', 'logdir')
+logfile = config.get('DEFAULT', 'logfile')
 
 devices_list = []
 
@@ -65,6 +69,14 @@ if "monitoring" in modules:
     monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')),
                          logdir)
 
+####
+# If logtofile is set, open log file
+if logtofile:
+    if __debug__:
+        print "Opening log file"
+    f = open(logdir + '/' + logfile, 'at')
+    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + "****** r2_control started ******\n")
+    f.flush
 
 def system_status():
     with open('/proc/uptime', 'r') as f:
@@ -145,6 +157,8 @@ def servo_list_body():
 @app.route('/servo/<part>/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
 def servo_move(part, servo_name, servo_position, servo_duration):
     """GET will move a selected servo to the required position over a set duration"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo move: " + servo_name + "," + servo_position + "," + servo_duration + "\n")
     if request.method == 'GET':
         if part == 'body':
             pwm_body.servo_command(servo_name, servo_position, servo_duration)
@@ -156,6 +170,8 @@ def servo_move(part, servo_name, servo_position, servo_duration):
 @app.route('/servo/close', methods=['GET'])
 def servo_close():
     """GET to close all servos"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo close: \n")
     if request.method == 'GET':
         pwm_body.close_all_servos()
         pwm_dome.close_all_servos()
@@ -165,6 +181,8 @@ def servo_close():
 @app.route('/servo/dome/close', methods=['GET'])
 def servo_dome_close():
     """GET to close all dome servos"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo close dome: \n")
     if request.method == 'GET':
         pwm_dome.close_all_servos()
         return "Ok"
@@ -173,6 +191,8 @@ def servo_dome_close():
 @app.route('/servo/body/close', methods=['GET'])
 def servo_body_close():
     """GET to close all body servos"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo close body: \n")
     if request.method == 'GET':
         pwm_body.close_all_servos()
         return "Ok"
@@ -181,6 +201,8 @@ def servo_body_close():
 @app.route('/servo/open', methods=['GET'])
 def servo_open():
     """GET to open all servos"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo open: \n")
     if request.method == 'GET':
         pwm_body.open_all_servos()
         pwm_dome.open_all_servos()
@@ -190,6 +212,8 @@ def servo_open():
 @app.route('/servo/dome/open', methods=['GET'])
 def servo_dome_open():
     """GET to open all dome servos"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo open dome: \n")
     if request.method == 'GET':
         pwm_dome.open_all_servos()
         return "Ok"
@@ -198,6 +222,8 @@ def servo_dome_open():
 @app.route('/servo/body/open', methods=['GET'])
 def servo_body_open():
     """GET to open all body servos"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo open body: \n")
     if request.method == 'GET':
         pwm_body.open_all_servos()
         return "Ok"
@@ -242,6 +268,8 @@ def running_scripts():
 @app.route('/script/stop/<script_id>', methods=['GET'])
 def stop_script(script_id):
     """GET a script ID to stop that script"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script stop: " + script_id + "\n")
     message = ""
     if request.method == 'GET':
         if script_id == "all":
@@ -254,6 +282,8 @@ def stop_script(script_id):
 @app.route('/script/<name>/<loop>', methods=['GET'])
 def start_script(name, loop):
     """GET to trigger the named script"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script loop: " + name + "," + loop + "\n")
     message = ""
     if request.method == 'GET':
         message += scripts.run_script(name, loop)
@@ -277,6 +307,8 @@ def audio_list():
 @app.route('/audio/<name>', methods=['GET'])
 def audio(name):
     """GET to trigger the given sound"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound : " + name + "\n")
     if request.method == 'GET':
         r2audio.TriggerSound(name)
     return "Ok"
@@ -295,6 +327,8 @@ def random_audio_list():
 @app.route('/audio/random/<name>', methods=['GET'])
 def random_audio(name):
     """GET to play a random sound of a given type"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound random: " + name + "\n")
     if request.method == 'GET':
         r2audio.TriggerRandomSound(name)
     return "Ok"
@@ -312,6 +346,8 @@ def get_volume():
 @app.route('/audio/volume/<level>', methods=['GET'])
 def set_volume(level):
     """GET to set a specific volume level"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Volume set : " + level + "\n")
     message = ""
     if request.method == 'GET':
         message += r2audio.SetVolume(level)
@@ -321,6 +357,8 @@ def set_volume(level):
 @app.route('/shutdown/now', methods=['GET'])
 def shutdown():
     """GET to shutdown Raspberry Pi"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Shutting down ****** \n")
     if request.method == 'GET':
         os.system('shutdown now -h')
     return "Shutting down"
@@ -337,3 +375,5 @@ def sysstatus():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, use_reloader=False)
+
+
