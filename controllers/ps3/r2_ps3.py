@@ -13,9 +13,9 @@ sys.path.append('/home/pi/r2_control/classes/')
 from Adafruit_PWM_Servo_Driver import PWM
 
 #### Open a log file
-#f = open('/home/pi/r2_control/logs/ps3.log', 'at')
-#f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
-#f.flush()
+f = open('/home/pi/r2_control/logs/ps3.log', 'at')
+f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
+f.flush()
 
 
 # PWM Frequency
@@ -48,12 +48,16 @@ os.environ["SDL_VIDEODRIVER"] = "dummy"
 pygame.display.init()
 
 while True:
+    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Waiting for joystick \n")
+    f.flush()
     pygame.joystick.quit()
     pygame.joystick.init()
     num_joysticks = pygame.joystick.get_count()
     if __debug__:
         print "Waiting for joystick... (count: %s)" % num_joysticks
     if num_joysticks != 0:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Joystick found \n")
+        f.flush()
         break
     time.sleep(5)
 
@@ -126,6 +130,9 @@ try:
 except:
     print "Fail...."
 
+f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : System Initialised \n")
+f.flush()
+
 # Main loop
 while True:
     global previous
@@ -144,7 +151,7 @@ while True:
         except:
             print "Fail...."
         # Play a sound to alert about a problem
-        url = baseurl + "audio/Happy007"
+        url = baseurl + "audio/MOTIVATR"
         try:
             r = requests.get(url)
         except:
@@ -166,6 +173,8 @@ while True:
             #   print "Do shit"
             try:
                 newurl = baseurl + keys[combo][0]
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Button Down event : " + combo + "," + keys[combo][0] +" \n")
+                f.flush() 
                 if __debug__:
                     print "Would run: %s" % keys[combo]
                     print "URL: %s" % newurl
@@ -182,6 +191,8 @@ while True:
                 print "Buttons released: %s" % previous
             try:
                 newurl = baseurl + keys[previous][1]
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Button Up event : " + previous + "," + keys[previous][1] + "\n")
+                f.flush()
                 if __debug__:
                     print "Would run: %s" % keys[previous][1]
                     print "URL: %s" % newurl
@@ -222,4 +233,5 @@ try:
     r = requests.get(url)
 except:
     print "Fail...."
+f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " ****** PS3 Shutdown ******\n")
 
