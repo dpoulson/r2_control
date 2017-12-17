@@ -8,6 +8,7 @@ import time
 import datetime
 from cStringIO import StringIO
 from collections import defaultdict
+from SabertoothPacketSerial import SabertoothPacketSerial
 
 sys.path.append('/home/pi/r2_control/classes/')
 from Adafruit_PWM_Servo_Driver import PWM
@@ -16,6 +17,11 @@ from Adafruit_PWM_Servo_Driver import PWM
 f = open('/home/pi/r2_control/logs/ps3.log', 'at')
 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
 f.flush()
+
+drive = SabertoothPacketSerial()
+drive.driveCommand(0)
+drive.turnCommand(0)
+
 
 
 # PWM Frequency
@@ -83,24 +89,6 @@ with open('keys.csv', mode='r') as infile:
 keys.items()
 
 
-def driveServo(channel, speed):
-    pulse = SERVO_STOP
-    speed_adj = ((curve * (speed ** 3)) + ((1 - curve) * speed))
-    if speed != 0:
-        # Use curve variable to decrease sensitivity at low end.
-        pulse = (speed_adj * (SERVO_STOP - SERVO_FULL_CW)) + SERVO_STOP
-
-    period = 1 / float(freq)
-    bit_duration = period / 4096
-    pulse_duration = bit_duration * pulse * 1000000
-
-    # tell servo what to do
-    if __debug__:
-        print "Channel %s : speed %5.5f : Adjusted speed: %5.5f : pulse %5.5f : duration %5.5f" % (
-        channel, speed, speed_adj, pulse, pulse_duration)
-    pwm.setPWM(channel, 0, int(pulse))
-
-
 def driveDome(channel, speed):
     pulse = DOME_STOP
     speed_adj = ((curve * (speed ** 3)) + ((1 - curve) * speed))
@@ -141,8 +129,8 @@ while True:
     except:
         if __debug__:
             print "Something went wrong!"
-        driveServo(SERVO_DRIVE, 0)
-        driveServo(SERVO_STEER, 0)
+        drive.driveCommand(0)
+        drive.turnCommand(0)
         driveDome(SERVO_DOME, 0)
         # Send motor disable command
         url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
@@ -207,11 +195,11 @@ while True:
             if event.axis == PS3_AXIS_LEFT_VERTICAL:
                 if __debug__:
                     print "Value (Drive): %s" % event.value
-                driveServo(SERVO_DRIVE, event.value)
+                drive.driveCommand(event.value)
             elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
                 if __debug__:
                     print "Value (Steer): %s" % event.value
-                driveServo(SERVO_STEER, event.value)
+                drive.turnCommand(event.value)
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
                 if __debug__:
                     print "Value (Dome): %s" % event.value
@@ -219,8 +207,8 @@ while True:
                 driveDome(SERVO_DOME, newvalue)
 
 # If the while loop quits, make sure that the motors are reset.
-driveServo(SERVO_DRIVE, 0)
-driveServo(SERVO_STEER, 0)
+drive.driveCommand(0)
+drive.turnCommand(0)
 driveDome(SERVO_DOME, 0)
 # Turn off motors
 url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
