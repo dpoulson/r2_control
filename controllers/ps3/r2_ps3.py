@@ -22,7 +22,20 @@ drive = SabertoothPacketSerial()
 drive.driveCommand(0)
 drive.turnCommand(0)
 
+keepalive = 0.25
 
+# Speed factor. This multiplier will define the max value to be sent to the drive system. 
+# eg. 0.5 means that the value of the joystick position will be halved
+# Should never be greater than 1
+speed_fac = 0.5
+
+# Invert. Does the drive need to be inverted. 1 = no, -1 = yes
+invert = -1
+
+drive_mod = speed_fac * invert
+
+# Deadband: the amount of deadband on the sticks
+deadband = 3
 
 # PWM Frequency
 freq = 60
@@ -36,13 +49,9 @@ PS3_AXIS_RIGHT_HORIZONTAL = 2
 
 # Channel numbers on PWM controller
 SERVO_DOME = 15
-SERVO_DRIVE = 14
-SERVO_STEER = 13
 
 # PWM ranges
 # 245 will give full range on a Sabertooth controller (ie, 1000ms and 2000ms, with 1500ms as the centerpoint)
-SERVO_FULL_CW = 300
-SERVO_STOP = 380
 DOME_FULL_CW = 330
 DOME_STOP = 425
 
@@ -121,9 +130,17 @@ except:
 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : System Initialised \n")
 f.flush()
 
+last_command = time.time()
+
 # Main loop
 while True:
     global previous
+    global last_command
+    if time.time() - last_command > keepalive: 
+        if __debug__:
+            print "Last command sent greater than %s ago, doing keepAlive" % keepalive
+        drive.deadBand(deadband)
+        last_command = time.time()
     try:
         events = pygame.event.get()
     except:
@@ -195,15 +212,17 @@ while True:
             if event.axis == PS3_AXIS_LEFT_VERTICAL:
                 if __debug__:
                     print "Value (Drive): %s" % event.value
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Forward/Back : " + str(event.value) + "\n")
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Forward/Back : " + str(event.value*speed_fac) + "\n")
                 f.flush
-                drive.driveCommand(event.value)
+                drive.driveCommand(event.value*drive_mod)
+                last_command = time.time()
             elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
                 if __debug__:
                     print "Value (Steer): %s" % event.value
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Left/Right : " + str(event.value) + "\n")
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Left/Right : " + str(event.value*speed_fac) + "\n")
                 f.flush
-                drive.turnCommand(event.value)
+                drive.turnCommand(event.value*drive_mod)
+                last_command = time.time()
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
                 if __debug__:
                     print "Value (Dome): %s" % event.value
