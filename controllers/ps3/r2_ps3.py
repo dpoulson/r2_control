@@ -195,10 +195,14 @@ while True:
             if event.axis == PS3_AXIS_LEFT_VERTICAL:
                 if __debug__:
                     print "Value (Drive): %s" % event.value
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Forward/Back : " + str(event.value) + "\n")
+                f.flush
                 drive.driveCommand(event.value)
             elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
                 if __debug__:
                     print "Value (Steer): %s" % event.value
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Left/Right : " + str(event.value) + "\n")
+                f.flush
                 drive.turnCommand(event.value)
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
                 if __debug__:
