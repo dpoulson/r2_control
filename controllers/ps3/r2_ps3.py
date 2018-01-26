@@ -136,6 +136,7 @@ last_command = time.time()
 while True:
     global previous
     global last_command
+    global speed_fac
     if time.time() - last_command > keepalive: 
         if __debug__:
             print "Last command sent greater than %s ago, doing keepAlive" % keepalive
@@ -170,12 +171,38 @@ while True:
             combo = buf.getvalue()
             if __debug__:
                 print "Buttons pressed: %s" % combo
-            # Special key press (Select) to switch speeds of drive
-            # if combo == "1000000000000000000"
-            #   if __debug__:
-            #      print "Switching drive speeds"
-            #   # When detected, will switch between two speeds. Also, will give audio feedback
-            #   print "Do shit"
+            # Special key press (All 4 plus triangle) to increase speed of drive
+            if combo == "0000010011110000000":
+              if __debug__:
+                 print "Incrementing drive speed"
+              # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
+              speed_fac += 0.05
+              if speed_fac > 1:
+                 speed_fac = 1
+              if __debug__:
+                 print "*** NEW SPEED %s" % speed_fac
+              drive_mod = speed_fac * invert
+              f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Speed Increase : " + str(speed_fac) + " \n")
+              url = baseurl + "audio/Happy006"
+              try:
+                 r = requests.get(url)
+              except:
+                 print "Fail...."
+            # Special key press (All 4 plus X) to decrease speed of drive
+            if combo == "0000000111110000000":
+              if __debug__:
+                 print "Decrementing drive speed"
+              # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
+              speed_fac -= 0.05
+              if speed_fac < 0.2:
+                 speed_fac = 0.2
+              drive_mod = speed_fac * invert
+              f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Speed Decrease : " + str(speed_fac) + " \n")
+              url = baseurl + "audio/Sad__019"
+              try:
+                 r = requests.get(url)
+              except:
+                 print "Fail...."
             try:
                 newurl = baseurl + keys[combo][0]
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Button Down event : " + combo + "," + keys[combo][0] +" \n")
@@ -211,7 +238,7 @@ while True:
         if event.type == pygame.JOYAXISMOTION:
             if event.axis == PS3_AXIS_LEFT_VERTICAL:
                 if __debug__:
-                    print "Value (Drive): %s" % event.value
+                    print "Value (Drive): %s : Speed Factor : %s" % (event.value, speed_fac)
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Forward/Back : " + str(event.value*speed_fac) + "\n")
                 f.flush
                 drive.driveCommand(event.value*drive_mod)
