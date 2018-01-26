@@ -27,7 +27,7 @@ keepalive = 0.25
 # Speed factor. This multiplier will define the max value to be sent to the drive system. 
 # eg. 0.5 means that the value of the joystick position will be halved
 # Should never be greater than 1
-speed_fac = 0.25
+speed_fac = 0.35
 
 # Invert. Does the drive need to be inverted. 1 = no, -1 = yes
 invert = -1
