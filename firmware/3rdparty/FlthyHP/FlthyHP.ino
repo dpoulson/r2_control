@@ -230,7 +230,7 @@ const int RCRange[2] = {1250, 1750};     // {Min, Max}
 ///*****        uncomment the following if you have the RGBW version.     *****///
 ///*****                                                                  *****///
 //////////////////////////////////////////////////////////////////////////////////
-//#define NEO_JEWEL_RGBW
+#define NEO_JEWEL_RGBW
 
 //////////////////////////////////////////////////////////////////////////////////
 ///*****                          LED Brightness                          *****///

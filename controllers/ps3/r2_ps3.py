@@ -18,9 +18,9 @@ f = open('/home/pi/r2_control/logs/ps3.log', 'at')
 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
 f.flush()
 
-drive = SabertoothPacketSerial()
-drive.driveCommand(0)
-drive.turnCommand(0)
+drive = SabertoothPacketSerial(legacy=True)
+drive.drive(0)
+drive.turn(0)
 
 keepalive = 0.25
 
@@ -241,14 +241,14 @@ while True:
                     print "Value (Drive): %s : Speed Factor : %s" % (event.value, speed_fac)
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Forward/Back : " + str(event.value*speed_fac) + "\n")
                 f.flush
-                drive.driveCommand(event.value*drive_mod)
+                drive.drive(event.value*drive_mod)
                 last_command = time.time()
             elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
                 if __debug__:
                     print "Value (Steer): %s" % event.value
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Left/Right : " + str(event.value*speed_fac) + "\n")
                 f.flush
-                drive.turnCommand(event.value*drive_mod)
+                drive.turn(event.value*drive_mod)
                 last_command = time.time()
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
                 if __debug__:
