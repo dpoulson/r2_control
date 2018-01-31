@@ -48,22 +48,35 @@ devices_list = []
 
 ######################################
 # initialise modules
+
 # Initialise server controllers
 if "body" in modules:
     pwm_body = ServoControl(int(config.get('body', 'address'), 16), config.get('body', 'config_file'))
 if "dome" in modules:
     pwm_dome = ServoControl(int(config.get('dome', 'address'), 16), config.get('dome', 'config_file'))
+
+# Lighting systems
+if "teecees" in modules:
+    print "Adding TeeCees"
+if "rseries" in modules:
+    print "Adding Rseries"
+if "flthy" in modules:
+    print "Adding Flthy"
+
 # Initialise LCD
 if "lcd" in modules:
     lcd = Adafruit_CharLCD(pin_rs=1, pin_e=2, pins_db=[3, 4, 5, 6],
                            GPIO=MCP230XX_GPIO(1, int(config.get('lcd', 'address'), 16), int(config.get('lcd', 'bit'))))
     lcd.write("R2 Control\nBy Darren Poulson")
+
 # Initialise Audio
 if "audio" in modules:
     r2audio = AudioLibrary(config.get('audio', 'sounds_dir'), config.get('audio', 'volume'))
+
 # Initialise script object
 if "scripts" in modules:
     scripts = ScriptControl(config.get('scripts', 'script_dir'))
+
 # Monitoring
 if "monitoring" in modules:
     monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')),
