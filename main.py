@@ -37,7 +37,6 @@ config.read('config/main.cfg')
 
 modules = config.sections()
 i2c_bus = config.getint('DEFAULT', 'busid')
-debug_lcd = config.getboolean('DEFAULT', 'debug_lcd')
 logtofile = config.getboolean('DEFAULT', 'logtofile')
 logdir = config.get('DEFAULT', 'logdir')
 logfile = config.get('DEFAULT', 'logfile')
@@ -60,12 +59,6 @@ if "rseries" in modules:
     print "Adding Rseries"
 if "flthy" in modules:
     print "Adding Flthy"
-
-# Initialise LCD
-if "lcd" in modules:
-    lcd = Adafruit_CharLCD(pin_rs=1, pin_e=2, pins_db=[3, 4, 5, 6],
-                           GPIO=MCP230XX_GPIO(1, int(config.get('lcd', 'address'), 16), int(config.get('lcd', 'bit'))))
-    lcd.write("R2 Control\nBy Darren Poulson")
 
 # Initialise Audio
 if "audio" in modules:
@@ -240,19 +233,6 @@ def servo_body_open():
     if request.method == 'GET':
         pwm_body.open_all_servos()
         return "Ok"
-
-
-#############################
-# LCD API calls
-#
-
-
-@app.route('/lcd/<message>', methods=['GET'])
-def lcd_write(message):
-    """GET to write a message to the LCD screen"""
-    if request.method == 'GET':
-        lcd.write("%s" % message)
-    return "Ok"
 
 
 #############################
