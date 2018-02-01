@@ -14,7 +14,7 @@ class i2cMonitor(threading.Thread):
                 data = self.bus.read_i2c_block_data(0x04, 0)
             except:
                 if __debug__:
-                    print "Failed to read i2c data"
+                    print "i2cMonitor: Failed to read i2c data"
                 sleep(1)
             self.extracted[0] = time.time()
             for i in range(0, 8):

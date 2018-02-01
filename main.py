@@ -31,6 +31,7 @@ from i2cMonitor import i2cMonitor
 from ServoControl import ServoControl
 from ScriptControl import ScriptControl
 from AudioLibrary import AudioLibrary
+from FlthyHPControl import FlthyHPControl
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')
@@ -58,7 +59,7 @@ if "teecees" in modules:
 if "rseries" in modules:
     print "Adding Rseries"
 if "flthy" in modules:
-    print "Adding Flthy"
+    flthy = FlthyHPControl(int(config.get('flthy', 'address'), 16))
 
 # Initialise Audio
 if "audio" in modules:
@@ -120,6 +121,16 @@ def index():
                  if not r.rule.startswith('/static')])
     return render_template('index.html', urls=urls)
 
+
+#############################
+# FlthyHP Control
+#
+@app.route('/flthy/<hp>/<cmd>', methods=['GET'])
+def flthyCommand(hp, cmd):
+    """GET to write a message to the LCD screen"""
+    if request.method == 'GET':
+        flthy.sendCommand(hp, cmd)
+    return "Ok"
 
 #############################
 # Servo API calls
