@@ -31,8 +31,6 @@ from i2cMonitor import i2cMonitor
 from ServoControl import ServoControl
 from ScriptControl import ScriptControl
 from AudioLibrary import AudioLibrary
-from Adafruit_MCP230xx import MCP230XX_GPIO
-from Adafruit_CharLCD import Adafruit_CharLCD
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')

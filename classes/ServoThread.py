@@ -2,7 +2,7 @@
 import threading
 import Queue
 import time
-from Adafruit_PWM_Servo_Driver import PWM
+import Adafruit_PCA9685
 
 tick_duration = 100
 
@@ -28,8 +28,11 @@ class ServoThread(threading.Thread):
         self.Current = Min
         self.Channel = Channel
         threading.Thread.__init__(self)
-        self.i2c = PWM(Address, debug=False)
-        self.i2c.setPWMFreq(60)
+        try: 
+           self.i2c = Adafruit_PCA9685.PCA9685(address=Address)
+           self.i2c.set_pwm_freq(60)
+        except:
+           print "Failed to initialise the i2c device"
         return
 
     def run(self):
@@ -55,7 +58,10 @@ class ServoThread(threading.Thread):
                 for x in range(0, ticks):
                     if __debug__:
                         print "Tick: %s Position: %s" % (x, tick_actual_position)
-                    self.i2c.setPWM(self.Channel, 0, int(tick_actual_position))
+                    try:
+                        self.i2c.setPWM(self.Channel, 0, int(tick_actual_position))
+                    except:
+                        print "Failed to send command"
                     tick_actual_position += tick_position_shift
                 if __debug__:
                     print "Finished move: Position: %s" % tick_actual_position
@@ -63,7 +69,10 @@ class ServoThread(threading.Thread):
                 if __debug__:
                     print "Setting servo %s(%s) to position = %s(%s)" % (
                     "test", self.Channel, actual_position, position)
-                self.i2c.setPWM(self.Channel, 0, actual_position)
+                try:
+                    self.i2c.set_pwm(self.Channel, 0, actual_position)
+                except:
+                    print "Failed to send command"
             # Save current position of servo
             if __debug__:
                 print "Servo move finished. Servo.name: %s ServoCurrent %s Tick %s" % (
@@ -72,5 +81,9 @@ class ServoThread(threading.Thread):
             if __debug__:
                 print "New current: %s" % self.Current
             time.sleep(0.3)
-            self.i2c.setPWM(self.Channel, 4096, 0)
+            try:
+                self.i2c.set_pwm(self.Channel, 4096, 0)
+            except:
+                print "Failed to send command"
         return
+

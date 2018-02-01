@@ -31,9 +31,12 @@ class i2cMonitor(threading.Thread):
     def __init__(self, address, interval, logdir):
         self.address = address
         self.interval = interval
-        self.bus = smbus.SMBus(1)
         self.logdir = logdir
         self.extracted = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        try:
+            self.bus = smbus.SMBus(1)
+        except:
+            print "Failed to connect to device on bus"
         if __debug__:
             print "Monitoring...."
         loop = Thread(target=self.monitor_loop)
@@ -56,3 +59,4 @@ class i2cMonitor(threading.Thread):
 
     def queryCurrentDome(self):
         return self.extracted[4]
+
