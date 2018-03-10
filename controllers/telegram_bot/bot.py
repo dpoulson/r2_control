@@ -5,6 +5,9 @@ from telegram.ext import CommandHandler
 import ConfigParser
 import requests
 import logging
+import time
+
+time.sleep(20)
 
 config = ConfigParser.RawConfigParser()
 config.read('config.cfg')
