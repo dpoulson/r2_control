@@ -48,7 +48,7 @@ curve = 0.8
 # Set Axis definitions
 PS3_AXIS_LEFT_VERTICAL = 1
 PS3_AXIS_LEFT_HORIZONTAL = 0
-PS3_AXIS_RIGHT_HORIZONTAL = 2
+PS3_AXIS_RIGHT_HORIZONTAL = 3
 
 # Channel numbers on PWM controller
 SERVO_DOME = 15
@@ -175,7 +175,7 @@ while True:
             if __debug__:
                 print "Buttons pressed: %s" % combo
             # Special key press (All 4 plus triangle) to increase speed of drive
-            if combo == "0000010011110000000":
+            if combo == "00001111000000001":
               if __debug__:
                  print "Incrementing drive speed"
               # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
@@ -192,7 +192,7 @@ while True:
               except:
                  print "Fail...."
             # Special key press (All 4 plus X) to decrease speed of drive
-            if combo == "0000000111110000000":
+            if combo == "00001111000000010":
               if __debug__:
                  print "Decrementing drive speed"
               # When detected, will increment the speed_fac by 0.5 and give some audio feedback.

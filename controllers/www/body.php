@@ -11,7 +11,7 @@ include("include/config.php");
 
 <?php
 
- $panels = array("TopArm", "BotArm", "LLD", "RLD", "PWR", "AUX", "DATA");
+ $panels = array("TopArm", "BotArm", "LLD", "RLD", "PWR", "AUX", "DATA", "ENABLE_DRIVE");
  $servo_list = file_get_contents("http://localhost:5000/servo/body/list");
  $convert = explode("\n", $servo_list);
 
