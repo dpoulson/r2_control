@@ -238,6 +238,7 @@ while True:
             except:
                 if __debug__:
                     print "No combo (released)"
+            previous = ""
         if event.type == pygame.JOYAXISMOTION:
             if event.axis == PS3_AXIS_LEFT_VERTICAL:
                 if __debug__:

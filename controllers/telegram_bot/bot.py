@@ -58,20 +58,31 @@ def status(bot, update):
     url = baseurl + "status"
     try:
         r = requests.get(url)
-        bot.send_message(chat_id=update.message.chat_id, text=r.content)
+        chat_id = update.message.chat_id
+        bot.send_message(chat_id=chat_id, text=r.content)
     except:
         print "Fail...."
         bot.send_message(chat_id=update.message.chat_id, text="Failed to get status")
+
+def chatid(bot, update):
+    try:
+        chat_id = update.message.chat_id
+        bot.send_message(chat_id=chat_id, text=chat_id)
+    except:
+        print "Fail...."
+        bot.send_message(chat_id=update.message.chat_id, text="Failed to get chat_id")
 
 
 start_handler = CommandHandler('status', status)
 sounds_handler = CommandHandler('sounds', sounds, pass_args=True)
 volmute_handler = CommandHandler('mute', volmute)
 volmax_handler = CommandHandler('maxvol', volmax)
+chatid_handler = CommandHandler('chatid', chatid)
 
 dispatcher.add_handler(start_handler)
 dispatcher.add_handler(sounds_handler)
 dispatcher.add_handler(volmute_handler)
 dispatcher.add_handler(volmax_handler)
+dispatcher.add_handler(chatid_handler)
 
 updater.start_polling()

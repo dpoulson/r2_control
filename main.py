@@ -24,6 +24,7 @@ import sys
 import time
 import datetime
 import socket
+import requests
 sys.path.append("./classes/")
 from flask import Flask, request, render_template
 from datetime import timedelta
@@ -42,6 +43,33 @@ logdir = config.get('DEFAULT', 'logdir')
 logfile = config.get('DEFAULT', 'logfile')
 
 devices_list = []
+
+try:
+    host = socket.gethostbyname("www.google.com")
+    s = socket.create_connection((host, 80), 2)
+    internet_connection = True
+except:
+    internet_connection = False
+
+
+def send_telegram(message):
+    global internet_connection
+    try:
+    	host = socket.gethostbyname("www.google.com")
+    	s = socket.create_connection((host, 80), 2)
+    	internet_connection = True
+    except:
+    	internet_connection = False
+    if internet_connection:
+        try:
+    	    send_message = 'https://api.telegram.org/bot' + config.get('telegram', 'token') + '/sendMessage?chat_id=' + config.get('telegram', 'chat_id') + '&parse_mode=Markdown&text=' + message
+    	    requests.get(send_message)
+	except:
+	    if __debug__:
+	       print "Thought we had an internet connection, but sending Telegram failed"
+    else:
+	if __debug__:
+		print "Tried to send Telegram, but no internet connection"
 
 ######################################
 # initialise modules
@@ -68,6 +96,11 @@ if "audio" in modules:
 if "scripts" in modules:
     scripts = ScriptControl(config.get('scripts', 'script_dir'))
 
+# Telegram support
+if "telegram" in modules:
+    send_telegram("R2 reporting in.")
+
+
 # Monitoring
 if "monitoring" in modules:
     monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')),
@@ -86,14 +119,11 @@ def system_status():
     with open('/proc/uptime', 'r') as f:
         uptime_seconds = float(f.readline().split()[0])
         uptime_string = str(timedelta(seconds=uptime_seconds))
-    with open('/sys/class/power_supply/sony_controller_battery_00:19:c1:5f:78:b9/capacity', 'r') as b:
-        remote_battery = int(b.readline().split()[0])
     try:
-        host = socket.gethostbyname("www.google.com")
-        s = socket.create_connection((host, 80), 2)
-        internet_connection = True
+   	with open('/sys/class/power_supply/sony_controller_battery_00:19:c1:5f:78:b9/capacity', 'r') as b:
+        	remote_battery = int(b.readline().split()[0])
     except:
-        internet_connection = False
+	remote_battery = 0
     status = "Current Status\n"
     status += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
     status += "Uptime: \t%s\n" % uptime_string
@@ -352,6 +382,8 @@ def shutdown():
     """GET to shutdown Raspberry Pi"""
     if logtofile:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Shutting down ****** \n")
+    if "telegram" in modules:
+	send_telegram("Night night...")
     if request.method == 'GET':
         os.system('shutdown now -h')
     return "Shutting down"
@@ -364,6 +396,19 @@ def sysstatus():
     if request.method == 'GET':
         message = system_status()
     return message
+
+@app.route('/sendstatus', methods=['GET'])
+def sendstatus():
+    """GET to send system status via telegram"""
+    message = ""
+    if request.method == 'GET':
+        if "telegram" in modules:
+            send_telegram(system_status())
+            message = "Sent"
+        else:
+	    message = "Telegram module not configured"
+    return message
+
 
 
 if __name__ == '__main__':
