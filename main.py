@@ -100,7 +100,6 @@ if "scripts" in modules:
 if "telegram" in modules:
     send_telegram("R2 reporting in.")
 
-
 # Monitoring
 if "monitoring" in modules:
     monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')),
@@ -269,112 +268,113 @@ def servo_body_open():
 # Script API calls
 #
 
-@app.route('/script/', methods=['GET'])
-@app.route('/script/list', methods=['GET'])
-def script_list():
-    """GET gives a comma separated list of available scripts"""
-    message = ""
-    if request.method == 'GET':
-        message += scripts.list()
-    return message
+if "scripts" in modules:
+    @app.route('/script/', methods=['GET'])
+    @app.route('/script/list', methods=['GET'])
+    def script_list():
+        """GET gives a comma separated list of available scripts"""
+        message = ""
+        if request.method == 'GET':
+            message += scripts.list()
+        return message
 
 
-@app.route('/script/running', methods=['GET'])
-def running_scripts():
-    """GET a list of all running scripts and their ID"""
-    message = ""
-    if request.method == 'GET':
-        message += scripts.list_running()
-    return message
+    @app.route('/script/running', methods=['GET'])
+    def running_scripts():
+        """GET a list of all running scripts and their ID"""
+        message = ""
+        if request.method == 'GET':
+            message += scripts.list_running()
+        return message
 
 
-@app.route('/script/stop/<script_id>', methods=['GET'])
-def stop_script(script_id):
-    """GET a script ID to stop that script"""
-    if logtofile:
-        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script stop: " + script_id + "\n")
-    message = ""
-    if request.method == 'GET':
-        if script_id == "all":
-            message += scripts.stop_all()
-        else:
-            message += scripts.stop_script(script_id)
-    return message
+    @app.route('/script/stop/<script_id>', methods=['GET'])
+    def stop_script(script_id):
+        """GET a script ID to stop that script"""
+        if logtofile:
+            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script stop: " + script_id + "\n")
+        message = ""
+        if request.method == 'GET':
+            if script_id == "all":
+                message += scripts.stop_all()
+            else:
+                message += scripts.stop_script(script_id)
+        return message
 
 
-@app.route('/script/<name>/<loop>', methods=['GET'])
-def start_script(name, loop):
-    """GET to trigger the named script"""
-    if logtofile:
-        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script loop: " + name + "," + loop + "\n")
-    message = ""
-    if request.method == 'GET':
-        message += scripts.run_script(name, loop)
-    return message
+    @app.route('/script/<name>/<loop>', methods=['GET'])
+    def start_script(name, loop):
+        """GET to trigger the named script"""
+        if logtofile:
+            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script loop: " + name + "," + loop + "\n")
+        message = ""
+        if request.method == 'GET':
+            message += scripts.run_script(name, loop)
+        return message
 
 
 #############################
 # Audio API calls
 #
-
-@app.route('/audio/', methods=['GET'])
-@app.route('/audio/list', methods=['GET'])
-def audio_list():
-    """GET gives a comma separated list of available sounds"""
-    message = ""
-    if request.method == 'GET':
-        message += r2audio.ListSounds()
-    return message
-
-
-@app.route('/audio/<name>', methods=['GET'])
-def audio(name):
-    """GET to trigger the given sound"""
-    if logtofile:
-        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound : " + name + "\n")
-    if request.method == 'GET':
-        r2audio.TriggerSound(name)
-    return "Ok"
+if "audio" in modules:
+    @app.route('/audio/', methods=['GET'])
+    @app.route('/audio/list', methods=['GET'])
+    def audio_list():
+        """GET gives a comma separated list of available sounds"""
+        message = ""
+        if request.method == 'GET':
+            message += r2audio.ListSounds()
+        return message
 
 
-@app.route('/audio/random/', methods=['GET'])
-@app.route('/audio/random/list', methods=['GET'])
-def random_audio_list():
-    """GET returns types of sounds available at random"""
-    message = ""
-    if request.method == 'GET':
-        message += r2audio.ListRandomSounds()
-    return message
+    @app.route('/audio/<name>', methods=['GET'])
+    def audio(name):
+        """GET to trigger the given sound"""
+        if logtofile:
+            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound : " + name + "\n")
+        if request.method == 'GET':
+            r2audio.TriggerSound(name)
+        return "Ok"
 
 
-@app.route('/audio/random/<name>', methods=['GET'])
-def random_audio(name):
-    """GET to play a random sound of a given type"""
-    if logtofile:
-        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound random: " + name + "\n")
-    if request.method == 'GET':
-        r2audio.TriggerRandomSound(name)
-    return "Ok"
+    @app.route('/audio/random/', methods=['GET'])
+    @app.route('/audio/random/list', methods=['GET'])
+    def random_audio_list():
+        """GET returns types of sounds available at random"""
+        message = ""
+        if request.method == 'GET':
+            message += r2audio.ListRandomSounds()
+        return message
 
 
-@app.route('/audio/volume', methods=['GET'])
-def get_volume():
-    """GET returns current volume level"""
-    message = ""
-    if request.method == 'GET':
-        message += r2audio.ShowVolume()
-    return message
+    @app.route('/audio/random/<name>', methods=['GET'])
+    def random_audio(name):
+        """GET to play a random sound of a given type"""
+        if logtofile:
+            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound random: " + name + "\n")
+        if request.method == 'GET':
+            r2audio.TriggerRandomSound(name)
+        return "Ok"
 
 
-@app.route('/audio/volume/<level>', methods=['GET'])
-def set_volume(level):
-    """GET to set a specific volume level"""
-    if logtofile:
-        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Volume set : " + level + "\n")
-    message = ""
-    if request.method == 'GET':
-        message += r2audio.SetVolume(level)
-    return message
+    @app.route('/audio/volume', methods=['GET'])
+    def get_volume():
+        """GET returns current volume level"""
+        message = ""
+        if request.method == 'GET':
+            message += r2audio.ShowVolume()
+        return message
+
+
+    @app.route('/audio/volume/<level>', methods=['GET'])
+    def set_volume(level):
+        """GET to set a specific volume level"""
+        if logtofile:
+            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Volume set : " + level + "\n")
+        message = ""
+        if request.method == 'GET':
+            message += r2audio.SetVolume(level)
+        return message
 
 
 @app.route('/shutdown/now', methods=['GET'])
