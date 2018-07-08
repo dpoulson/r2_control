@@ -74,6 +74,7 @@ class i2cMonitor(threading.Thread):
 	    self.send_telegram("Monitoring started")
 
         loop = Thread(target=self.monitor_loop)
+	loop.daemon = True
         loop.start()
 
     def queryBattery(self):

@@ -44,23 +44,19 @@ logfile = config.get('DEFAULT', 'logfile')
 
 devices_list = []
 
-try:
-    host = socket.gethostbyname("www.google.com")
-    s = socket.create_connection((host, 80), 2)
-    internet_connection = True
-except:
-    internet_connection = False
+def check_internet():
+    try:
+        host = socket.gethostbyname("www.google.com")
+        s = socket.create_connection((host, 80), 2)
+        internet_connection = True
+    except:
+        internet_connection = False
+    return internet_connection
 
 
 def send_telegram(message):
     global internet_connection
-    try:
-    	host = socket.gethostbyname("www.google.com")
-    	s = socket.create_connection((host, 80), 2)
-    	internet_connection = True
-    except:
-    	internet_connection = False
-    if internet_connection:
+    if check_internet():
         try:
     	    send_message = 'https://api.telegram.org/bot' + config.get('telegram', 'token') + '/sendMessage?chat_id=' + config.get('telegram', 'chat_id') + '&parse_mode=Markdown&text=' + message
     	    requests.get(send_message)
@@ -130,7 +126,7 @@ def system_status():
     status += "Main Battery: \t%5.3f (balance: %5.3f)\n" % (monitor.queryBattery(), monitor.queryBatteryBalance())
     status += "Remote Battery: %s%%\t\n" % remote_battery
     status += "Wifi: \t\t\n"
-    status += "Internet: \t%s \n" % internet_connection
+    status += "Internet: \t%s \n" % check_internet()
     status += "Location: \t\n"
     status += "Volume: \t%s\n" % r2audio.ShowVolume()
     status += "--------------\n"

@@ -1,5 +1,6 @@
 [Unit]
 Description=R2 Control
+After=network.target
  
 [Service]
 Type=simple
@@ -12,7 +13,7 @@ StandardError=syslog
 Restart=on-failure
  
 [Install]
-WantedBy=multi-user.target
+WantedBy=network.target
 Alias=r2_control.service
 
 
