@@ -29,6 +29,7 @@ sys.path.append("./classes/")
 from flask import Flask, request, render_template
 from datetime import timedelta
 from i2cMonitor import i2cMonitor
+from FlthyHPControl import FlthyHPControl
 from ServoControl import ServoControl
 from ScriptControl import ScriptControl
 from AudioLibrary import AudioLibrary
@@ -81,7 +82,10 @@ if "teecees" in modules:
     print "Adding TeeCees"
 if "rseries" in modules:
     print "Adding Rseries"
+if "vader" in modules:
+    print "Adding VADER"
 if "flthy" in modules:
+    flthy = FlthyHPControl(config.get('flthy', 'address'), logdir)
     print "Adding Flthy"
 
 # Initialise Audio
@@ -404,6 +408,27 @@ def sendstatus():
         else:
 	    message = "Telegram module not configured"
     return message
+
+if "flthy" in modules:
+    @app.route('/flthy/raw/<cmd>', methods=['GET'])
+    def flthy_raw(cmd):
+        """ GET to send a raw command to the flthy HP system"""
+        if logtofile:
+            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy raw command : " + cmd + "\n")
+        message = ""
+        if request.method == 'GET':
+            message += flthy.sendCommand(cmd)
+        return message
+    
+    @app.route('/flthy/sequence/<seq>', methods=['GET'])
+    def flthy_seq(seq):
+        """ GET to send a sequence command to the flthy HP system"""
+        if logtofile:
+            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy sequence command : " + seq + "\n")
+        message = ""
+        if request.method == 'GET':
+            message += flthy.sendSequence(seq)
+        return message
 
 
 
