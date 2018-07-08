@@ -8,13 +8,14 @@ for a more complicated sketch.
 Requires the FastLED library : https://github.com/FastLED/FastLED/releases/
 */
 
-#define LOGIC 2       // 1 for Front Logic, 2 for Rear Logic
+#define LOGIC 1       // 1 for Front Logic, 2 for Rear Logic
 
 #define PCBVERSION 2  // 2 for Sept 2014 logics (Kenny & 3PO PCBs) or newer
                       // 1 for older logics (Naboo logo on PCB backs)
 
 #define maxBrightness 128  // how bright the LEDs can get with the Bright trimpot turned up all the way
                            // limit this to something under 192 to conserve eyeballs and batteries
+#define I2CADDRESS 0x71
                            
 #define keyColors 5
 #define Tweens 10   
@@ -22,6 +23,7 @@ Requires the FastLED library : https://github.com/FastLED/FastLED/releases/
 #define DEBUG 0
 
 #include "FastSPI_LED2.h"
+#include "Wire.h"
 #define DATA_PIN 6
 #include <avr/pgmspace.h>
 
@@ -107,6 +109,8 @@ byte hueVal;
 #define totalColorsWBiz ((totalColors*2)-2)
 CRGB leds[NUM_LEDS]; // This is an array of leds.  One item for each led in your strip.
 byte LEDstatus[NUM_LEDS][2]; //an array that will hold color number and pause value for each LED
+volatile boolean stringComplete = false;       // whether the serial string is complete
+
 
 //function takes a color number (that may be bizarro) and returns an actual color number
 byte actualColorNum(byte x) {
@@ -164,6 +168,10 @@ void setup() {
   #if (DEBUG>0)
   Serial.begin(9600);         
   #endif 
+
+  Wire.begin(I2CADDRESS);                  // Connects to I2C Bus and establishes address.
+  Wire.onReceive(i2cEvent);                // Register event so when we receive something we jump to i2cEvent();
+
   randomSeed(analogRead(0)); //helps keep random numbers more randomy 
   hueVal = analogRead(huePin)/4; //read the value of the hue trimpot, colors will have their Hue shifted by this amount
   FastLED.setBrightness(map(analogRead(briPin),0,1024,0,maxBrightness)); //read the value of the hue trimpot and map it down to an allowed brightness
@@ -198,6 +206,15 @@ void loop() {
     long currentMillis = millis();
     loopcount++;
   #endif
+
+
+  if(stringComplete) {
+    inputString.trim();    // Trim any white space off off inputString, including \r and \n as they are unecessary now.
+
+    Serial.print("Received Command: ");
+    Serial.println(inputString);
+    
+  } 
   
   //update each LED...
   for(byte x = 0; x < NUM_LEDS; x++) {
@@ -222,3 +239,19 @@ void loop() {
   }
   #endif
 }
+
+
+void i2cEvent(int howMany)
+{  
+  inputString = "";                                     // Ensures inputString is empty
+  int i=0;
+  while(Wire.available())  {                            // loop through all incoming bytes
+    char inChar = (char)Wire.read();                    // Receive each byte as a character
+    if(i<MAXCOMMANDLENGTH) {
+       inputString += inChar;                           // Add each Character to inputString
+    }
+    i++;
+  }
+  stringComplete = true;                                // Once done, set a flag so the main loop can do something about it. 
+}
+
