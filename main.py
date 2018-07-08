@@ -417,7 +417,7 @@ if "flthy" in modules:
             f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy raw command : " + cmd + "\n")
         message = ""
         if request.method == 'GET':
-            message += flthy.sendCommand(cmd)
+            message += flthy.sendRaw(cmd)
         return message
     
     @app.route('/flthy/sequence/<seq>', methods=['GET'])
@@ -429,6 +429,17 @@ if "flthy" in modules:
         if request.method == 'GET':
             message += flthy.sendSequence(seq)
         return message
+
+    @app.route('/flthy/<hp>/<type>/<seq>/<value>', methods=['GET'])
+    def flthy_cmd(hp, type, seq, value):
+        """ GET to send a command to the flthy HP system"""
+        if logtofile:
+            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy command : " + hp + " " + type + " " + seq + " " + value + "\n")
+        message = ""
+        if request.method == 'GET':
+            message += flthy.sendCommand(hp, type, seq, value)
+        return message
+
 
 
 
