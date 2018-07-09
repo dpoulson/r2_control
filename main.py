@@ -296,6 +296,7 @@ def sendstatus():
 	    message = "Telegram module not configured"
     return message
 
+print dir()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, use_reloader=False)

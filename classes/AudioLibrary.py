@@ -41,7 +41,7 @@ api = Blueprint('audio', __name__, url_prefix='/audio')
 
 @api.route('/', methods=['GET'])
 @api.route('/list', methods=['GET'])
-def audio_list():
+def _audio_list():
     """GET gives a comma separated list of available sounds"""
     message = ""
     if request.method == 'GET':
@@ -50,7 +50,7 @@ def audio_list():
 
 
 @api.route('/<name>', methods=['GET'])
-def audio(name):
+def _audio(name):
     """GET to trigger the given sound"""
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound : " + name + "\n")
@@ -61,7 +61,7 @@ def audio(name):
 
 @api.route('/random/', methods=['GET'])
 @api.route('/random/list', methods=['GET'])
-def random_audio_list():
+def _random_audio_list():
     """GET returns types of sounds available at random"""
     message = ""
     if request.method == 'GET':
@@ -70,7 +70,7 @@ def random_audio_list():
 
 
 @api.route('/random/<name>', methods=['GET'])
-def random_audio(name):
+def _random_audio(name):
     """GET to play a random sound of a given type"""
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound random: " + name + "\n")
@@ -79,7 +79,7 @@ def random_audio(name):
     return "Ok"
 
 @api.route('/volume', methods=['GET'])
-def get_volume():
+def _get_volume():
     """GET returns current volume level"""
     message = ""
     if request.method == 'GET':
@@ -88,7 +88,7 @@ def get_volume():
 
 
 @api.route('/volume/<level>', methods=['GET'])
-def set_volume(level):
+def _set_volume(level):
     """GET to set a specific volume level"""
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Volume set : " + level + "\n")
@@ -98,7 +98,7 @@ def set_volume(level):
     return message
 
 
-class AudioLibrary:
+class _AudioLibrary:
     def init_config(self, sounds_dir):
         """Load in CSV of Audio definitions"""
         if __debug__:
@@ -179,4 +179,4 @@ class AudioLibrary:
         return "Ok"
 
 
-r2audio = AudioLibrary(_defaults['sounds_dir'], _defaults['volume'])
+r2audio = _AudioLibrary(_defaults['sounds_dir'], _defaults['volume'])

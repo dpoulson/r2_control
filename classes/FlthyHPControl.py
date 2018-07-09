@@ -40,7 +40,7 @@ if _logtofile:
 api = Blueprint('flthy', __name__, url_prefix='/flthy')
 
 @api.route('/raw/<cmd>', methods=['GET'])
-def flthy_raw(cmd):
+def _flthy_raw(cmd):
     """ GET to send a raw command to the flthy HP system"""
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy raw command : " + cmd + "\n")
@@ -50,7 +50,7 @@ def flthy_raw(cmd):
     return message
 
 @api.route('/sequence/<seq>', methods=['GET'])
-def flthy_seq(seq):
+def _flthy_seq(seq):
     """ GET to send a sequence command to the flthy HP system"""
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy sequence command : " + seq + "\n")
@@ -60,7 +60,7 @@ def flthy_seq(seq):
     return message
 
 @api.route('/<hp>/<type>/<seq>/<value>', methods=['GET'])
-def flthy_cmd(hp, type, seq, value):
+def _flthy_cmd(hp, type, seq, value):
     """ GET to send a command to the flthy HP system"""
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy command : " + hp + " " + type + " " + seq + " " + value + "\n")
@@ -70,7 +70,7 @@ def flthy_cmd(hp, type, seq, value):
     return message
 
 
-class FlthyHPControl:
+class _FlthyHPControl:
 
     def __init__(self, address, logdir):
         self.address = address
@@ -210,5 +210,5 @@ class FlthyHPControl:
         return "Ok"
 
 
-_flthy = FlthyHPControl(_defaults['address'], _defaults['logfile'])
+_flthy = _FlthyHPControl(_defaults['address'], _defaults['logfile'])
 

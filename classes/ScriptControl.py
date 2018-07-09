@@ -18,7 +18,6 @@
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
 
-from ScriptThread import ScriptThread
 import ConfigParser
 import glob
 import os
@@ -58,50 +57,52 @@ api = Blueprint('scripts', __name__, url_prefix='/scripts')
 
 @api.route('/', methods=['GET'])
 @api.route('/list', methods=['GET'])
-def script_list():
+def _script_list():
     """GET gives a comma separated list of available scripts"""
     message = ""
     if request.method == 'GET':
-        message += _scripts.list()
+        message += scripts.list()
     return message
 
 
 @api.route('/running', methods=['GET'])
-def running_scripts():
+def _running_scripts():
     """GET a list of all running scripts and their ID"""
     message = ""
     if request.method == 'GET':
-        message += _scripts.list_running()
+        message += scripts.list_running()
     return message
 
 
 @api.route('/stop/<script_id>', methods=['GET'])
-def stop_script(script_id):
+def _stop_script(script_id):
     """GET a script ID to stop that script"""
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script stop: " + script_id + "\n")
     message = ""
     if request.method == 'GET':
         if script_id == "all":
-            message += _scripts.stop_all()
+            message += scripts.stop_all()
         else:
-            message += _scripts.stop_script(script_id)
+            message += scripts.stop_script(script_id)
     return message
 
 
 @api.route('/<name>/<loop>', methods=['GET'])
-def start_script(name, loop):
+def _start_script(name, loop):
     """GET to trigger the named script"""
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script loop: " + name + "," + loop + "\n")
     message = ""
     if request.method == 'GET':
-        message += _scripts.run_script(name, loop)
+        message += scripts.run_script(name, loop)
     return message
 
 
 
-class ScriptControl:
+class _ScriptControl:
+    from ScriptThread import ScriptThread
+
     Scripts = collections.namedtuple('Script', 'name, script_id, thread')
 
     def __init__(self, script_dir):
@@ -148,7 +149,7 @@ class ScriptControl:
         idx = 0
         current_id = 0
         self.running_scripts.append(
-            self.Scripts(name=script, script_id=self.script_id, thread=ScriptThread(script, loop)))
+            self.Scripts(name=script, script_id=self.script_id, thread=self.ScriptThread(script, loop)))
         if __debug__:
             print "ID %s" % self.script_id
         for scripts in self.running_scripts:
@@ -169,4 +170,4 @@ class ScriptControl:
         return "Ok"
 
 
-scripts = ScriptControl(_defaults['script_dir'])
+scripts = _ScriptControl(_defaults['script_dir'])
