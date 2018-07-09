@@ -45,7 +45,7 @@ def _audio_list():
     """GET gives a comma separated list of available sounds"""
     message = ""
     if request.method == 'GET':
-        message += r2audio.ListSounds()
+        message += audio.ListSounds()
     return message
 
 
@@ -55,7 +55,7 @@ def _audio(name):
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound : " + name + "\n")
     if request.method == 'GET':
-        r2audio.TriggerSound(name)
+        audio.TriggerSound(name)
     return "Ok"
 
 
@@ -65,7 +65,7 @@ def _random_audio_list():
     """GET returns types of sounds available at random"""
     message = ""
     if request.method == 'GET':
-        message += r2audio.ListRandomSounds()
+        message += audio.ListRandomSounds()
     return message
 
 
@@ -75,7 +75,7 @@ def _random_audio(name):
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound random: " + name + "\n")
     if request.method == 'GET':
-        r2audio.TriggerRandomSound(name)
+        audio.TriggerRandomSound(name)
     return "Ok"
 
 @api.route('/volume', methods=['GET'])
@@ -83,7 +83,7 @@ def _get_volume():
     """GET returns current volume level"""
     message = ""
     if request.method == 'GET':
-        message += r2audio.ShowVolume()
+        message += audio.ShowVolume()
     return message
 
 
@@ -94,7 +94,7 @@ def _set_volume(level):
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Volume set : " + level + "\n")
     message = ""
     if request.method == 'GET':
-        message += r2audio.SetVolume(level)
+        message += audio.SetVolume(level)
     return message
 
 
@@ -179,4 +179,4 @@ class _AudioLibrary:
         return "Ok"
 
 
-r2audio = _AudioLibrary(_defaults['sounds_dir'], _defaults['volume'])
+audio = _AudioLibrary(_defaults['sounds_dir'], _defaults['volume'])

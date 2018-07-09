@@ -4,6 +4,7 @@ import smbus, time, threading, struct, csv, requests
 import ConfigParser
 from threading import Thread
 from time import sleep
+from config import mainconfig
 
 
 class i2cMonitor(threading.Thread):
@@ -66,7 +67,7 @@ class i2cMonitor(threading.Thread):
         self.lowbat = False
         self.extracted = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         try:
-            self.bus = smbus.SMBus(1)
+            self.bus = smbus.SMBus(int(mainconfig['busid']))
         except:
             print "Failed to connect to device on bus"
         if __debug__:

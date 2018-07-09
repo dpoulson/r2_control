@@ -36,7 +36,6 @@ if _logtofile:
     _f.flush
 
 
-
 api = Blueprint('flthy', __name__, url_prefix='/flthy')
 
 @api.route('/raw/<cmd>', methods=['GET'])
@@ -74,7 +73,7 @@ class _FlthyHPControl:
 
     def __init__(self, address, logdir):
         self.address = address
-        self.bus = smbus.SMBus(1)
+        self.bus = smbus.SMBus(int(mainconfig['busid']))
         self.logdir = logdir
         if __debug__:
             print "Initialising FlthyHP Control"

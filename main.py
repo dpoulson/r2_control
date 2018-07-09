@@ -88,10 +88,10 @@ def system_status():
     status += "Wifi: \t\t\n"
     status += "Internet: \t%s \n" % check_internet()
     status += "Location: \t\n"
-    status += "Volume: \t%s\n" % r2audio.ShowVolume()
+    status += "Volume: \t%s\n" % p.audio.ShowVolume()
     status += "--------------\n"
     status += "Scripts Running:\n"
-    status += scripts.list_running()
+    #status += scripts.list_running()
     return status
 
 # If logtofile is set, open log file

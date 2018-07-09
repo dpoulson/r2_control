@@ -3,6 +3,7 @@ import threading
 import Queue
 import time
 import Adafruit_PCA9685
+from config import mainconfig
 
 tick_duration = 100
 
