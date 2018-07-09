@@ -28,22 +28,17 @@ import requests
 sys.path.append("./classes/")
 from flask import Flask, request, render_template
 from datetime import timedelta
-from i2cMonitor import i2cMonitor
-from FlthyHPControl import FlthyHPControl
-from ServoControl import ServoControl
-from ScriptControl import ScriptControl
-from AudioLibrary import AudioLibrary
+
+from config import mainconfig
+
+modules = mainconfig['modules'].split(",")
+i2c_bus = mainconfig['busid']
+logtofile = mainconfig['logtofile']
+logdir = mainconfig['logdir']
+logfile = mainconfig['logfile']
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')
-
-modules = config.sections()
-i2c_bus = config.getint('DEFAULT', 'busid')
-logtofile = config.getboolean('DEFAULT', 'logtofile')
-logdir = config.get('DEFAULT', 'logdir')
-logfile = config.get('DEFAULT', 'logfile')
-
-devices_list = []
 
 def check_internet():
     try:
@@ -68,61 +63,16 @@ def send_telegram(message):
 	if __debug__:
 		print "Tried to send Telegram, but no internet connection"
 
-######################################
-# initialise modules
-
-# Initialise server controllers
-if "body" in modules:
-    pwm_body = ServoControl(int(config.get('body', 'address'), 16), config.get('body', 'config_file'))
-if "dome" in modules:
-    pwm_dome = ServoControl(int(config.get('dome', 'address'), 16), config.get('dome', 'config_file'))
-
-# Lighting systems
-if "teecees" in modules:
-    print "Adding TeeCees"
-if "rseries" in modules:
-    print "Adding Rseries"
-if "vader" in modules:
-    print "Adding VADER"
-if "flthy" in modules:
-    flthy = FlthyHPControl(config.get('flthy', 'address'), logdir)
-    print "Adding Flthy"
-
-# Initialise Audio
-if "audio" in modules:
-    r2audio = AudioLibrary(config.get('audio', 'sounds_dir'), config.get('audio', 'volume'))
-
-# Initialise script object
-if "scripts" in modules:
-    scripts = ScriptControl(config.get('scripts', 'script_dir'))
-
-# Telegram support
-if "telegram" in modules:
-    send_telegram("R2 reporting in.")
-
-# Monitoring
-if "monitoring" in modules:
-    monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')),
-                         logdir)
-
-####
-# If logtofile is set, open log file
-if logtofile:
-    if __debug__:
-        print "Opening log file: Dir: %s - Filename: %s" % (logdir, logfile)
-    f = open(logdir + '/' + logfile, 'at')
-    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** r2_control started ******\n")
-    f.flush
 
 def system_status():
     with open('/proc/uptime', 'r') as f:
         uptime_seconds = float(f.readline().split()[0])
         uptime_string = str(timedelta(seconds=uptime_seconds))
     try:
-   	with open('/sys/class/power_supply/sony_controller_battery_00:19:c1:5f:78:b9/capacity', 'r') as b:
-        	remote_battery = int(b.readline().split()[0])
+        with open('/sys/class/power_supply/sony_controller_battery_00:19:c1:5f:78:b9/capacity', 'r') as b:
+                remote_battery = int(b.readline().split()[0])
     except:
-	remote_battery = 0
+        remote_battery = 0
     status = "Current Status\n"
     status += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
     status += "Uptime: \t%s\n" % uptime_string
@@ -137,6 +87,31 @@ def system_status():
     status += scripts.list_running()
     return status
 
+# If logtofile is set, open log file
+if logtofile:
+    if __debug__:
+        print "Opening log file: Dir: %s - Filename: %s" % (logdir, logfile)
+    f = open(logdir + '/' + logfile, 'at')
+    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** r2_control started ******\n")
+    f.flush
+
+
+######################################
+# initialise modules
+
+# Initialise server controllers
+if "body" in modules:
+    from ServoControl import ServoControl
+    pwm_body = ServoControl(int(config.get('body', 'address'), 16), config.get('body', 'config_file'))
+if "dome" in modules:
+    from ServoControl import ServoControl
+    pwm_dome = ServoControl(int(config.get('dome', 'address'), 16), config.get('dome', 'config_file'))
+
+# Monitoring
+if "monitoring" in modules:
+    from i2cMonitor import i2cMonitor
+    monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')),
+                         logdir)
 
 app = Flask(__name__, template_folder='templates')
 
@@ -267,116 +242,28 @@ def servo_body_open():
 #############################
 # Script API calls
 #
-
 if "scripts" in modules:
-    @app.route('/script/', methods=['GET'])
-    @app.route('/script/list', methods=['GET'])
-    def script_list():
-        """GET gives a comma separated list of available scripts"""
-        message = ""
-        if request.method == 'GET':
-            message += scripts.list()
-        return message
-
-
-    @app.route('/script/running', methods=['GET'])
-    def running_scripts():
-        """GET a list of all running scripts and their ID"""
-        message = ""
-        if request.method == 'GET':
-            message += scripts.list_running()
-        return message
-
-
-    @app.route('/script/stop/<script_id>', methods=['GET'])
-    def stop_script(script_id):
-        """GET a script ID to stop that script"""
-        if logtofile:
-            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script stop: " + script_id + "\n")
-        message = ""
-        if request.method == 'GET':
-            if script_id == "all":
-                message += scripts.stop_all()
-            else:
-                message += scripts.stop_script(script_id)
-        return message
-
-
-    @app.route('/script/<name>/<loop>', methods=['GET'])
-    def start_script(name, loop):
-        """GET to trigger the named script"""
-        if logtofile:
-            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script loop: " + name + "," + loop + "\n")
-        message = ""
-        if request.method == 'GET':
-            message += scripts.run_script(name, loop)
-        return message
+    from ScriptControl import *
+    app.register_blueprint(api)
 
 
 #############################
 # Audio API calls
 #
 if "audio" in modules:
-    @app.route('/audio/', methods=['GET'])
-    @app.route('/audio/list', methods=['GET'])
-    def audio_list():
-        """GET gives a comma separated list of available sounds"""
-        message = ""
-        if request.method == 'GET':
-            message += r2audio.ListSounds()
-        return message
+    from AudioLibrary import *
+    app.register_blueprint(api)
 
 
-    @app.route('/audio/<name>', methods=['GET'])
-    def audio(name):
-        """GET to trigger the given sound"""
-        if logtofile:
-            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound : " + name + "\n")
-        if request.method == 'GET':
-            r2audio.TriggerSound(name)
-        return "Ok"
+########################
+# Flthy API
+#
+if "flthy" in modules:
+    from FlthyHPControl import *
+    app.register_blueprint(api)
 
-
-    @app.route('/audio/random/', methods=['GET'])
-    @app.route('/audio/random/list', methods=['GET'])
-    def random_audio_list():
-        """GET returns types of sounds available at random"""
-        message = ""
-        if request.method == 'GET':
-            message += r2audio.ListRandomSounds()
-        return message
-
-
-    @app.route('/audio/random/<name>', methods=['GET'])
-    def random_audio(name):
-        """GET to play a random sound of a given type"""
-        if logtofile:
-            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound random: " + name + "\n")
-        if request.method == 'GET':
-            r2audio.TriggerRandomSound(name)
-        return "Ok"
-
-
-    @app.route('/audio/volume', methods=['GET'])
-    def get_volume():
-        """GET returns current volume level"""
-        message = ""
-        if request.method == 'GET':
-            message += r2audio.ShowVolume()
-        return message
-
-
-    @app.route('/audio/volume/<level>', methods=['GET'])
-    def set_volume(level):
-        """GET to set a specific volume level"""
-        if logtofile:
-            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Volume set : " + level + "\n")
-        message = ""
-        if request.method == 'GET':
-            message += r2audio.SetVolume(level)
-        return message
-
-
+#######################
+# System API calls
 @app.route('/shutdown/now', methods=['GET'])
 def shutdown():
     """GET to shutdown Raspberry Pi"""
@@ -408,39 +295,6 @@ def sendstatus():
         else:
 	    message = "Telegram module not configured"
     return message
-
-if "flthy" in modules:
-    @app.route('/flthy/raw/<cmd>', methods=['GET'])
-    def flthy_raw(cmd):
-        """ GET to send a raw command to the flthy HP system"""
-        if logtofile:
-            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy raw command : " + cmd + "\n")
-        message = ""
-        if request.method == 'GET':
-            message += flthy.sendRaw(cmd)
-        return message
-    
-    @app.route('/flthy/sequence/<seq>', methods=['GET'])
-    def flthy_seq(seq):
-        """ GET to send a sequence command to the flthy HP system"""
-        if logtofile:
-            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy sequence command : " + seq + "\n")
-        message = ""
-        if request.method == 'GET':
-            message += flthy.sendSequence(seq)
-        return message
-
-    @app.route('/flthy/<hp>/<type>/<seq>/<value>', methods=['GET'])
-    def flthy_cmd(hp, type, seq, value):
-        """ GET to send a command to the flthy HP system"""
-        if logtofile:
-            f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy command : " + hp + " " + type + " " + seq + " " + value + "\n")
-        message = ""
-        if request.method == 'GET':
-            message += flthy.sendCommand(hp, type, seq, value)
-        return message
-
-
 
 
 if __name__ == '__main__':

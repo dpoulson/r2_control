@@ -1,10 +1,101 @@
 import glob
 import random
+import ConfigParser
 from pygame import mixer  # Load the required library
+import os
+import datetime
+import time
+from config import mainconfig
+from flask import Blueprint, request
 
-Random_Sounds = ['alarm', 'happy', 'hum', 'misc', 'quote', 'razz', 'sad', 'sent', 'ooh', 'proc', 'whistle', 'scream']
-Random_Files = ['ALARM', 'Happy', 'HUM__', 'MISC_', 'Quote', 'RAZZ_', 'Sad__', 'SENT_', 'OOH__', 'PROC_', 'WHIST',
+
+_configfile = 'config/audio.cfg'
+
+_config = ConfigParser.SafeConfigParser({'sounds_dir': './scripts', 'logfile': 'audio.log', 'volume': '0.3'})
+_config.read(_configfile)
+
+if not os.path.isfile(_configfile):
+    print "Config file does not exist"
+    with open(_configfile, 'wb') as configfile:
+        _config.write(configfile)
+
+_defaults = _config.defaults()
+
+_logtofile = mainconfig['logtofile']
+_logdir = mainconfig['logdir']
+_logfile = _defaults['logfile']
+
+if _logtofile:
+    if __debug__:
+        print "Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile)
+    _f = open(_logdir + '/' + _logfile, 'at')
+    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: audio ******\n")
+    _f.flush
+
+
+_Random_Sounds = ['alarm', 'happy', 'hum', 'misc', 'quote', 'razz', 'sad', 'sent', 'ooh', 'proc', 'whistle', 'scream']
+_Random_Files = ['ALARM', 'Happy', 'HUM__', 'MISC_', 'Quote', 'RAZZ_', 'Sad__', 'SENT_', 'OOH__', 'PROC_', 'WHIST',
                 'SCREA']
+
+api = Blueprint('audio', __name__, url_prefix='/audio')
+
+@api.route('/', methods=['GET'])
+@api.route('/list', methods=['GET'])
+def audio_list():
+    """GET gives a comma separated list of available sounds"""
+    message = ""
+    if request.method == 'GET':
+        message += r2audio.ListSounds()
+    return message
+
+
+@api.route('/<name>', methods=['GET'])
+def audio(name):
+    """GET to trigger the given sound"""
+    if _logtofile:
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound : " + name + "\n")
+    if request.method == 'GET':
+        r2audio.TriggerSound(name)
+    return "Ok"
+
+
+@api.route('/random/', methods=['GET'])
+@api.route('/random/list', methods=['GET'])
+def random_audio_list():
+    """GET returns types of sounds available at random"""
+    message = ""
+    if request.method == 'GET':
+        message += r2audio.ListRandomSounds()
+    return message
+
+
+@api.route('/random/<name>', methods=['GET'])
+def random_audio(name):
+    """GET to play a random sound of a given type"""
+    if _logtofile:
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Sound random: " + name + "\n")
+    if request.method == 'GET':
+        r2audio.TriggerRandomSound(name)
+    return "Ok"
+
+@api.route('/volume', methods=['GET'])
+def get_volume():
+    """GET returns current volume level"""
+    message = ""
+    if request.method == 'GET':
+        message += r2audio.ShowVolume()
+    return message
+
+
+@api.route('/volume/<level>', methods=['GET'])
+def set_volume(level):
+    """GET to set a specific volume level"""
+    if _logtofile:
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Volume set : " + level + "\n")
+    message = ""
+    if request.method == 'GET':
+        message += r2audio.SetVolume(level)
+    return message
 
 
 class AudioLibrary:
@@ -35,8 +126,8 @@ class AudioLibrary:
             print "Play"
 
     def TriggerRandomSound(self, data):
-        idx = Random_Sounds.index(data)
-        prefix = Random_Files[idx]
+        idx = _Random_Sounds.index(data)
+        prefix = _Random_Files[idx]
         print "Random index: %s, prefix=%s" % (idx, prefix)
         file_list = glob.glob("./sounds/" + prefix + "*.mp3")
         file_idx = len(file_list) - 1
@@ -60,7 +151,7 @@ class AudioLibrary:
         return files
 
     def ListRandomSounds(self):
-        types = ', '.join(Random_Sounds)
+        types = ', '.join(_Random_Sounds)
         return types
 
     def ShowVolume(self):
@@ -86,3 +177,6 @@ class AudioLibrary:
             print "Setting volume to: %s" % new_level
         mixer.music.set_volume(float(new_level))
         return "Ok"
+
+
+r2audio = AudioLibrary(_defaults['sounds_dir'], _defaults['volume'])

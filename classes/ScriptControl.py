@@ -19,8 +19,86 @@
 # ===============================================================================
 
 from ScriptThread import ScriptThread
+import ConfigParser
 import glob
+import os
 import collections
+import datetime
+import time
+from config import mainconfig
+from flask import Blueprint, request
+
+
+_configfile = 'config/scripts.cfg'
+
+_config = ConfigParser.SafeConfigParser({'script_dir': './scripts', 'logfile': 'scripts.log'})
+_config.read(_configfile)
+
+if not os.path.isfile(_configfile):
+    print "Config file does not exist"
+    with open(_configfile, 'wb') as configfile:
+        _config.write(configfile)
+
+_defaults = _config.defaults()
+
+_logtofile = mainconfig['logtofile']
+_logdir = mainconfig['logdir']
+_logfile = _defaults['logfile']
+
+if _logtofile:
+    if __debug__:
+        print "Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile)
+    _f = open(_logdir + '/' + _logfile, 'at')
+    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: scripts ******\n")
+    _f.flush
+
+
+
+api = Blueprint('scripts', __name__, url_prefix='/scripts')
+
+@api.route('/', methods=['GET'])
+@api.route('/list', methods=['GET'])
+def script_list():
+    """GET gives a comma separated list of available scripts"""
+    message = ""
+    if request.method == 'GET':
+        message += _scripts.list()
+    return message
+
+
+@api.route('/running', methods=['GET'])
+def running_scripts():
+    """GET a list of all running scripts and their ID"""
+    message = ""
+    if request.method == 'GET':
+        message += _scripts.list_running()
+    return message
+
+
+@api.route('/stop/<script_id>', methods=['GET'])
+def stop_script(script_id):
+    """GET a script ID to stop that script"""
+    if _logtofile:
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script stop: " + script_id + "\n")
+    message = ""
+    if request.method == 'GET':
+        if script_id == "all":
+            message += _scripts.stop_all()
+        else:
+            message += _scripts.stop_script(script_id)
+    return message
+
+
+@api.route('/<name>/<loop>', methods=['GET'])
+def start_script(name, loop):
+    """GET to trigger the named script"""
+    if _logtofile:
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script loop: " + name + "," + loop + "\n")
+    message = ""
+    if request.method == 'GET':
+        message += _scripts.run_script(name, loop)
+    return message
+
 
 
 class ScriptControl:
@@ -32,6 +110,7 @@ class ScriptControl:
         self.script_dir = script_dir
         if __debug__:
             print "Starting script object with path: %s" % script_dir
+
 
     def list(self):
         files = ', '.join(glob.glob("./scripts/*.scr"))
@@ -88,3 +167,6 @@ class ScriptControl:
                 idx += 1
         self.script_id += 1
         return "Ok"
+
+
+scripts = ScriptControl(_defaults['script_dir'])
