@@ -32,6 +32,7 @@ from datetime import timedelta
 from config import mainconfig
 
 modules = mainconfig['modules'].split(",")
+plugins = mainconfig['plugins'].split(",")
 i2c_bus = mainconfig['busid']
 logtofile = mainconfig['logtofile']
 logdir = mainconfig['logdir']
@@ -39,6 +40,12 @@ logfile = mainconfig['logfile']
 
 config = ConfigParser.RawConfigParser()
 config.read('config/main.cfg')
+
+plugin_names = {
+        'flthy':'FlthyHPControl',
+        'scripts':'ScriptControl',
+        'audio':'AudioLibrary'
+        }
 
 def check_internet():
     try:
@@ -238,29 +245,10 @@ def servo_body_open():
         pwm_body.open_all_servos()
         return "Ok"
 
-
-#############################
-# Script API calls
-#
-if "scripts" in modules:
-    from ScriptControl import *
-    app.register_blueprint(api)
-
-
-#############################
-# Audio API calls
-#
-if "audio" in modules:
-    from AudioLibrary import *
-    app.register_blueprint(api)
-
-
-########################
-# Flthy API
-#
-if "flthy" in modules:
-    from FlthyHPControl import *
-    app.register_blueprint(api)
+for x in plugins:
+    p = __import__(plugin_names[x], fromlist=[ x, 'api'])
+    app.register_blueprint(p.api)
+    
 
 #######################
 # System API calls
