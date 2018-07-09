@@ -6,7 +6,7 @@ from config import mainconfig
 from time import sleep
 from flask import Blueprint, request
 
-_configfile = 'config/vader.cfg'
+_configfile = 'config/teecees.cfg'
 
 _config = ConfigParser.SafeConfigParser({'address': '0x1c', 'logfile': 'vader.log'})
 _config.read(_configfile)
@@ -26,41 +26,41 @@ if _logtofile:
     if __debug__:
         print "Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile)
     _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: VADER PSI ******\n")
+    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: TeeCees ******\n")
     _f.flush
 
 
 
-api = Blueprint('vader', __name__, url_prefix='/vader')
+api = Blueprint('teecees', __name__, url_prefix='/teecees')
 
 @api.route('/raw/<cmd>', methods=['GET'])
-def _vader_raw(cmd):
-    """ GET to send a raw command to the vader HP system"""
+def _teecees_raw(cmd):
+    """ GET to send a raw command to the teecees system"""
     if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Vader raw command : " + cmd + "\n")
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : teecees raw command : " + cmd + "\n")
     message = ""
     if request.method == 'GET':
-        message += _vader.sendRaw(cmd)
+        message += _teecees.sendRaw(cmd)
     return message
 
 @api.route('/sequence/<seq>', methods=['GET'])
-def _vader_seq(seq):
-    """ GET to send a sequence command to the vader HP system"""
+def _teecees_seq(seq):
+    """ GET to send a sequence command to the teecees system"""
     if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Vader sequence command : " + seq + "\n")
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : teecees sequence command : " + seq + "\n")
     message = ""
     if request.method == 'GET':
-        message += _vader.sendSequence(seq)
+        message += _teecees.sendSequence(seq)
     return message
 
-class _VaderPSIControl:
+class _TeeceesControl:
 
     def __init__(self, address, logdir):
         self.address = address
         self.bus = smbus.SMBus(int(mainconfig['busid']))
         self.logdir = logdir
         if __debug__:
-            print "Initialising VaderPSI Control"
+            print "Initialising TeeCees Control"
 
     def sendSequence(self, seq):
         if seq.isdigit():
@@ -99,5 +99,5 @@ class _VaderPSIControl:
         return "Ok"
 
 
-_vader = _VaderPSIControl(_defaults['address'], _defaults['logfile'])
+_teecees = _TeeceesControl(_defaults['address'], _defaults['logfile'])
 

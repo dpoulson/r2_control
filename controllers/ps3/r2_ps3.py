@@ -66,8 +66,8 @@ os.environ["SDL_VIDEODRIVER"] = "dummy"
 pygame.display.init()
 
 while True:
-    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Waiting for joystick \n")
-    f.flush()
+#    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Waiting for joystick \n")
+#    f.flush()
     pygame.joystick.quit()
     pygame.joystick.init()
     num_joysticks = pygame.joystick.get_count()

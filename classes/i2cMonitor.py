@@ -49,21 +49,13 @@ class i2cMonitor(threading.Thread):
 			self.lowbat = True
 	f.close()
 
-    def __init__(self, address, interval, logdir):
+    def __init__(self, address, interval):
 
         # Check for telegram config
-	config = ConfigParser.RawConfigParser()
-        config.read('config/main.cfg')
-        modules = config.sections()
-        if "telegram" in modules:
-            self.telegram = True
-            self.token = config.get('telegram', 'token')
-	    self.chat_id = config.get('telegram', 'chat_id')
-        else:
-            self.telegram = False
+        self.telegram = False
         self.address = address
         self.interval = interval
-        self.logdir = logdir
+        self.logdir = mainconfig['logdir']
         self.lowbat = False
         self.extracted = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         try:

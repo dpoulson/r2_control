@@ -44,7 +44,8 @@ config.read('config/main.cfg')
 plugin_names = {
         'flthy':'FlthyHPControl',
         'scripts':'ScriptControl',
-        'audio':'AudioLibrary'
+        'audio':'AudioLibrary',
+        'vader':'VaderPSIControl'
         }
 
 def check_internet():
@@ -117,8 +118,7 @@ if "dome" in modules:
 # Monitoring
 if "monitoring" in modules:
     from i2cMonitor import i2cMonitor
-    monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')),
-                         logdir)
+    monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16), float(config.get('monitoring', 'interval')))
 
 app = Flask(__name__, template_folder='templates')
 
@@ -283,8 +283,6 @@ def sendstatus():
         else:
 	    message = "Telegram module not configured"
     return message
-
-print dir()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, use_reloader=False)
