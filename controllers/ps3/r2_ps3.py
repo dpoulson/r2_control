@@ -13,6 +13,14 @@ from SabertoothPacketSerial import SabertoothPacketSerial
 sys.path.append('/home/pi/r2_control/classes/')
 from Adafruit_PWM_Servo_Driver import PWM
 
+import signal
+
+def sig_handler(signal, frame):
+    print('Cleaning Up')
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, sig_handler)
+
 #### Open a log file
 f = open('/home/pi/r2_control/logs/ps3.log', 'at')
 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
@@ -165,6 +173,7 @@ while True:
             r = requests.get(url)
         except:
             print "Fail...."
+	sys.exit(0)
     for event in events:
         if event.type == pygame.JOYBUTTONDOWN:
             buf = StringIO()

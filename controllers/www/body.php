@@ -38,7 +38,7 @@ include("include/config.php");
   <a href="/index.php">R2 Unit: Web control system</a> - Body
  </div>
  <div id="diagram">
-  <img width=400 border=0 src="Body.png">
+  <img border=0 src="Body.png">
  </div>
  <div id="menu">
   <table border=1>
