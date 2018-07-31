@@ -46,12 +46,16 @@ invert = -1
 drive_mod = speed_fac * invert
 
 # Deadband: the amount of deadband on the sticks
-deadband = 3
+deadband = 0.01
 
 # PWM Frequency
 freq = 60
 # Exponential curve constant. Set this to 0 < curve < 1 to give difference response curves for axis
-curve = 0.8
+curve = 0.9
+
+dome_speed = 0
+accel_rate = 0.005
+dome_stick = 0
 
 # Set Axis definitions
 PS3_AXIS_LEFT_VERTICAL = 1
@@ -110,11 +114,21 @@ keys.items()
 
 
 def driveDome(channel, speed):
+    global dome_speed
+    speed_actual = 0
     pulse = DOME_STOP
-    speed_adj = ((curve * (speed ** 3)) + ((1 - curve) * speed))
-    if speed != 0:
-        # Use curve variable to decrease sensitivity at low end.
-        pulse = (speed_adj * (DOME_STOP - DOME_FULL_CW)) + DOME_STOP
+    speed_desired = ((curve * (speed ** 3)) + ((1 - curve) * speed))
+    if speed_desired > dome_speed:
+        speed_actual = dome_speed + accel_rate
+    elif speed_desired < dome_speed:
+        speed_actual = dome_speed - accel_rate
+    if speed_actual < deadband and speed_actual > deadband:
+        speed_actual = 0
+    dome_speed = speed_actual
+
+    
+    # Use curve variable to decrease sensitivity at low end.
+    pulse = (speed_actual * (DOME_STOP - DOME_FULL_CW)) + DOME_STOP
 
     period = 1 / float(freq)
     bit_duration = period / 4096
@@ -122,8 +136,8 @@ def driveDome(channel, speed):
 
     # tell servo what to do
     if __debug__:
-        print "Channel %s : speed %5.5f : Adjusted speed: %5.5f : pulse %5.5f : duration %5.5f" % (
-        channel, speed, speed_adj, pulse, pulse_duration)
+        print "Channel %s : speed %5.5f : Desired speed: %5.5f : Actual speed: %5.5f : pulse %5.5f : duration %5.5f" % (
+        channel, speed, speed_desired, speed_actual, pulse, pulse_duration)
     pwm.setPWM(channel, 0, int(pulse))
 
 
@@ -148,6 +162,8 @@ while True:
     global previous
     global last_command
     global speed_fac
+    global dome_stick
+    driveDome(SERVO_DOME, dome_stick)
     if time.time() - last_command > keepalive: 
         if __debug__:
             print "Last command sent greater than %s ago, doing keepAlive" % keepalive
@@ -266,8 +282,9 @@ while True:
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
                 if __debug__:
                     print "Value (Dome): %s" % event.value
-                newvalue = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
-                driveDome(SERVO_DOME, newvalue)
+                #newvalue = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
+                dome_stick = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
+                # driveDome(SERVO_DOME, newvalue)
 
 # If the while loop quits, make sure that the motors are reset.
 drive.driveCommand(0)
