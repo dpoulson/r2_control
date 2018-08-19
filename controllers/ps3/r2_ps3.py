@@ -156,9 +156,52 @@ f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S
 f.flush()
 
 last_command = time.time()
+joystick = True
+
+def shutdownR2():
+   if __debug__:
+      print "Running shutdown procedure"
+   if __debug__:
+      print "Stopping all motion..."
+      print "...Setting drive to 0"
+   drive.driveCommand(0)
+   if __debug__:
+      print "...Setting turn to 0"
+   drive.turnCommand(0)
+   if __debug__:
+      print "...Setting dome to 0"
+   pwm.setPWM(SERVO_DOME, 0, DOME_STOP)
+
+   if __debug__:
+      print "Disable drives"
+   url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
+   try:
+      r = requests.get(url)
+   except:
+      print "Fail...."
+ 
+   if __debug__:
+      print "Disable dome"
+   url = baseurl + "servo/body/ENABLE_DOME/0/0"
+   try:
+      r = requests.get(url)
+   except:
+      print "Fail...."
+
+   if __debug__:
+      print "Bad motivator"
+   # Play a sound to alert about a problem
+      url = baseurl + "audio/MOTIVATR"
+   try:
+      r = requests.get(url)
+   except:
+      print "Fail...."
+
+   f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " ****** PS3 Shutdown ******\n")
+
 
 # Main loop
-while True:
+while (joystick):
     global previous
     global last_command
     global speed_fac
@@ -168,27 +211,19 @@ while True:
         if __debug__:
             print "Last command sent greater than %s ago, doing keepAlive" % keepalive
         drive.keepAlive()
+        # Check js0 still there
+        if (os.path.exists('/dev/input/js0')): 
+           print "Joystick still there...."
+        else:
+           print "No joystick"
+           joystick = False
         last_command = time.time()
     try:
         events = pygame.event.get()
     except:
         if __debug__:
             print "Something went wrong!"
-        drive.driveCommand(0)
-        drive.turnCommand(0)
-        driveDome(SERVO_DOME, 0)
-        # Send motor disable command
-        url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
-        try:
-            r = requests.get(url)
-        except:
-            print "Fail...."
-        # Play a sound to alert about a problem
-        url = baseurl + "audio/MOTIVATR"
-        try:
-            r = requests.get(url)
-        except:
-            print "Fail...."
+        shutdownR2()
 	sys.exit(0)
     for event in events:
         if event.type == pygame.JOYBUTTONDOWN:
@@ -287,19 +322,6 @@ while True:
                 # driveDome(SERVO_DOME, newvalue)
 
 # If the while loop quits, make sure that the motors are reset.
-drive.driveCommand(0)
-drive.turnCommand(0)
-driveDome(SERVO_DOME, 0)
-# Turn off motors
-url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
-try:
-    r = requests.get(url)
-except:
-    print "Fail...."
-url = baseurl + "servo/body/ENABLE_DOME/0/0"
-try:
-    r = requests.get(url)
-except:
-    print "Fail...."
-f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " ****** PS3 Shutdown ******\n")
-
+if __debug__:
+    print "Exited main loop"
+shutdownR2()
