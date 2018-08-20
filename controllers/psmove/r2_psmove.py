@@ -10,9 +10,6 @@ from cStringIO import StringIO
 from collections import defaultdict
 from SabertoothPacketSerial import SabertoothPacketSerial
 
-sys.path.append('/home/pi/r2_control/classes/')
-from Adafruit_PWM_Servo_Driver import PWM
-
 import signal
 
 def sig_handler(signal, frame):
@@ -22,15 +19,17 @@ def sig_handler(signal, frame):
 signal.signal(signal.SIGINT, sig_handler)
 
 #### Open a log file
-f = open('/home/pi/r2_control/logs/ps3.log', 'at')
-f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
+f = open('/home/pi/r2_control/logs/psmove.log', 'at')
+f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** psmove started ******\n")
 f.flush()
 
 #drive = SabertoothPacketSerial(legacy=True)
 #drive.drive(0)
 #drive.turn(0)
 drive = SabertoothPacketSerial()
+dome = SabertoothPacketSerial(address=129)
 drive.driveCommand(0)
+dome.driveCommand(0)
 drive.turnCommand(0)
 
 keepalive = 0.25
@@ -58,18 +57,9 @@ accel_rate = 0.005
 dome_stick = 0
 
 # Set Axis definitions
-PS3_AXIS_LEFT_VERTICAL = 1
-PS3_AXIS_LEFT_HORIZONTAL = 0
-PS3_AXIS_RIGHT_HORIZONTAL = 3
-
-# Channel numbers on PWM controller
-SERVO_DOME = 15
-
-# PWM ranges
-# 245 will give full range on a Sabertooth controller (ie, 1000ms and 2000ms, with 1500ms as the centerpoint)
-DOME_FULL_CW = 330
-DOME_STOP = 425
-
+PSMOVE_AXIS_LEFT_VERTICAL = 1
+PSMOVE_AXIS_LEFT_HORIZONTAL = 0
+PSMOVE_AXIS_SHOULDER = 3
 
 baseurl = "http://localhost:5000/"
 
@@ -78,8 +68,6 @@ os.environ["SDL_VIDEODRIVER"] = "dummy"
 pygame.display.init()
 
 while True:
-#    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Waiting for joystick \n")
-#    f.flush()
     pygame.joystick.quit()
     pygame.joystick.init()
     num_joysticks = pygame.joystick.get_count()
@@ -170,7 +158,7 @@ def shutdownR2():
    drive.turnCommand(0)
    if __debug__:
       print "...Setting dome to 0"
-   pwm.setPWM(SERVO_DOME, 0, DOME_STOP)
+   dome.driveCommand(0)
 
    if __debug__:
       print "Disable drives"
@@ -305,21 +293,21 @@ while (joystick):
                     print "No combo (released)"
             previous = ""
         if event.type == pygame.JOYAXISMOTION:
-            if event.axis == PS3_AXIS_LEFT_VERTICAL:
+            if event.axis == PSMOVE_AXIS_LEFT_VERTICAL:
                 if __debug__:
                     print "Value (Drive): %s : Speed Factor : %s" % (event.value, speed_fac)
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Forward/Back : " + str(event.value*speed_fac) + "\n")
                 f.flush
                 drive.driveCommand(event.value*drive_mod)
                 last_command = time.time()
-            elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
+            elif event.axis == PSMOVE_AXIS_LEFT_HORIZONTAL:
                 if __debug__:
                     print "Value (Steer): %s" % event.value
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Left/Right : " + str(event.value*speed_fac) + "\n")
                 f.flush
                 drive.turnCommand(event.value*drive_mod)
                 last_command = time.time()
-            elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
+            elif event.axis == PSMOVE_AXIS_SHOULDER:
                 if __debug__:
                     print "Value (Dome): %s" % event.value
                 #newvalue = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))

@@ -261,6 +261,10 @@ def shutdown():
 	send_telegram("Night night...")
     if request.method == 'GET':
         os.system('shutdown now -h')
+        s = open("controllers/.shutdown", "w+")
+        s.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
+        s.flush()
+        s.close()
     return "Shutting down"
 
 

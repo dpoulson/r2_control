@@ -3,6 +3,7 @@
 CONT_DIR=/home/pi/r2_control/controllers
 
 CURRENT=`cat $CONT_DIR/.current`
+rm $CONT_DIR/.shutdown
 
 echo "Joystick selected: $CURRENT"
 
