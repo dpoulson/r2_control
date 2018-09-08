@@ -19,8 +19,8 @@ def sig_handler(signal, frame):
 signal.signal(signal.SIGINT, sig_handler)
 
 #### Open a log file
-#logdir = "/home/pi/r2_control/logs/"
-logdir = "./"
+logdir = "/home/pi/r2_control/logs/"
+#logdir = "./"
 logfile = logdir + "psmove.log"
 f = open(logfile, 'at')
 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** psmove started ******\n")
@@ -187,6 +187,12 @@ while joy < num_joysticks:
     joy += 1
 
 
+if num_joysticks == 1:
+    PSMOVE_AXIS_LEFT_VERTICAL = 1
+    PSMOVE_AXIS_LEFT_HORIZONTAL = 0
+    PSMOVE_AXIS_RIGHT_HORIZONTAL = 2
+    
+
 # Read in key combos from csv file
 keys = defaultdict(list)
 keys_file = 'keys' + str(num_joysticks) + '.csv'
@@ -214,11 +220,11 @@ while (joystick):
     global last_command
     global speed_fac
     global dome_stick
-    #driveDome(dome_stick)
+    driveDome(dome_stick)
     if time.time() - last_command > keepalive: 
         if __debug__:
             print "Last command sent greater than %s ago, doing keepAlive" % keepalive
-        #drive.keepAlive()
+        drive.keepAlive()
         # Check js0 still there
         if (os.path.exists('/dev/input/js0')): 
            if __debug__:
@@ -251,7 +257,7 @@ while (joystick):
             if __debug__:
                 print "Buttons pressed: %s" % combo
             # Special key press (Both shoulder plus right) to increase speed of drive
-            if combo == "000011000001":
+            if combo == "00001010000000001":
               if __debug__:
                  print "Incrementing drive speed"
               # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
@@ -268,7 +274,7 @@ while (joystick):
               except:
                  print "Fail...."
             # Special key press (Both shoulder plus left) to decrease speed of drive
-            if combo == "000011000010":
+            if combo == "00001010000000010":
               if __debug__:
                  print "Decrementing drive speed"
               # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
@@ -316,20 +322,19 @@ while (joystick):
                     print "No combo (released)"
             previous = ""
         if event.type == pygame.JOYAXISMOTION:
-            '''
             if event.axis == PSMOVE_AXIS_LEFT_VERTICAL:
                 if __debug__:
                     print "Value (Drive): %s : Speed Factor : %s" % (event.value, speed_fac)
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Forward/Back : " + str(event.value*speed_fac) + "\n")
                 f.flush
-                #drive.driveCommand(event.value*drive_mod)
+                drive.driveCommand(event.value*drive_mod)
                 last_command = time.time()
             elif event.axis == PSMOVE_AXIS_LEFT_HORIZONTAL:
                 if __debug__:
                     print "Value (Steer): %s" % event.value
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Left/Right : " + str(event.value*speed_fac) + "\n")
                 f.flush
-                #drive.turnCommand(event.value*drive_mod)
+                drive.turnCommand(event.value*drive_mod)
                 last_command = time.time()
             elif event.axis == PSMOVE_AXIS_SHOULDER:
                 if __debug__:
@@ -337,7 +342,6 @@ while (joystick):
                 #newvalue = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
                 dome_stick = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
                 # driveDome(SERVO_DOME, newvalue)
-            '''
 
 # If the while loop quits, make sure that the motors are reset.
 if __debug__:

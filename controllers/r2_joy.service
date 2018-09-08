@@ -5,7 +5,7 @@ Description=R2 Joystick
 ExecStart=/home/pi/r2_control/controllers/joystick_wrapper.sh
 WorkingDirectory=/home/pi/r2_control/controllers
 StandardOutput=syslog
-Restart=on-failure
+Restart=always
  
 [Install]
 WantedBy=multi-user.target
