@@ -263,13 +263,26 @@ def joystick_list():
             return j.read()
 
 @app.route('/joystick/<stick>', methods=['GET'])
-def joystick_change():
+def joystick_change(stick):
     """GET to change jostick to <stick> """
     if logtofile:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Changing joystick to " + stick + "\n")
     if request.method == 'GET':
-        with open("controllers/.current", "w") as current_joy:
-            current_joy.write(stick)
+        message = "Invalid stick"
+	with open('controllers/joysticks.ini') as j:
+            line = j.readline().strip()
+            while line:
+                if __debug__:
+                    print "Checking controller type is valid: " + line
+                if line == stick:
+                    if __debug__:
+                        print "Valid stick"
+                    message = "Valid stick. Changed to " + stick
+                    with open("controllers/.current", "w") as current_joy:
+                       current_joy.write(stick)
+                line = j.readline().strip()
+                print "End of loop"
+    return message
 
 
 @app.route('/shutdown/now', methods=['GET'])
