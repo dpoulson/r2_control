@@ -252,6 +252,26 @@ for x in plugins:
 
 #######################
 # System API calls
+@app.route('/joystick', methods=['GET'])
+@app.route('/joystick/list', methods=['GET'])
+def joystick_list():
+    """GET to display list of possible joysticks"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Retrieving list of joysticks\n")
+    if request.method == 'GET':
+        with open('controllers/joysticks.ini') as j:
+            return j.read()
+
+@app.route('/joystick/<stick>', methods=['GET'])
+def joystick_change():
+    """GET to change jostick to <stick> """
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Changing joystick to " + stick + "\n")
+    if request.method == 'GET':
+        with open("controllers/.current", "w") as current_joy:
+            current_joy.write(stick)
+
+
 @app.route('/shutdown/now', methods=['GET'])
 def shutdown():
     """GET to shutdown Raspberry Pi"""
