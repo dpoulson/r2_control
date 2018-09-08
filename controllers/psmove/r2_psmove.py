@@ -19,13 +19,13 @@ def sig_handler(signal, frame):
 signal.signal(signal.SIGINT, sig_handler)
 
 #### Open a log file
-f = open('/home/pi/r2_control/logs/psmove.log', 'at')
+#logdir = "/home/pi/r2_control/logs/"
+logdir = "./"
+logfile = logdir + "psmove.log"
+f = open(logfile, 'at')
 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** psmove started ******\n")
 f.flush()
 
-#drive = SabertoothPacketSerial(legacy=True)
-#drive.drive(0)
-#drive.turn(0)
 drive = SabertoothPacketSerial()
 dome = SabertoothPacketSerial(address=129)
 drive.driveCommand(0)
@@ -56,6 +56,10 @@ dome_speed = 0
 accel_rate = 0.005
 dome_stick = 0
 
+num_joysticks = 0
+j = list()
+buttons = list()
+
 # Set Axis definitions
 PSMOVE_AXIS_LEFT_VERTICAL = 1
 PSMOVE_AXIS_LEFT_HORIZONTAL = 0
@@ -67,44 +71,11 @@ os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 pygame.display.init()
 
-while True:
-    pygame.joystick.quit()
-    pygame.joystick.init()
-    num_joysticks = pygame.joystick.get_count()
-    if __debug__:
-        print "Waiting for joystick... (count: %s)" % num_joysticks
-    if num_joysticks != 0:
-        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Joystick found \n")
-        f.flush()
-        break
-    time.sleep(5)
-
-pygame.init()
-size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-if __debug__:
-    print "Framebuffer size: %d x %d" % (size[0], size[1])
-
-j = pygame.joystick.Joystick(0)
-j.init()
-buttons = j.get_numbuttons()
-
-# Read in key combos from csv file
-keys = defaultdict(list)
-with open('keys.csv', mode='r') as infile:
-    reader = csv.reader(infile)
-    for row in reader:
-        if __debug__:
-            print "Row: %s | %s | %s" % (row[0], row[1], row[2])
-        keys[row[0]].append(row[1])
-        keys[row[0]].append(row[2])
-
-keys.items()
-
-
-def driveDome(channel, speed):
+# Functions
+''' driveDome - Set the dome to a certain speed, but use acceleration to avoid stripping gears '''
+def driveDome(speed):
     global dome_speed
     speed_actual = 0
-    pulse = DOME_STOP
     speed_desired = ((curve * (speed ** 3)) + ((1 - curve) * speed))
     if speed_desired > dome_speed:
         speed_actual = dome_speed + accel_rate
@@ -114,38 +85,14 @@ def driveDome(channel, speed):
         speed_actual = 0
     dome_speed = speed_actual
 
-    
-    # Use curve variable to decrease sensitivity at low end.
-    pulse = (speed_actual * (DOME_STOP - DOME_FULL_CW)) + DOME_STOP
-
-    period = 1 / float(freq)
-    bit_duration = period / 4096
-    pulse_duration = bit_duration * pulse * 1000000
 
     # tell servo what to do
     if __debug__:
-        print "Channel %s : speed %5.5f : Desired speed: %5.5f : Actual speed: %5.5f : pulse %5.5f : duration %5.5f" % (
-        channel, speed, speed_desired, speed_actual, pulse, pulse_duration)
-    pwm.setPWM(channel, 0, int(pulse))
+        print "speed %5.5f : Desired speed: %5.5f : Actual speed: %5.5f " % (
+        speed, speed_desired, speed_actual)
+    #dome.driveCommand(int(speed_actual))
 
-
-print "Initialised... entering main loop..."
-
-pwm = PWM(0x40, debug=True)
-pwm.setPWMFreq(freq)  # Set frequency to 60 Hz
-
-url = baseurl + "audio/Happy007"
-try:
-    r = requests.get(url)
-except:
-    print "Fail...."
-
-f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : System Initialised \n")
-f.flush()
-
-last_command = time.time()
-joystick = True
-
+''' shutdownR2 - Put R2 into a safe state '''
 def shutdownR2():
    if __debug__:
       print "Running shutdown procedure"
@@ -167,7 +114,7 @@ def shutdownR2():
       r = requests.get(url)
    except:
       print "Fail...."
- 
+
    if __debug__:
       print "Disable dome"
    url = baseurl + "servo/body/ENABLE_DOME/0/0"
@@ -188,17 +135,90 @@ def shutdownR2():
    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " ****** PS3 Shutdown ******\n")
 
 
+# Start up
+####################################################
+# Wait for the first joystick
+while True:
+    pygame.joystick.quit()
+    pygame.joystick.init()
+    num_joysticks = pygame.joystick.get_count()
+    if __debug__:
+        print "Waiting for joystick... (count: %s)" % num_joysticks
+    if num_joysticks != 0:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Joystick found \n")
+        f.flush()
+        break
+    time.sleep(5)
+
+# Acknowledge first joystick
+url = baseurl + "audio/Happy007"
+try:
+    r = requests.get(url)
+except:
+    print "Fail...."
+
+# Wait for second joystick, or button press.
+count = 0
+while True:
+    if __debug__:
+        print "Waiting for another joystick... (count: %s)" % num_joysticks
+    pygame.joystick.quit()
+    pygame.joystick.init()
+    num_joysticks = pygame.joystick.get_count()
+    if num_joysticks == 2 or count > 3:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Joystick found \n")
+        f.flush()
+        break
+    time.sleep(5)
+    count += 1
+
+pygame.init()
+size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
+if __debug__:
+    print "Framebuffer size: %d x %d" % (size[0], size[1])
+
+joy = 0
+while joy < num_joysticks:
+    if __debug__:
+        print "Initialising joystick " + str(joy)
+    j.append(pygame.joystick.Joystick(joy))
+    j[joy].init()
+    buttons.append(j[joy].get_numbuttons())
+    joy += 1
+
+
+# Read in key combos from csv file
+keys = defaultdict(list)
+keys_file = 'keys' + str(num_joysticks) + '.csv'
+with open(keys_file, mode='r') as infile:
+    reader = csv.reader(infile)
+    for row in reader:
+        if __debug__:
+            print "Row: %s | %s | %s" % (row[0], row[1], row[2])
+        keys[row[0]].append(row[1])
+        keys[row[0]].append(row[2])
+
+keys.items()
+
+print "Initialised... entering main loop..."
+
+f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : System Initialised \n")
+f.flush()
+
+last_command = time.time()
+joystick = True
+
 # Main loop
 while (joystick):
     global previous
     global last_command
     global speed_fac
     global dome_stick
-    driveDome(SERVO_DOME, dome_stick)
+    #driveDome(dome_stick)
     if time.time() - last_command > keepalive: 
         if __debug__:
             print "Last command sent greater than %s ago, doing keepAlive" % keepalive
-        drive.keepAlive()
+        #drive.keepAlive()
         # Check js0 still there
         if (os.path.exists('/dev/input/js0')): 
            if __debug__:
@@ -221,14 +241,17 @@ while (joystick):
     for event in events:
         if event.type == pygame.JOYBUTTONDOWN:
             buf = StringIO()
-            for i in range(buttons):
-                button = j.get_button(i)
-                buf.write(str(button))
+            x = 0
+            while x < len(buttons):
+                for i in range(buttons[x]):
+                    button = j[x].get_button(i)
+                    buf.write(str(button))
+                x += 1
             combo = buf.getvalue()
             if __debug__:
                 print "Buttons pressed: %s" % combo
-            # Special key press (All 4 plus triangle) to increase speed of drive
-            if combo == "00001111000000001":
+            # Special key press (Both shoulder plus right) to increase speed of drive
+            if combo == "000011000001":
               if __debug__:
                  print "Incrementing drive speed"
               # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
@@ -244,8 +267,8 @@ while (joystick):
                  r = requests.get(url)
               except:
                  print "Fail...."
-            # Special key press (All 4 plus X) to decrease speed of drive
-            if combo == "00001111000000010":
+            # Special key press (Both shoulder plus left) to decrease speed of drive
+            if combo == "000011000010":
               if __debug__:
                  print "Decrementing drive speed"
               # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
@@ -293,19 +316,20 @@ while (joystick):
                     print "No combo (released)"
             previous = ""
         if event.type == pygame.JOYAXISMOTION:
+            '''
             if event.axis == PSMOVE_AXIS_LEFT_VERTICAL:
                 if __debug__:
                     print "Value (Drive): %s : Speed Factor : %s" % (event.value, speed_fac)
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Forward/Back : " + str(event.value*speed_fac) + "\n")
                 f.flush
-                drive.driveCommand(event.value*drive_mod)
+                #drive.driveCommand(event.value*drive_mod)
                 last_command = time.time()
             elif event.axis == PSMOVE_AXIS_LEFT_HORIZONTAL:
                 if __debug__:
                     print "Value (Steer): %s" % event.value
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Left/Right : " + str(event.value*speed_fac) + "\n")
                 f.flush
-                drive.turnCommand(event.value*drive_mod)
+                #drive.turnCommand(event.value*drive_mod)
                 last_command = time.time()
             elif event.axis == PSMOVE_AXIS_SHOULDER:
                 if __debug__:
@@ -313,6 +337,7 @@ while (joystick):
                 #newvalue = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
                 dome_stick = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
                 # driveDome(SERVO_DOME, newvalue)
+            '''
 
 # If the while loop quits, make sure that the motors are reset.
 if __debug__:
