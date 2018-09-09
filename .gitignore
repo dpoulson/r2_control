@@ -56,3 +56,4 @@ config.cfg
 config/*.cfg
 logs/*.log
 .idea/
+.*.swp
