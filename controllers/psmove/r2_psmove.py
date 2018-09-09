@@ -53,7 +53,7 @@ freq = 60
 curve = 0.9
 
 dome_speed = 0
-accel_rate = 0.005
+accel_rate = 0.05
 dome_stick = 0
 
 num_joysticks = 0
@@ -76,10 +76,9 @@ pygame.display.init()
 def driveDome(speed):
     global dome_speed
     speed_actual = 0
-    speed_desired = ((curve * (speed ** 3)) + ((1 - curve) * speed))
-    if speed_desired > dome_speed:
+    if speed > dome_speed:
         speed_actual = dome_speed + accel_rate
-    elif speed_desired < dome_speed:
+    elif speed < dome_speed:
         speed_actual = dome_speed - accel_rate
     if speed_actual < deadband and speed_actual > deadband:
         speed_actual = 0
@@ -88,9 +87,9 @@ def driveDome(speed):
 
     # tell servo what to do
     if __debug__:
-        print "speed %5.5f : Desired speed: %5.5f : Actual speed: %5.5f " % (
-        speed, speed_desired, speed_actual)
-    #dome.driveCommand(int(speed_actual))
+        print "speed %5.5f : Actual speed: %5.5f " % (
+        speed, speed_actual)
+    dome.driveCommand(int(speed_actual))
 
 ''' shutdownR2 - Put R2 into a safe state '''
 def shutdownR2():
@@ -336,12 +335,6 @@ while (joystick):
                 f.flush
                 drive.turnCommand(event.value*drive_mod)
                 last_command = time.time()
-            elif event.axis == PSMOVE_AXIS_SHOULDER:
-                if __debug__:
-                    print "Value (Dome): %s" % event.value
-                #newvalue = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
-                dome_stick = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
-                # driveDome(SERVO_DOME, newvalue)
 
 # If the while loop quits, make sure that the motors are reset.
 if __debug__:
