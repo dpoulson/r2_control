@@ -38,7 +38,7 @@ logtofile = mainconfig['logtofile']
 logdir = mainconfig['logdir']
 logfile = mainconfig['logfile']
 
-config = ConfigParser.RawConfigParser()
+config = ConfigParser.SafeConfigParser({'busid': '1', 'logfile': 'test.log', 'logdir': './logs', 'logtofile': True, 'modules': 'dome', 'plugins': 'audio'})
 config.read('config/main.cfg')
 
 plugin_names = {

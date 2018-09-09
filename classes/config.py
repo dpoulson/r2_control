@@ -1,5 +1,6 @@
 import ConfigParser
 
+_configfile = 'config/main.cfg'
 _config = ConfigParser.SafeConfigParser({ 'logtofile': True,
                                          'logdir' : './logs',
                                          'logfile' : 'debug.log',
@@ -7,7 +8,13 @@ _config = ConfigParser.SafeConfigParser({ 'logtofile': True,
                                          'modules' : 'scripts,audio'
                                             })
 
-_config.read('config/main.cfg')
+_config.read(_configfile)
+
+if not os.path.isfile(_configfile):
+    print "Config file does not exist"
+    with open(_configfile, 'wb') as configfile:
+        _config.write(configfile)
+
 
 mainconfig = _config.defaults()
 
