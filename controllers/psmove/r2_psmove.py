@@ -27,7 +27,7 @@ f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S
 f.flush()
 
 drive = SabertoothPacketSerial()
-dome = SabertoothPacketSerial(address=129)
+dome = SabertoothPacketSerial(port='/dev/ttyUSB0', type='Syren', address=129)
 drive.driveCommand(0)
 dome.driveCommand(0)
 drive.turnCommand(0)

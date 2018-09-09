@@ -10,9 +10,6 @@ from cStringIO import StringIO
 from collections import defaultdict
 from SabertoothPacketSerial import SabertoothPacketSerial
 
-sys.path.append('/home/pi/r2_control/classes/')
-from Adafruit_PWM_Servo_Driver import PWM
-
 import signal
 
 def sig_handler(signal, frame):
@@ -26,10 +23,8 @@ f = open('/home/pi/r2_control/logs/ps3.log', 'at')
 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
 f.flush()
 
-#drive = SabertoothPacketSerial(legacy=True)
-#drive.drive(0)
-#drive.turn(0)
 drive = SabertoothPacketSerial()
+dome = SabertoothPacketSerial(address=129, type='Syren', port='/dev/ttyUSB0')
 drive.driveCommand(0)
 drive.turnCommand(0)
 
@@ -46,7 +41,7 @@ invert = -1
 drive_mod = speed_fac * invert
 
 # Deadband: the amount of deadband on the sticks
-deadband = 0.01
+deadband = 0.05
 
 # PWM Frequency
 freq = 60
@@ -54,7 +49,7 @@ freq = 60
 curve = 0.9
 
 dome_speed = 0
-accel_rate = 0.005
+accel_rate = 0.05
 dome_stick = 0
 
 # Set Axis definitions
@@ -78,8 +73,6 @@ os.environ["SDL_VIDEODRIVER"] = "dummy"
 pygame.display.init()
 
 while True:
-#    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Waiting for joystick \n")
-#    f.flush()
     pygame.joystick.quit()
     pygame.joystick.init()
     num_joysticks = pygame.joystick.get_count()
@@ -113,38 +106,25 @@ with open('keys.csv', mode='r') as infile:
 keys.items()
 
 
-def driveDome(channel, speed):
+def driveDome(speed):
     global dome_speed
     speed_actual = 0
-    pulse = DOME_STOP
-    speed_desired = ((curve * (speed ** 3)) + ((1 - curve) * speed))
-    if speed_desired > dome_speed:
+    if speed > dome_speed:
         speed_actual = dome_speed + accel_rate
-    elif speed_desired < dome_speed:
+    elif speed < dome_speed:
         speed_actual = dome_speed - accel_rate
     if speed_actual < deadband and speed_actual > deadband:
         speed_actual = 0
     dome_speed = speed_actual
 
-    
-    # Use curve variable to decrease sensitivity at low end.
-    pulse = (speed_actual * (DOME_STOP - DOME_FULL_CW)) + DOME_STOP
-
-    period = 1 / float(freq)
-    bit_duration = period / 4096
-    pulse_duration = bit_duration * pulse * 1000000
-
     # tell servo what to do
     if __debug__:
-        print "Channel %s : speed %5.5f : Desired speed: %5.5f : Actual speed: %5.5f : pulse %5.5f : duration %5.5f" % (
-        channel, speed, speed_desired, speed_actual, pulse, pulse_duration)
-    pwm.setPWM(channel, 0, int(pulse))
+        print "speed %5.5f : Actual speed: %5.5f" % (
+        speed, speed_actual)
+    dome.driveCommand(speed_actual)
 
 
 print "Initialised... entering main loop..."
-
-pwm = PWM(0x40, debug=True)
-pwm.setPWMFreq(freq)  # Set frequency to 60 Hz
 
 url = baseurl + "audio/Happy007"
 try:
@@ -170,7 +150,7 @@ def shutdownR2():
    drive.turnCommand(0)
    if __debug__:
       print "...Setting dome to 0"
-   pwm.setPWM(SERVO_DOME, 0, DOME_STOP)
+   dome.driveCommand(0)
 
    if __debug__:
       print "Disable drives"
@@ -206,11 +186,12 @@ while (joystick):
     global last_command
     global speed_fac
     global dome_stick
-    driveDome(SERVO_DOME, dome_stick)
+    driveDome(dome_stick)
     if time.time() - last_command > keepalive: 
         if __debug__:
             print "Last command sent greater than %s ago, doing keepAlive" % keepalive
         drive.keepAlive()
+        dome.keepAlive()
         # Check js0 still there
         if (os.path.exists('/dev/input/js0')): 
            if __debug__:
@@ -322,11 +303,12 @@ while (joystick):
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
                 if __debug__:
                     print "Value (Dome): %s" % event.value
-                #newvalue = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
-                dome_stick = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
-                # driveDome(SERVO_DOME, newvalue)
+                dome_stick = event.value
+                dome.driveCommand(event.value)
 
 # If the while loop quits, make sure that the motors are reset.
 if __debug__:
     print "Exited main loop"
 shutdownR2()
+
+
