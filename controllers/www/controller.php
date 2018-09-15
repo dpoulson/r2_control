@@ -20,10 +20,18 @@ include("include/config.php");
  $js_name=$_GET["js_name"];
 
  if (isset($js_name)) {
-   $url = "http://localhost:5000/controller/ps3/".$js_name;
+   $url = "http://localhost:5000/joystick/".$js_name;
    $handle = fopen($url, "r");
  }
 
+ # Get list of possible joysticks
+ $url = "http://localhost:5000/joystick";
+ $fh = fopen($url, "r");
+ $joysticks = explode(' ', stream_get_contents($fh));
+ foreach ($joysticks as $stick) {
+   echo "<a href='?js_name=$stick'>$stick</a><br />";
+ }
 
 ?>
-<a href=?js_name=0>PS3 (js0)</a>
+</body>
+</html>
