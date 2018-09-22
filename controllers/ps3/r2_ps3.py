@@ -41,30 +41,21 @@ invert = -1
 drive_mod = speed_fac * invert
 
 # Deadband: the amount of deadband on the sticks
-deadband = 0.05
+deadband = 0.2
 
 # PWM Frequency
 freq = 60
 # Exponential curve constant. Set this to 0 < curve < 1 to give difference response curves for axis
-curve = 0.9
+curve = 0.6
 
 dome_speed = 0
-accel_rate = 0.05
+accel_rate = 0.025
 dome_stick = 0
 
 # Set Axis definitions
 PS3_AXIS_LEFT_VERTICAL = 1
 PS3_AXIS_LEFT_HORIZONTAL = 0
 PS3_AXIS_RIGHT_HORIZONTAL = 3
-
-# Channel numbers on PWM controller
-SERVO_DOME = 15
-
-# PWM ranges
-# 245 will give full range on a Sabertooth controller (ie, 1000ms and 2000ms, with 1500ms as the centerpoint)
-DOME_FULL_CW = 330
-DOME_STOP = 425
-
 
 baseurl = "http://localhost:5000/"
 
@@ -105,22 +96,34 @@ with open('keys.csv', mode='r') as infile:
 
 keys.items()
 
+def clamp(n, minn, maxn):
+    if n < minn:
+        print "Clamping min"
+        return minn
+    elif n > maxn:
+        print "Clamping max " + str(n)
+        return maxn
+    else:
+        return n
 
-def driveDome(speed):
+
+def driveDome(speed_wanted):
     global dome_speed
     speed_actual = 0
-    if speed > dome_speed:
+    #speed_wanted = clamp(speed_wanted, -1, 1)
+    if speed_wanted < deadband and speed_wanted > -deadband:
+        speed_wanted = 0
+    if speed_wanted > dome_speed:
         speed_actual = dome_speed + accel_rate
-    elif speed < dome_speed:
+    elif speed_wanted < dome_speed:
         speed_actual = dome_speed - accel_rate
-    if speed_actual < deadband and speed_actual > deadband:
-        speed_actual = 0
+#    speed_actual = clamp(speed_actual, -1, 1)
     dome_speed = speed_actual
 
     # tell servo what to do
     if __debug__:
         print "speed %5.5f : Actual speed: %5.5f" % (
-        speed, speed_actual)
+        speed_wanted, speed_actual)
     dome.driveCommand(speed_actual)
 
 
@@ -191,7 +194,7 @@ while (joystick):
         if __debug__:
             print "Last command sent greater than %s ago, doing keepAlive" % keepalive
         drive.keepAlive()
-        dome.keepAlive()
+        #dome.keepAlive()
         # Check js0 still there
         if (os.path.exists('/dev/input/js0')): 
            if __debug__:
@@ -303,8 +306,9 @@ while (joystick):
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
                 if __debug__:
                     print "Value (Dome): %s" % event.value
+                #dome_stick = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
+                #dome.driveCommand(event.value)
                 dome_stick = event.value
-                dome.driveCommand(event.value)
 
 # If the while loop quits, make sure that the motors are reset.
 if __debug__:

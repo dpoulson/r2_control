@@ -57,6 +57,13 @@ def check_internet():
         internet_connection = False
     return internet_connection
 
+def list_joysticks():
+    path = "controllers"
+    result = []
+    for root, dirs, files in os.walk(path):
+        if ".isjoystick" in files:
+            result.append(root.replace(path + "/", ''))
+    return result
 
 def send_telegram(message):
     global internet_connection
@@ -259,8 +266,18 @@ def joystick_list():
     if logtofile:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Retrieving list of joysticks\n")
     if request.method == 'GET':
-        with open('controllers/joysticks.ini') as j:
-            return j.read()
+        return '\n'.join(list_joysticks())
+
+@app.route('/joystick/current', methods=['GET'])
+def joystick_current():
+    """GET to display current joystick"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Retrieving current joystick\n")
+    if request.method == 'GET':
+        with open("controllers/.current", "r") as current_joy:
+            current = current_joy.read()
+        return current
+
 
 @app.route('/joystick/<stick>', methods=['GET'])
 def joystick_change(stick):
@@ -269,20 +286,17 @@ def joystick_change(stick):
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Changing joystick to " + stick + "\n")
     if request.method == 'GET':
         message = "Invalid stick"
-	with open('controllers/joysticks.ini') as j:
-            line = j.readline().strip()
-            while line:
+        for valid in list_joysticks():
+            if __debug__:
+                print "Checking controller type is valid: " + valid
+            if valid == stick:
                 if __debug__:
-                    print "Checking controller type is valid: " + line
-                if line == stick:
-                    if __debug__:
-                        print "Valid stick"
-                    message = "Valid stick. Changed to " + stick
-                    with open("controllers/.current", "w") as current_joy:
-                       current_joy.write(stick)
-                    if "telegram" in modules:
-                       send_telegram("Setting joystick to " + stick)
-                line = j.readline().strip()
+                    print "Valid stick"
+                message = "Valid stick. Changed to " + stick
+                with open("controllers/.current", "w") as current_joy:
+                    current_joy.write(stick)
+                if "telegram" in modules:
+                    send_telegram("Setting joystick to " + stick)
                 print "End of loop"
     return message
 

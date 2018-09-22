@@ -1,4 +1,5 @@
 import ConfigParser
+import os
 
 _configfile = 'config/main.cfg'
 _config = ConfigParser.SafeConfigParser({ 'logtofile': True,

@@ -53,6 +53,20 @@ def sounds(bot, update, args):
         print "Fail...."
         bot.send_message(chat_id=update.message.chat_id, text="Failed...")
 
+def joystick(bot, update, args):
+    url = baseurl + "joystick/"
+    if len(args) == 0:
+        url += "list"
+    else:
+        url += args[0]
+    try:
+        r = requests.get(url)
+        bot.send_message(chat_id=update.message.chat_id, text=r.content)
+    except:
+        print "Fail...."
+        bot.send_message(chat_id=update.message.chat_id, text="Failed...")
+
+
 
 def status(bot, update):
     url = baseurl + "status"
@@ -75,12 +89,14 @@ def chatid(bot, update):
 
 start_handler = CommandHandler('status', status)
 sounds_handler = CommandHandler('sounds', sounds, pass_args=True)
+joystick_handler = CommandHandler('joystick', joystick, pass_args=True)
 volmute_handler = CommandHandler('mute', volmute)
 volmax_handler = CommandHandler('maxvol', volmax)
 chatid_handler = CommandHandler('chatid', chatid)
 
 dispatcher.add_handler(start_handler)
 dispatcher.add_handler(sounds_handler)
+dispatcher.add_handler(joystick_hander)
 dispatcher.add_handler(volmute_handler)
 dispatcher.add_handler(volmax_handler)
 dispatcher.add_handler(chatid_handler)
