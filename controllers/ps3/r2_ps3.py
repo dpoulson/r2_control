@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import datetime
+import argparse
 from cStringIO import StringIO
 from collections import defaultdict
 from SabertoothPacketSerial import SabertoothPacketSerial
@@ -18,16 +19,10 @@ def sig_handler(signal, frame):
 
 signal.signal(signal.SIGINT, sig_handler)
 
-#### Open a log file
-f = open('/home/pi/r2_control/logs/ps3.log', 'at')
-f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
-f.flush()
+##########################################################
+# Set variables
 
-drive = SabertoothPacketSerial()
-dome = SabertoothPacketSerial(address=129, type='Syren', port='/dev/ttyUSB0')
-drive.driveCommand(0)
-drive.turnCommand(0)
-
+# How often should the script send a keepalive (s)
 keepalive = 0.25
 
 # Speed factor. This multiplier will define the max value to be sent to the drive system. 
@@ -61,41 +56,12 @@ baseurl = "http://localhost:5000/"
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-pygame.display.init()
+################################################################################
+################################################################################
+# Custom Functions
 
-while True:
-    pygame.joystick.quit()
-    pygame.joystick.init()
-    num_joysticks = pygame.joystick.get_count()
-    if __debug__:
-        print "Waiting for joystick... (count: %s)" % num_joysticks
-    if num_joysticks != 0:
-        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Joystick found \n")
-        f.flush()
-        break
-    time.sleep(5)
-
-pygame.init()
-size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-if __debug__:
-    print "Framebuffer size: %d x %d" % (size[0], size[1])
-
-j = pygame.joystick.Joystick(0)
-j.init()
-buttons = j.get_numbuttons()
-
-# Read in key combos from csv file
-keys = defaultdict(list)
-with open('keys.csv', mode='r') as infile:
-    reader = csv.reader(infile)
-    for row in reader:
-        if __debug__:
-            print "Row: %s | %s | %s" % (row[0], row[1], row[2])
-        keys[row[0]].append(row[1])
-        keys[row[0]].append(row[2])
-
-keys.items()
-
+########################################
+# Clamp a value between a min and max
 def clamp(n, minn, maxn):
     if n < minn:
         print "Clamping min"
@@ -106,7 +72,8 @@ def clamp(n, minn, maxn):
     else:
         return n
 
-
+########################################
+# Send command to the dome
 def driveDome(speed_wanted):
     global dome_speed
     speed_actual = 0
@@ -126,21 +93,8 @@ def driveDome(speed_wanted):
         speed_wanted, speed_actual)
     dome.driveCommand(speed_actual)
 
-
-print "Initialised... entering main loop..."
-
-url = baseurl + "audio/Happy007"
-try:
-    r = requests.get(url)
-except:
-    print "Fail...."
-
-f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : System Initialised \n")
-f.flush()
-
-last_command = time.time()
-joystick = True
-
+######################################
+# Shutdown R2's drive - kill all motion
 def shutdownR2():
    if __debug__:
       print "Running shutdown procedure"
@@ -182,6 +136,71 @@ def shutdownR2():
 
    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " ****** PS3 Shutdown ******\n")
 
+#######################################################
+
+parser = argparse.ArgumentParser(description='PS3 controller for r2_control.');
+parser.add_argument('--curses', '-c', action="store_true", dest="curses", required=False, default=False,
+        help='Output in a nice readable format')
+args = parser.parse_args()
+print(args)
+
+#### Open a log file
+#f = open('/home/pi/r2_control/logs/ps3.log', 'at')
+f = open('test.log', 'at')
+f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
+f.flush()
+
+drive = SabertoothPacketSerial()
+dome = SabertoothPacketSerial(address=129, type='Syren', port='/dev/ttyUSB0')
+drive.driveCommand(0)
+drive.turnCommand(0)
+
+pygame.display.init()
+
+while True:
+    pygame.joystick.quit()
+    pygame.joystick.init()
+    num_joysticks = pygame.joystick.get_count()
+    if __debug__:
+        print "Waiting for joystick... (count: %s)" % num_joysticks
+    if num_joysticks != 0:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Joystick found \n")
+        f.flush()
+        break
+    time.sleep(5)
+
+pygame.init()
+size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
+if __debug__:
+    print "Framebuffer size: %d x %d" % (size[0], size[1])
+
+j = pygame.joystick.Joystick(0)
+j.init()
+buttons = j.get_numbuttons()
+
+# Read in key combos from csv file
+keys = defaultdict(list)
+with open('keys.csv', mode='r') as infile:
+    reader = csv.reader(infile)
+    for row in reader:
+        if __debug__:
+            print "Row: %s | %s | %s" % (row[0], row[1], row[2])
+        keys[row[0]].append(row[1])
+        keys[row[0]].append(row[2])
+
+keys.items()
+
+url = baseurl + "audio/Happy007"
+try:
+    r = requests.get(url)
+except:
+    print "Fail...."
+
+f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : System Initialised \n")
+f.flush()
+
+last_command = time.time()
+joystick = True
 
 # Main loop
 while (joystick):
