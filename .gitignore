@@ -52,6 +52,7 @@ coverage.xml
 docs/_build/
 
 main.cfg
+ps3.cfg
 config.cfg
 config/*.cfg
 logs/*.log
