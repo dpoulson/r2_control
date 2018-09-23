@@ -96,6 +96,7 @@ os.environ["SDL_VIDEODRIVER"] = "dummy"
 ################################################################################
 ################################################################################
 # Custom Functions
+''' locate - Print a string at a certain location '''
 def locate(user_string="PS3 Controller", x=0, y=0):
         # Don't allow any user errors. Python's own error detection will check for
         # syntax and concatination, etc, etc, errors.
@@ -110,9 +111,7 @@ def locate(user_string="PS3 Controller", x=0, y=0):
         # Plot the user_string at the starting at position HORIZ, VERT...
         print("\033["+VERT+";"+HORIZ+"f"+user_string)
 
-
-########################################
-# Clamp a value between a min and max
+''' clamp - clamp a value between a min and max '''
 def clamp(n, minn, maxn):
     if n < minn:
         print "Clamping min"
@@ -123,8 +122,7 @@ def clamp(n, minn, maxn):
     else:
         return n
 
-########################################
-# Send command to the dome
+''' driveDome - Set the dome to a certain speed, but use acceleration to avoid stripping gears '''
 def driveDome(speed_wanted):
     global dome_speed
     speed_actual = 0
@@ -148,8 +146,7 @@ def driveDome(speed_wanted):
     if not args.dryrun:
         dome.driveCommand(speed_actual)
 
-######################################
-# Shutdown R2's drive - kill all motion
+''' shutdownR2 - Put R2 into a safe state '''
 def shutdownR2():
    if __debug__:
       print "Running shutdown procedure"
@@ -274,15 +271,11 @@ joystick = True
 # Main loop
 while (joystick):
     global previous
-#    global last_command
-#    global speed_fac
-#    global dome_stick
     driveDome(dome_stick)
     if time.time() - last_command > keepalive: 
         if __debug__:
             print "Last command sent greater than %s ago, doing keepAlive" % keepalive
         drive.keepAlive()
-        #dome.keepAlive()
         # Check js0 still there
         if (os.path.exists('/dev/input/js0')): 
            if __debug__:
@@ -424,8 +417,6 @@ while (joystick):
                 if args.curses:
                     locate("                   ", 35, 4)
                     locate('%10f' % (event.value), 35, 4)
-                #dome_stick = ((curve * (event.value ** 3)) + ((1 - curve) * event.value))
-                #dome.driveCommand(event.value)
                 dome_stick = event.value
 
 # If the while loop quits, make sure that the motors are reset.

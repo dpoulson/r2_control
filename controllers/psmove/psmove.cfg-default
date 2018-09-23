@@ -1,0 +1,25 @@
+[DEFAULT]
+deadband = 0.2
+accel_rate = 0.025
+speed_fac = 0.35
+invert = -1
+log_file = /home/pi/r2_control/logs/psmove.log
+curve = 0.6
+baseurl = http://localhost:5000/
+keepalive = 0.25
+
+[Dome]
+address = 129
+type = Syren
+port = /dev/ttyUSB0
+
+[Drive]
+address = 128
+type = Sabertooth
+port = /dev/ttyACM0
+
+[Axis]
+drive = 1
+turn = 0
+dome = 3
+

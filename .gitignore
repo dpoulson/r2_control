@@ -53,6 +53,7 @@ docs/_build/
 
 main.cfg
 ps3.cfg
+psmove.cfg
 config.cfg
 config/*.cfg
 logs/*.log

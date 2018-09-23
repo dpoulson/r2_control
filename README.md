@@ -27,14 +27,12 @@ APIs Implemented:
  * /servo/\<body|dome\>/list - lists all servos configured
  * /servo/\<body|dome\>/\<name\>/\<position\>/\<duration\> - sets servo \<name\> to \<position\> (from 0 to 1 of full configured swing) over \<duration\> (seconds)
  * /servo/close - Close all servos
- * /audio/list - lists all audio files available
- * /audio/\<name\> - Plays audio file \<name\>
- * /audio/random/\<type\> - Plays random audio file of \<type\>. If \<type\> is omitted, any random sound is played
- * /audio/volume - Returns current volume
- * /audio/volume/\<up|down|value\> - Turns volume up/down or sets to level 0-1
- * /lights/\<effect\> - Triggers pre programmed Teecee \<effect\>
- * /lcd - TBD
-
+ * /joystick - Joystick selection functions
+ * /joystick/list - List all possible joysticks
+ * /joystick/\<stick\> - Select a joystick
+ * /shutdown - Shutdown system
+ * /status - Print current status
+ * /sendstatus - Send status via telegram if enabled
 
 Install
 =======
