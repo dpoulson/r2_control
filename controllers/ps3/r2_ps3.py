@@ -62,7 +62,7 @@ mainconfig = _config.defaults()
 log_file = mainconfig['log_file']
 
 # How often should the script send a keepalive (s)
-keepalive = mainconfig['keepalive']
+keepalive = float(mainconfig['keepalive'])
 
 # Speed factor. This multiplier will define the max value to be sent to the drive system. 
 # eg. 0.5 means that the value of the joystick position will be halved
@@ -114,37 +114,15 @@ def locate(user_string="PS3 Controller", x=0, y=0):
 ''' clamp - clamp a value between a min and max '''
 def clamp(n, minn, maxn):
     if n < minn:
-        print "Clamping min"
+        if __debug__:
+            print "Clamping min"
         return minn
     elif n > maxn:
-        print "Clamping max " + str(n)
+        if __debug__:
+            print "Clamping max " + str(n)
         return maxn
     else:
         return n
-
-''' driveDome - Set the dome to a certain speed, but use acceleration to avoid stripping gears '''
-def driveDome(speed_wanted):
-    global dome_speed
-    speed_actual = 0
-    #speed_wanted = clamp(speed_wanted, -1, 1)
-    if speed_wanted < deadband and speed_wanted > -deadband:
-        speed_wanted = 0
-    if speed_wanted > dome_speed:
-        speed_actual = dome_speed + accel_rate
-    elif speed_wanted < dome_speed:
-        speed_actual = dome_speed - accel_rate
-#    speed_actual = clamp(speed_actual, -1, 1)
-    dome_speed = speed_actual
-
-    # tell servo what to do
-    if __debug__:
-        print "speed %5.5f : Actual speed: %5.5f" % (
-        speed_wanted, speed_actual)
-    if args.curses:
-        locate("                    ", 35, 8)
-        locate('%10f' % (speed_actual), 35, 8)
-    if not args.dryrun:
-        dome.driveCommand(speed_actual)
 
 ''' shutdownR2 - Put R2 into a safe state '''
 def shutdownR2():
@@ -180,7 +158,7 @@ def shutdownR2():
    if __debug__:
       print "Bad motivator"
    # Play a sound to alert about a problem
-      url = baseurl + "audio/MOTIVATR"
+   url = baseurl + "audio/MOTIVATR"
    try:
       r = requests.get(url)
    except:
@@ -271,11 +249,13 @@ joystick = True
 # Main loop
 while (joystick):
     global previous
-    driveDome(dome_stick)
-    if time.time() - last_command > keepalive: 
+    #driveDome(dome_stick)
+    difference = float(time.time() - last_command)
+    if difference > keepalive: 
         if __debug__:
             print "Last command sent greater than %s ago, doing keepAlive" % keepalive
         drive.keepAlive()
+        dome.keepAlive()
         # Check js0 still there
         if (os.path.exists('/dev/input/js0')): 
            if __debug__:
@@ -283,10 +263,12 @@ while (joystick):
         else:
            print "No joystick"
            joystick = False
+           shutdownR2()
         # Check for no shutdown file
         if (os.path.exists('/home/pi/r2_control/controllers/.shutdown')):
-            print "Shutdown file is there"
-            joystick = False
+           print "Shutdown file is there"
+           joystick = False
+           shutdownR2()
         last_command = time.time()
     try:
         events = pygame.event.get()
@@ -417,7 +399,17 @@ while (joystick):
                 if args.curses:
                     locate("                   ", 35, 4)
                     locate('%10f' % (event.value), 35, 4)
-                dome_stick = event.value
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Dome : " + str(event.value) + "\n")
+                f.flush
+                if not args.dryrun:
+                    if __debug__:
+                        print "Not a drytest"
+                    dome.driveCommand(clamp(event.value, -0.99, 0.99))
+                if args.curses:
+                    locate("                   ", 35, 8)
+                    locate('%10f' % (event.value), 35,8)
+                last_command = time.time()
+#                dome_stick = event.value
 
 # If the while loop quits, make sure that the motors are reset.
 if __debug__:
