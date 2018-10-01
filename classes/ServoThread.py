@@ -5,8 +5,6 @@ import time
 import Adafruit_PCA9685
 from config import mainconfig
 
-tick_duration = 100
-
 q = Queue
 
 Address = 0x40
@@ -26,8 +24,12 @@ class ServoThread(threading.Thread):
         self.Max = Max
         self.Min = Min
         self.Home = Home
-        self.Current = Min
+        self.current_position = Home
         self.Channel = Channel
+        self.destination_position = Home
+        self.destination_start = 0
+        self.destination_time = 0
+        self.processing = False
         threading.Thread.__init__(self)
         try: 
            self.i2c = Adafruit_PCA9685.PCA9685(address=Address)
@@ -36,55 +38,52 @@ class ServoThread(threading.Thread):
            print "Failed to initialise the i2c device"
         return
 
+    def sendCommand(self):
+        if self.processing:
+            if __debug__:
+                print "Processing and sending command"
+            current_time = int(round(time.time() * 1000))
+            if self.destination_time < current_time
+                position = self.destination_position
+            else:
+                progress = (current_time - self.destination_start) / (self.destination_time - self.destination_start)
+                if __debug__:
+                    print "Currently %s way through this move" % progress
+                position = self.destination_position * progress
+            try:
+                self.i2c.set_pwm(self.Channel, 0, position)
+            except:
+                print "Failed to send command"
+            if self.destination_position == self.current_position:
+                self.processing = False
+            if self.destination_time + 500 < current_time
+                if __debug__:
+                    print "Servo reached destination, sending off command to device"
+                try:
+                    self.i2c.set_pwm(self.Channel, 4096, 0)
+                except:
+                    print "Failed to send command"
+        return
+
     def run(self):
         if __debug__:
             print "Starting Thread"
         while True:
-            command = self.q.get()
-            position = command[0]
-            duration = command[1]
-            if position > 1 or position < 0:
-                print "Invalid position (%s)" % position
-            else:
-                actual_position = int(((self.Max - self.Min) * position) + self.Min)
-            if __debug__:
-                print "Duration: %s " % duration
-            if duration > 0:
-                ticks = (duration * 1000) / tick_duration
-                tick_position_shift = (actual_position - self.Current) / float(ticks)
-                tick_actual_position = self.Current + tick_position_shift
-                if __debug__:
-                    print "Ticks:%s  Current Position: %s Position shift: %s Starting Position: %s End Position %s" % (
-                    ticks, self.Current, tick_position_shift, tick_actual_position, actual_position)
-                for x in range(0, ticks):
-                    if __debug__:
-                        print "Tick: %s Position: %s" % (x, tick_actual_position)
-                    try:
-                        self.i2c.setPWM(self.Channel, 0, int(tick_actual_position))
-                    except:
-                        print "Failed to send command"
-                    tick_actual_position += tick_position_shift
-                if __debug__:
-                    print "Finished move: Position: %s" % tick_actual_position
-            else:
-                if __debug__:
-                    print "Setting servo %s(%s) to position = %s(%s)" % (
-                    "test", self.Channel, actual_position, position)
-                try:
-                    self.i2c.set_pwm(self.Channel, 0, actual_position)
-                except:
-                    print "Failed to send command"
-            # Save current position of servo
-            if __debug__:
-                print "Servo move finished. Servo.name: %s ServoCurrent %s Tick %s" % (
-                "Test", self.Current, actual_position)
-            self.Current = actual_position
-            if __debug__:
-                print "New current: %s" % self.Current
-            time.sleep(0.3)
+            self.sendCommand()
             try:
-                self.i2c.set_pwm(self.Channel, 4096, 0)
-            except:
-                print "Failed to send command"
+                command = self.q.get()
+                position = command[0]
+                duration = command[1]
+                if position > 1 or position < 0:
+                    print "Invalid position (%s)" % position
+                else:
+                    self.destination_position = int(((self.Max - self.Min) * position) + self.Min)
+                if __debug__:
+                    print "Duration: %s " % duration
+                self.destination_start = int(round(time.time() * 1000))
+                self.destination_time = self.destination_start + (duration * 1000)
+            except Queue.Empty:
+                self.sendCommand()
+
         return
 
