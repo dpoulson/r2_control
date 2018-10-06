@@ -45,7 +45,9 @@ plugin_names = {
         'flthy':'FlthyHPControl',
         'scripts':'ScriptControl',
         'audio':'AudioLibrary',
-        'vader':'VaderPSIControl'
+        'vader':'VaderPSIControl',
+        'dome':'DomeControl',
+        'smoke':'SmokeControl'
         }
 
 def check_internet():
