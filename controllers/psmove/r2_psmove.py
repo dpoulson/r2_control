@@ -60,7 +60,7 @@ mainconfig = _config.defaults()
 log_file = mainconfig['log_file']
 
 # How often should the script send a keepalive (s)
-keepalive = mainconfig['keepalive']
+keepalive = float(mainconfig['keepalive'])
 
 # Speed factor. This multiplier will define the max value to be sent to the drive system.
 # eg. 0.5 means that the value of the joystick position will be halved
@@ -121,29 +121,6 @@ def clamp(n, minn, maxn):
     else:
         return n
 
-''' driveDome - Set the dome to a certain speed, but use acceleration to avoid stripping gears '''
-def driveDome(speed):
-    global dome_speed
-    speed_actual = 0
-    if speed > dome_speed:
-        speed_actual = dome_speed + accel_rate
-    elif speed < dome_speed:
-        speed_actual = dome_speed - accel_rate
-    if speed_actual < deadband and speed_actual > deadband:
-        speed_actual = 0
-    dome_speed = speed_actual
-
-    # tell servo what to do
-    if __debug__:
-        print "speed %5.5f : Actual speed: %5.5f " % (
-        speed, speed_actual)
-    if args.curses:
-        locate("                    ", 35, 8)
-        locate('%10f' % (speed_actual), 35, 8)
-    if not args.dryrun:
-        dome.driveCommand(speed_actual)
-
-
 ''' shutdownR2 - Put R2 into a safe state '''
 def shutdownR2():
    if __debug__:
@@ -197,7 +174,7 @@ args = parser.parse_args()
 
 #### Open a log file
 f = open(log_file, 'at')
-f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** ps3 started ******\n")
+f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** PSMove started ******\n")
 f.flush()
 
 if not args.dryrun:
@@ -308,8 +285,6 @@ joystick = True
 # Main loop
 while (joystick):
     global previous
-    global dome_stick
-    driveDome(dome_stick)
     if time.time() - last_command > keepalive: 
         if __debug__:
             print "Last command sent greater than %s ago, doing keepAlive" % keepalive
