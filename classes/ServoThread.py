@@ -39,10 +39,10 @@ class ServoThread(threading.Thread):
         return
 
     def sendCommand(self):
+        current_time = int(round(time.time() * 1000))
         if self.processing:
             if __debug__:
                 print "Processing and sending command"
-            current_time = int(round(time.time() * 1000))
             if self.destination_time <= current_time:
                 position = self.destination_position
             else:
@@ -56,6 +56,7 @@ class ServoThread(threading.Thread):
                 position = self.destination_position * progress
             try:
                 self.i2c.set_pwm(self.Channel, 0, position)
+                self.current_position = position
             except:
                 print "Failed to send command"
             if self.destination_position == self.current_position:
@@ -77,7 +78,7 @@ class ServoThread(threading.Thread):
         while True:
             self.sendCommand()
             try:
-                command = self.q.get()
+                command = self.q.get(False)
                 position = command[0]
                 duration = command[1]
                 if position > 1 or position < 0:
