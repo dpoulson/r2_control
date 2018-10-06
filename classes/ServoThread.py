@@ -59,14 +59,16 @@ class ServoThread(threading.Thread):
             except:
                 print "Failed to send command"
             if self.destination_position == self.current_position:
+                if __debug__: 
+                    print "Reached final position"
                 self.processing = False
-            if self.destination_time + 500 < current_time:
-                if __debug__:
-                    print "Servo reached destination, sending off command to device"
-                try:
-                    self.i2c.set_pwm(self.Channel, 4096, 0)
-                except:
-                    print "Failed to send command"
+        if self.destination_time + 500 < current_time:
+            if __debug__:
+                print "Servo reached destination, sending off command to device"
+            try:
+                self.i2c.set_pwm(self.Channel, 4096, 0)
+            except:
+                print "Failed to send command"
         return
 
     def run(self):
