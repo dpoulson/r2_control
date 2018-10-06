@@ -43,9 +43,13 @@ class ServoThread(threading.Thread):
             if __debug__:
                 print "Processing and sending command"
             current_time = int(round(time.time() * 1000))
-            if self.destination_time < current_time
+            if self.destination_time <= current_time:
                 position = self.destination_position
             else:
+                if __debug__:
+                    print "Current time: %s | destination_start: %s | destination_time: %s" % (current_time, self.destination_start, self.destination_time)
+                    print "(current_time - self.destination_start): %s " % (current_time - self.destination_start)
+                    print "(self.destination_time - self.destination_start): %s " % (self.destination_time - self.destination_start)
                 progress = (current_time - self.destination_start) / (self.destination_time - self.destination_start)
                 if __debug__:
                     print "Currently %s way through this move" % progress
@@ -56,7 +60,7 @@ class ServoThread(threading.Thread):
                 print "Failed to send command"
             if self.destination_position == self.current_position:
                 self.processing = False
-            if self.destination_time + 500 < current_time
+            if self.destination_time + 500 < current_time:
                 if __debug__:
                     print "Servo reached destination, sending off command to device"
                 try:
@@ -78,6 +82,7 @@ class ServoThread(threading.Thread):
                     print "Invalid position (%s)" % position
                 else:
                     self.destination_position = int(((self.Max - self.Min) * position) + self.Min)
+                    self.processing = True
                 if __debug__:
                     print "Duration: %s " % duration
                 self.destination_start = int(round(time.time() * 1000))
