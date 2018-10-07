@@ -64,8 +64,6 @@ class ServoThread(threading.Thread):
                     print "Reached final position"
                 self.processing = False
         if self.destination_time + 500 < current_time:
-            if __debug__:
-                print "Servo reached destination, sending off command to device"
             try:
                 self.i2c.set_pwm(self.Channel, 4096, 0)
             except:

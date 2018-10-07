@@ -27,18 +27,18 @@ if(!isset($loop)) {
 
 if(isset($stop)) {
    echo "Stopping... $stop<br />\n";
-   $url = "http://localhost:5000/script/stop/".$stop;
+   $url = "http://localhost:5000/scripts/stop/".$stop;
    $handle = fopen($url, "r");
 }
 
 
 if(isset($play)) {
    echo "Playing.... $play<br />\n";
-   $url = "http://localhost:5000/script/".$play."/".$loop;
+   $url = "http://localhost:5000/scripts/".$play."/".$loop;
    $handle = fopen($url, "r");
 }
 
-$url = "http://localhost:5000/script/running";
+$url = "http://localhost:5000/scripts/running";
 $fh = fopen($url, "r");
 
 $convert = explode("\n", stream_get_contents($fh));
@@ -62,14 +62,16 @@ for ($x = 0 ; $x < sizeof($running_list) - 1; $x++) {
     echo "</ul>\n";
 }
 
-$url = "http://localhost:5000/script/list";
+$url = "http://localhost:5000/scripts/list";
 $fh = fopen($url, "r");
-$files = str_getcsv(str_replace(" ", "", stream_get_contents($fh)), ",");
+$files = str_getcsv(str_replace(" ", "", stream_get_contents($fh)));
+#$files = str_getcsv(stream_get_contents($fh));
 sort($files);
 $num_files=sizeof($files);
 $num_rows=($num_files/$num_cols);
 
 
+echo "Number of scripts: $num_files";
 
 echo "<table cols=$num_cols>\n";
 
