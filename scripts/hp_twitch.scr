@@ -1,0 +1,7 @@
+dome,FHP_X,0,0
+sleep,random,10,30
+dome,FHP_X,0.5,0
+sleep,random,10,30
+dome,FHP_X,1,0
+sleep,random,10,30
+
