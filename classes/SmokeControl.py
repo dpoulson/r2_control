@@ -8,7 +8,7 @@ from flask import Blueprint, request
 
 _configfile = 'config/smoke.cfg'
 
-_config = ConfigParser.SafeConfigParser({'address': '0x19', 'logfile': 'smoke.log'})
+_config = ConfigParser.SafeConfigParser({'address': '0x18', 'logfile': 'smoke.log'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
@@ -36,7 +36,7 @@ api = Blueprint('smoke', __name__, url_prefix='/smoke')
 def _smoke_on():
     """ GET to send a command to the smoke system"""
     if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Flthy command : on\n")
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Smoke command : on\n")
     message = ""
     if request.method == 'GET':
         message += _smoke.sendRaw("S")
