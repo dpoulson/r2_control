@@ -27,7 +27,22 @@ p {
     padding: 10px;
 }
 
-a:link a:visited a:hover a:active {
+a:link {
+    text-decoration: none;
+    color: #FFFFFF;
+}
+
+a:visited {
+    text-decoration: none;
+    color: #FFFFFF;
+}
+
+a:hover {
+    text-decoration: none;
+    color: #FFFFFF;
+}
+
+a:active {
     text-decoration: none;
     color: #FFFFFF;
 }
@@ -50,7 +65,7 @@ a:link a:visited a:hover a:active {
     height: 75px;
     background: #1B1A65;
     color: #FFFFFF;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #000000;
     margin: 5px;
     font-family: StarWars;
@@ -72,7 +87,7 @@ a:link a:visited a:hover a:active {
 
 #content {
     background: #FFFFFF;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #000000;
     margin: 5px;
 }
@@ -87,7 +102,7 @@ a:link a:visited a:hover a:active {
 #leftcolumn {
     background: #1B1A65;
     color: #FFFFFF;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #000000;
     margin: 5px;
     height: calc(100% - 10px);
@@ -107,7 +122,7 @@ a:link a:visited a:hover a:active {
     height: 40px;
     background: #1B1A65;
     color: #FFFFFF;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #000000;
     margin: 5px;
     font-family: StarWars;
@@ -116,6 +131,11 @@ a:link a:visited a:hover a:active {
 }
 
 
+#servowrapper {
+   position: relative; 
+   overflow: hidden;
+}
+
 #diagram {
    float: left;
    width: 450px;
@@ -123,9 +143,10 @@ a:link a:visited a:hover a:active {
 }
 
 #table {
-   width: 200px;
    padding: 50px 10px 10px 10px;
+   width: 200px;
    margin: 10px;
+   float: left;
 }
 
 table {
@@ -139,7 +160,7 @@ table {
 .button {
   background: #3498db;
   background-image: linear-gradient(to bottom, #3498db, #2980b9);
-  border-radius: 28px;
+  border-radius: 10px;
   font-family: StarWars;
   color: #ffffff;
   font-size: 15px;
@@ -158,11 +179,11 @@ table {
   display: flex;
   flex-wrap: wrap;
   background: #1B1A65;
-  border-radius: 10px;  
+  border-radius: 5px;  
 }
 .items .item {
   flex: 1 0 200px;
-  border-radius: 25px;
+  border-radius: 10px;
   box-sizing: border-box;
   background: #3498db;
   color: #171e42;
@@ -212,5 +233,40 @@ table {
     height: 25px; /* Slider handle height */
     background: #4CAF50; /* Green background */
     cursor: pointer; /* Cursor on hover */
+}
+
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
 }
 

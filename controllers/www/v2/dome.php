@@ -22,7 +22,7 @@ include("include/config.php");
 
 
 ?>
-
+ <div id="servowrapper">
  <div id="diagram">
   <img width=400 border=0 src="images/Dome.jpg">
  </div>
@@ -50,4 +50,5 @@ include("include/config.php");
     }
   ?>
   </table>
+ </div>
  </div>
