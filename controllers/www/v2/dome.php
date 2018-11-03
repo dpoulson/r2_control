@@ -49,4 +49,5 @@ include("include/config.php");
       }
     }
   ?>
+  </table>
  </div>
