@@ -2,6 +2,8 @@ import ConfigParser
 import time, struct, os
 import datetime
 import time
+import csv
+import collections
 import RPi.GPIO as GPIO
 from config import mainconfig
 from time import sleep
@@ -30,7 +32,6 @@ if _logtofile:
     _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: GPIOControl ******\n")
     _f.flush
 
-gpio = {}
 
 api = Blueprint('gpio', __name__, url_prefix='/gpio')
 
@@ -46,25 +47,32 @@ def _gpio_on(gpio, state):
 
 class _GPIOControl:
 
+    _GPIO_def = collections.namedtuple('_GPIO_def', 'pin, name')
+
     def __init__(self, gpio_configfile, logdir):
-        self.logdir = logdir
+        self._logdir = logdir
+        self._gpio_list = []
         ifile = open('config/%s' % gpio_configfile, "rb")
         reader = csv.reader(ifile)
         GPIO.setmode(GPIO.BCM)
         for row in reader:
-            self.gpio[row[1]] = row[0]     # Add gpio pin number and name to dictionary
-            GPIO.setup($row[0], GPIO.OUT)  # Set pin as an output
-            GPIO.output($row[0], $row[2])  # Third value in csv file is default, set pin to that
+            pin = row[0]
+            name = row[1]
+            self._gpio_list.append(self._GPIO_def(pin=pin, name=name))     # Add gpio pin number and name to dictionary,
+            GPIO.setup(int(row[0]), GPIO.OUT)  # Set pin as an output
+            GPIO.output(int(row[0]), int(row[2]))  # Third value in csv file is default, set pin to that
         if __debug__:
             print "Initialising GPIO Control"
+        self._gpio_list = dict(self._gpio_list)
 
     def setState(self, gpio, state):
-        if self.gpio[gpio] is not None:
+        if self._gpio_list[gpio] is not None:
+            print self._gpio_list[gpio]
             if __debug__:
-                print "Setting %s (pin %s) to %s" % (gpio, self.gpio[gpio], state)
-            GPIO.output(self.gpio[gpio], state)
+                print "Setting %s (pin %s) to %s" % (gpio, self._gpio[gpio], state)
+            GPIO.output(int(gpio), int(state))
         return "Ok"
 
 
-_gpio = _GPIOControl(_default['gpio_configfile'],_defaults['logfile'])
+_gpio = _GPIOControl(_defaults['gpio_configfile'],_defaults['logfile'])
 

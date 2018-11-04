@@ -35,7 +35,8 @@ class ServoThread(threading.Thread):
            self.i2c = Adafruit_PCA9685.PCA9685(address=Address)
            self.i2c.set_pwm_freq(60)
         except:
-           print "Failed to initialise the i2c device"
+           if __debug__:
+               print "Failed to initialise the i2c device"
         return
 
     def sendCommand(self):
@@ -67,7 +68,8 @@ class ServoThread(threading.Thread):
             try:
                 self.i2c.set_pwm(self.Channel, 4096, 0)
             except:
-                print "Failed to send command"
+                if __debug__:
+                   print "Failed to send command"
         return
 
     def run(self):

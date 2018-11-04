@@ -47,6 +47,7 @@ plugin_names = {
         'audio':'AudioLibrary',
         'vader':'VaderPSIControl',
         'dome':'DomeControl',
+        'gpio':'GPIOControl',
         'smoke':'SmokeControl'
         }
 
