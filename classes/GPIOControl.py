@@ -66,11 +66,11 @@ class _GPIOControl:
         self._gpio_list = dict(self._gpio_list)
 
     def setState(self, gpio, state):
-        if self._gpio_list[gpio] is not None:
-            print self._gpio_list[gpio]
-            if __debug__:
-                print "Setting %s (pin %s) to %s" % (gpio, self._gpio[gpio], state)
-            GPIO.output(int(gpio), int(state))
+        for gpios in self._gpio_list:
+            if gpios.name == gpio:
+               if __debug__:
+                  print "Setting %s (pin %s) to %s" % (gpio, gpios.pin, state)
+               GPIO.output(gpios.name, int(state)) 
         return "Ok"
 
 
