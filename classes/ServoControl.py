@@ -52,6 +52,7 @@ class ServoControl:
             if __debug__:
                 print "Added servo: %s %s %s %s %s" % (servo_channel, servo_name, servo_Min, servo_Max, servo_home)
         ifile.close()
+        self.close_all_servos()
 
     def __init__(self, address, servo_config_file):
         self.servo_list = []
