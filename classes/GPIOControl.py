@@ -47,7 +47,7 @@ def _gpio_on(gpio, state):
 
 class _GPIOControl:
 
-    _GPIO_def = collections.namedtuple('_GPIO_def', 'pin, name')
+    _GPIO_def = collections.namedtuple('_GPIO_def', 'name, pin')
 
     def __init__(self, gpio_configfile, logdir):
         self._logdir = logdir
@@ -63,14 +63,16 @@ class _GPIOControl:
             GPIO.output(int(row[0]), int(row[2]))  # Third value in csv file is default, set pin to that
         if __debug__:
             print "Initialising GPIO Control"
-        self._gpio_list = dict(self._gpio_list)
+#        self._gpio_list = dict(self._gpio_list)
 
     def setState(self, gpio, state):
+        print self._gpio_list
         for gpios in self._gpio_list:
+            print gpios
             if gpios.name == gpio:
                if __debug__:
                   print "Setting %s (pin %s) to %s" % (gpio, gpios.pin, state)
-               GPIO.output(gpios.name, int(state)) 
+               GPIO.output(int(gpios.pin), int(state)) 
         return "Ok"
 
 
