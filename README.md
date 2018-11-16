@@ -39,3 +39,6 @@ Install
 
 Read the wiki. 
 
+
+To see some parts of this in action, follow my instagram: https://www.instagram.com/r2djp/
+
