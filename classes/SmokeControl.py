@@ -8,7 +8,7 @@ from flask import Blueprint, request
 
 _configfile = 'config/smoke.cfg'
 
-_config = ConfigParser.SafeConfigParser({'address': '0x18', 'logfile': 'smoke.log'})
+_config = ConfigParser.SafeConfigParser({'address': '0x05', 'logfile': 'smoke.log'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
@@ -39,8 +39,19 @@ def _smoke_on():
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Smoke command : on\n")
     message = ""
     if request.method == 'GET':
-        message += _smoke.sendRaw("S")
+        message += _smoke.sendRaw('S', '5')
     return message
+
+@api.route('/on/<duration>', methods=['GET'])
+def _smoke_on_duration(duration):
+    """ GET to turn smoke on for a duration """
+    if _logtofile:
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Smoke command : on\n")
+    message = ""
+    if request.method == 'GET':
+        message += _smoke.sendRaw('S', duration)
+    return message
+
 
 class _SmokeControl:
 
@@ -51,16 +62,21 @@ class _SmokeControl:
         if __debug__:
             print "Initialising Smoke Control"
 
-    def sendRaw(self, cmd):
-	command = list(cmd)
-	hexCommand = list()
-	for i in command:
-            h=int(hex(ord(i)),16)
-	    hexCommand.append(h)	
+    def sendRaw(self, cmd, duration):
+	command = int(hex(ord(cmd)),16)
+        hexDuration = list()
+        if __debug__:
+            print "Duration: %s" % duration
+        # We don't want to run for longer than 10 seconds, might burn out the coil 
+        if int(duration) > 9:
+            if __debug__:
+               print "Too long, shortening duration"
+            duration = '9'
+        hexDuration.append(int(duration,16))
 	if __debug__:
-	    print hexCommand
+	    print "Command: %s | hexDuration: %s " % (command, hexDuration)
         try:
-            self.bus.write_i2c_block_data(int(self.address,16), hexCommand[0], hexCommand[1:])
+            self.bus.write_i2c_block_data(int(self.address,16), command, hexDuration)
 	except:
 	    print "Failed to send bytes"
         return "Ok"

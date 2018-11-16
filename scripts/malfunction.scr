@@ -14,6 +14,7 @@ dome,all,close
 sleep,0.05
 dome,all,open
 sleep,0.1
+smoke,7
 dome,all,close
 sleep,0.15
 dome,all,open

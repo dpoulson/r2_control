@@ -77,5 +77,7 @@ class ScriptThread(threading.Thread):
                         urllib2.urlopen("http://localhost:5000/audio/%s" % row[1])
                 if row[0] == "flthy":
                     urllib2.urlopen("http://localhost:5000/flthy/raw/%s" % row[1])
+                if row[0] == "smoke":
+                    urllib2.urlopen("http://localhost:5000/smoke/on/%s" % row[1])
         return
 
