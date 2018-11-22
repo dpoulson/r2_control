@@ -96,7 +96,7 @@ chatid_handler = CommandHandler('chatid', chatid)
 
 dispatcher.add_handler(start_handler)
 dispatcher.add_handler(sounds_handler)
-dispatcher.add_handler(joystick_hander)
+dispatcher.add_handler(joystick_handler)
 dispatcher.add_handler(volmute_handler)
 dispatcher.add_handler(volmax_handler)
 dispatcher.add_handler(chatid_handler)

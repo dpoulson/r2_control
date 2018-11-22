@@ -91,6 +91,7 @@ def system_status():
                 remote_battery = int(b.readline().split()[0])
     except:
         remote_battery = 0
+
     status = "Current Status\n"
     status += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
     status += "Uptime: \t%s\n" % uptime_string
@@ -99,10 +100,10 @@ def system_status():
     status += "Wifi: \t\t\n"
     status += "Internet: \t%s \n" % check_internet()
     status += "Location: \t\n"
-    status += "Volume: \t%s\n" % p.audio.ShowVolume()
+    status += "Volume: \t%s\n" % p['audio'].audio.ShowVolume()
     status += "--------------\n"
     status += "Scripts Running:\n"
-    #status += scripts.list_running()
+    status += p['scripts'].scripts.list_running()
     return status
 
 # If logtofile is set, open log file
@@ -200,8 +201,8 @@ def servo_close():
     if logtofile:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo close: \n")
     if request.method == 'GET':
-        pwm_body.close_all_servos()
-        pwm_dome.close_all_servos()
+        pwm_body.close_all_servos(0)
+        pwm_dome.close_all_servos(0)
         return "Ok"
 
 
@@ -211,7 +212,16 @@ def servo_dome_close():
     if logtofile:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo close dome: \n")
     if request.method == 'GET':
-        pwm_dome.close_all_servos()
+        pwm_dome.close_all_servos(0)
+        return "Ok"
+
+@app.route('/servo/dome/close/<duration>', methods=['GET'])
+def servo_dome_close_slow(duration):
+    """GET to close all dome servos slowly"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo close dome slow: \n")
+    if request.method == 'GET':
+        pwm_dome.close_all_servos(duration)
         return "Ok"
 
 
@@ -221,8 +231,18 @@ def servo_body_close():
     if logtofile:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo close body: \n")
     if request.method == 'GET':
-        pwm_body.close_all_servos()
+        pwm_body.close_all_servos(0)
         return "Ok"
+
+@app.route('/servo/body/close/<duration>', methods=['GET'])
+def servo_body_close_slow(duration):
+    """GET to close all body servos slowly"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo close body slow:\n")
+    if request.method == 'GET':
+        pwm_body.close_all_servos(duration)
+        return "Ok"
+
 
 
 @app.route('/servo/open', methods=['GET'])
@@ -231,8 +251,8 @@ def servo_open():
     if logtofile:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo open: \n")
     if request.method == 'GET':
-        pwm_body.open_all_servos()
-        pwm_dome.open_all_servos()
+        pwm_body.open_all_servos(0)
+        pwm_dome.open_all_servos(0)
         return "Ok"
 
 
@@ -242,9 +262,17 @@ def servo_dome_open():
     if logtofile:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo open dome: \n")
     if request.method == 'GET':
-        pwm_dome.open_all_servos()
+        pwm_dome.open_all_servos(0)
         return "Ok"
 
+@app.route('/servo/dome/open/<duration>', methods=['GET'])
+def servo_dome_open_slow(duration):
+    """GET to open all dome servos slowly"""
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo open dome slow: \n")
+    if request.method == 'GET':
+        pwm_dome.open_all_servos(duration)
+        return "Ok"
 
 @app.route('/servo/body/open', methods=['GET'])
 def servo_body_open():
@@ -252,13 +280,28 @@ def servo_body_open():
     if logtofile:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo open body: \n")
     if request.method == 'GET':
-        pwm_body.open_all_servos()
+        pwm_body.open_all_servos(0)
         return "Ok"
 
+@app.route('/servo/body/open/<duration>', methods=['GET'])
+def servo_body_open_slow(duration):
+    """GET to open all body servos" slowly """
+    if logtofile:
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Servo open body slow: \n")
+    if request.method == 'GET':
+        pwm_body.open_all_servos(duration)
+        return "Ok"
+
+p = {}
 for x in plugins:
-    p = __import__(plugin_names[x], fromlist=[ x, 'api'])
-    app.register_blueprint(p.api)
+    p[x] = __import__(plugin_names[x], fromlist=[ x, 'api'])
+    app.register_blueprint(p[x].api)
     
+if __debug__:
+   print "Modules loaded:"
+   print "============================================"
+   print p
+   print "============================================"
 
 #######################
 # System API calls

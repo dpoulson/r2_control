@@ -25,6 +25,7 @@ class ServoThread(threading.Thread):
         self.Min = Min
         self.Home = Home
         self.current_position = Home
+        self.original_position = Home
         self.Channel = Channel
         self.destination_position = Home
         self.destination_start = 0
@@ -36,7 +37,7 @@ class ServoThread(threading.Thread):
            self.i2c.set_pwm_freq(60)
         except:
            if __debug__:
-               print "Failed to initialise the i2c device"
+               print "Failed to initialise the i2c device %s/%s" % (self.Address, self.Channel)
         return
 
     def sendCommand(self):
@@ -48,28 +49,38 @@ class ServoThread(threading.Thread):
                 position = self.destination_position
             else:
                 if __debug__:
-                    print "Current time: %s | destination_start: %s | destination_time: %s" % (current_time, self.destination_start, self.destination_time)
+                    print "Current time: %s | destination_start: %s | destination_time: %s | destination_position: %s | original_position: %s" % (
+                                     current_time, self.destination_start, self.destination_time, self.destination_position, self.original_position)
                     print "(current_time - self.destination_start): %s " % (current_time - self.destination_start)
                     print "(self.destination_time - self.destination_start): %s " % (self.destination_time - self.destination_start)
-                progress = (current_time - self.destination_start) / (self.destination_time - self.destination_start)
+                progress = float(current_time - self.destination_start) / float(self.destination_time - self.destination_start)
                 if __debug__:
                     print "Currently %s way through this move" % progress
-                position = self.destination_position * progress
+                if self.original_position > self.destination_position:
+                   if __debug__:
+                      print "Closing slowly..."
+                   position = int(round(self.original_position - ((self.original_position - self.destination_position) * progress)))
+                else:
+                   if __debug__:
+                      print "Opening slowly...."
+                   position = int(round(((self.destination_position - self.original_position) * progress) + self.original_position))
+                if __debug__:
+                    print "Current position request: %s " % position
             try:
                 self.i2c.set_pwm(self.Channel, 0, position)
                 self.current_position = position
             except:
-                print "Failed to send command"
+                print "Failed to send command %s/%s -> %s " % (self.Address, self.Channel, position)
             if self.destination_position == self.current_position:
                 if __debug__: 
                     print "Reached final position"
                 self.processing = False
-        if self.destination_time + 500 < current_time:
+        if (self.destination_time + 500 < current_time): 
             try:
                 self.i2c.set_pwm(self.Channel, 4096, 0)
             except:
                 if __debug__:
-                   print "Failed to send command"
+                   print "Failed to send command (reset) %s/%s" % (self.Address, self.Channel)
         return
 
     def run(self):
@@ -86,10 +97,15 @@ class ServoThread(threading.Thread):
                 else:
                     self.destination_position = int(((self.Max - self.Min) * position) + self.Min)
                     self.processing = True
-                if __debug__:
-                    print "Duration: %s " % duration
                 self.destination_start = int(round(time.time() * 1000))
                 self.destination_time = self.destination_start + (duration * 1000)
+                self.original_position = self.current_position
+                if __debug__:
+                    print "Duration:    %s " % duration
+                    print "Destination: %s " % self.destination_position
+                    print "Original:    %s " % self.original_position
+                    print "Start time:  %s " % self.destination_start
+                    print "End time:    %s " % self.destination_time
             except Queue.Empty:
                 self.sendCommand()
 

@@ -52,7 +52,7 @@ class ServoControl:
             if __debug__:
                 print "Added servo: %s %s %s %s %s" % (servo_channel, servo_name, servo_Min, servo_Max, servo_home)
         ifile.close()
-        self.close_all_servos()
+        self.close_all_servos(0)
 
     def __init__(self, address, servo_config_file):
         self.servo_list = []
@@ -66,18 +66,28 @@ class ServoControl:
             message += "%s\n" % servo.name
         return message
 
-    def close_all_servos(self):
+    def close_all_servos(self, duration):
+        try:
+            duration = int(duration)
+        except:
+            print "Duration is not an int"
+            duration = 0
         if __debug__:
             print "Closing all servos"
         for servo in self.servo_list:
-            servo.queue.put([0, 0])
+            servo.queue.put([0, duration])
         return
 
-    def open_all_servos(self):
+    def open_all_servos(self, duration):
+        try:
+            duration = int(duration)
+        except:
+            print "Duration is not an int"
+            duration = 0
         if __debug__:
             print "Opening all servos"
         for servo in self.servo_list:
-            servo.queue.put([1, 0])
+            servo.queue.put([1, duration])
         return
 
     # Send a command over i2c to turn a servo to a given position (percentage) over a set duration (seconds)
@@ -98,3 +108,4 @@ class ServoControl:
             if servo.name == servo_name:
                 current_servo = servo
         current_servo.queue.put([position, duration])
+
