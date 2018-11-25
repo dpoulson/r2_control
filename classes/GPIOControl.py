@@ -1,21 +1,26 @@
-import ConfigParser
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+import configparser
 import time, struct, os
 import datetime
 import time
 import csv
 import collections
 import RPi.GPIO as GPIO
-from config import mainconfig
+from .config import mainconfig
 from time import sleep
 from flask import Blueprint, request
 
 _configfile = 'config/gpio.cfg'
 
-_config = ConfigParser.SafeConfigParser({'logfile': 'gpio.log', 'gpio_configfile': 'gpio_pins.cfg'})
+_config = configparser.SafeConfigParser({'logfile': 'gpio.log', 'gpio_configfile': 'gpio_pins.cfg'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
-    print "Config file does not exist"
+    print("Config file does not exist")
     with open(_configfile, 'wb') as configfile:
         _config.write(configfile)
 
@@ -27,7 +32,7 @@ _logfile = _defaults['logfile']
 
 if _logtofile:
     if __debug__:
-        print "Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile)
+        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
     _f = open(_logdir + '/' + _logfile, 'at')
     _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: GPIOControl ******\n")
     _f.flush
@@ -45,7 +50,7 @@ def _gpio_on(gpio, state):
         message += _gpio.setState(gpio,state)
     return message
 
-class _GPIOControl:
+class _GPIOControl(object):
 
     _GPIO_def = collections.namedtuple('_GPIO_def', 'name, pin')
 
@@ -62,16 +67,16 @@ class _GPIOControl:
             GPIO.setup(int(row[0]), GPIO.OUT)  # Set pin as an output
             GPIO.output(int(row[0]), int(row[2]))  # Third value in csv file is default, set pin to that
         if __debug__:
-            print "Initialising GPIO Control"
+            print("Initialising GPIO Control")
 #        self._gpio_list = dict(self._gpio_list)
 
     def setState(self, gpio, state):
-        print self._gpio_list
+        print(self._gpio_list)
         for gpios in self._gpio_list:
-            print gpios
+            print(gpios)
             if gpios.name == gpio:
                if __debug__:
-                  print "Setting %s (pin %s) to %s" % (gpio, gpios.pin, state)
+                  print("Setting %s (pin %s) to %s" % (gpio, gpios.pin, state))
                GPIO.output(int(gpios.pin), int(state)) 
         return "Ok"
 

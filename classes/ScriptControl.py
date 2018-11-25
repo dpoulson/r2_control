@@ -18,23 +18,28 @@
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
 
-import ConfigParser
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+import configparser
 import glob
 import os
 import collections
 import datetime
 import time
-from config import mainconfig
+from .config import mainconfig
 from flask import Blueprint, request
 
 
 _configfile = 'config/scripts.cfg'
 
-_config = ConfigParser.SafeConfigParser({'script_dir': './scripts', 'logfile': 'scripts.log'})
+_config = configparser.SafeConfigParser({'script_dir': './scripts', 'logfile': 'scripts.log'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
-    print "Config file does not exist"
+    print("Config file does not exist")
     with open(_configfile, 'wb') as configfile:
         _config.write(configfile)
 
@@ -46,7 +51,7 @@ _logfile = _defaults['logfile']
 
 if _logtofile:
     if __debug__:
-        print "Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile)
+        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
     _f = open(_logdir + '/' + _logfile, 'at')
     _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: scripts ******\n")
     _f.flush
@@ -100,8 +105,8 @@ def _start_script(name, loop):
 
 
 
-class _ScriptControl:
-    from ScriptThread import ScriptThread
+class _ScriptControl(object):
+    from .ScriptThread import ScriptThread
 
     Scripts = collections.namedtuple('Script', 'name, script_id, thread')
 
@@ -110,7 +115,7 @@ class _ScriptControl:
         self.script_id = 1
         self.script_dir = script_dir
         if __debug__:
-            print "Starting script object with path: %s" % script_dir
+            print("Starting script object with path: %s" % script_dir)
 
 
     def list(self):
@@ -128,7 +133,7 @@ class _ScriptControl:
     def stop_script(self, kill_id):
         idx = 0
         if __debug__:
-            print "Trying to stop script ID %s" % kill_id
+            print("Trying to stop script ID %s" % kill_id)
         for script in self.running_scripts:
             if (int(script.script_id) == int(kill_id)) or (script.name == kill_id):
                 script.thread.stop()
@@ -139,7 +144,7 @@ class _ScriptControl:
     def stop_all(self):
         idx = 0
         if __debug__:
-            print "Trying to stop all scripts"
+            print("Trying to stop all scripts")
         for script in self.running_scripts:
             self.stop_script(script.script_id)
         idx += 1
@@ -151,16 +156,16 @@ class _ScriptControl:
         self.running_scripts.append(
             self.Scripts(name=script, script_id=self.script_id, thread=self.ScriptThread(script, loop)))
         if __debug__:
-            print "ID %s" % self.script_id
+            print("ID %s" % self.script_id)
         for scripts in self.running_scripts:
             if scripts.script_id == self.script_id:
                 current_id = scripts.script_id
                 scripts.thread.daemon = True
                 scripts.thread.start()
         if __debug__:
-            print "Starting script %s" % script
+            print("Starting script %s" % script)
         if loop == "1":
-            print "Looping"
+            print("Looping")
         else:
             for script in self.running_scripts:
                 if int(script.script_id) == int(current_id):

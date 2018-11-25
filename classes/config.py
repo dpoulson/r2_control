@@ -1,8 +1,11 @@
-import ConfigParser
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+import configparser
 import os
 
 _configfile = 'config/main.cfg'
-_config = ConfigParser.SafeConfigParser({ 'logtofile': True,
+_config = configparser.SafeConfigParser({ 'logtofile': True,
                                          'logdir' : './logs',
                                          'logfile' : 'debug.log',
                                          'busid' : '1',
@@ -12,7 +15,7 @@ _config = ConfigParser.SafeConfigParser({ 'logtofile': True,
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
-    print "Config file does not exist"
+    print("Config file does not exist")
     with open(_configfile, 'wb') as configfile:
         _config.write(configfile)
 

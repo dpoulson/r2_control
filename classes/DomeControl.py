@@ -1,19 +1,25 @@
-import ConfigParser
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
+import configparser
 import smbus, time, struct, os
 import datetime
 import time
-from config import mainconfig
+from .config import mainconfig
 from time import sleep
 from flask import Blueprint, request
 from SabertoothPacketSerial import SabertoothPacketSerial
 
 _configfile = 'config/dome.cfg'
 
-_config = ConfigParser.SafeConfigParser({'address': '0x1c', 'logfile': 'dome.log', 'dome_address': '129', 'port': '/dev/ttyUSB0', 'type': 'Syren'})
+_config = configparser.SafeConfigParser({'address': '0x1c', 'logfile': 'dome.log', 'dome_address': '129', 'port': '/dev/ttyUSB0', 'type': 'Syren'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
-    print "Config file does not exist"
+    print("Config file does not exist")
     with open(_configfile, 'wb') as configfile:
         _config.write(configfile)
 
@@ -25,7 +31,7 @@ _logfile = _defaults['logfile']
 
 if _logtofile:
     if __debug__:
-        print "Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile)
+        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
     _f = open(_logdir + '/' + _logfile, 'at')
     _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: DOME ******\n")
     _f.flush
@@ -38,11 +44,11 @@ api = Blueprint('dome', __name__, url_prefix='/dome')
 def clamp(n, minn, maxn):
     if n < minn:
         if __debug__:
-            print "Clamping min"
+            print("Clamping min")
         return minn
     elif n > maxn:
         if __debug__:
-            print "Clamping max " + str(n)
+            print("Clamping max " + str(n))
         return maxn
     else:
         return n
@@ -78,7 +84,7 @@ def _dome_turn(stick):
     return message
 
 
-class _DomeControl:
+class _DomeControl(object):
 
     def __init__(self, address, logfile, dome_address, dome_type, dome_port):
         self.address = address
@@ -86,7 +92,7 @@ class _DomeControl:
         self.logfile = logfile
         self.dome_serial = SabertoothPacketSerial(address=int(dome_address), type=dome_type, port=dome_port)
         if __debug__:
-            print "Initialising Dome Control"
+            print("Initialising Dome Control")
 
     def _read_position(self):
         """ Read the dome position"""
