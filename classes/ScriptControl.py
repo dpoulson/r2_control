@@ -29,7 +29,7 @@ import os
 import collections
 import datetime
 import time
-from .config import mainconfig
+from config import mainconfig
 from flask import Blueprint, request
 
 
@@ -106,7 +106,7 @@ def _start_script(name, loop):
 
 
 class _ScriptControl(object):
-    from .ScriptThread import ScriptThread
+    from ScriptThread import ScriptThread
 
     Scripts = collections.namedtuple('Script', 'name, script_id, thread')
 

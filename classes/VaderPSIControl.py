@@ -7,7 +7,7 @@ import configparser
 import smbus, time, struct, os
 import datetime
 import time
-from .config import mainconfig
+from config import mainconfig
 from time import sleep
 from flask import Blueprint, request
 

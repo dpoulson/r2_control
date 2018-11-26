@@ -10,7 +10,7 @@ import smbus, time, threading, struct, csv, requests
 import configparser
 from threading import Thread
 from time import sleep
-from .config import mainconfig
+from config import mainconfig
 
 
 class i2cMonitor(threading.Thread):

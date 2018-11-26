@@ -10,7 +10,7 @@ import time
 import csv
 import collections
 import RPi.GPIO as GPIO
-from .config import mainconfig
+from config import mainconfig
 from time import sleep
 from flask import Blueprint, request
 

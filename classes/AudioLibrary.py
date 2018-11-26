@@ -11,7 +11,7 @@ from pygame import mixer  # Load the required library
 import os
 import datetime
 import time
-from .config import mainconfig
+from config import mainconfig
 from flask import Blueprint, request
 
 
