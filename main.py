@@ -1,5 +1,6 @@
 #!/usr/bin/python
 """ Main script for R2_Control """
+from __future__ import print_function
 # ===============================================================================
 # Copyright (C) 2014 Darren Poulson
 #
@@ -19,7 +20,10 @@
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
 
-import ConfigParser
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+import configparser
 import os
 import sys
 import time
@@ -38,7 +42,7 @@ logtofile = mainconfig['logtofile']
 logdir = mainconfig['logdir']
 logfile = mainconfig['logfile']
 
-config = ConfigParser.SafeConfigParser({'busid': '1', 'logfile': 'test.log', 'logdir': './logs',
+config = configparser.SafeConfigParser({'busid': '1', 'logfile': 'test.log', 'logdir': './logs',
                                         'logtofile': True, 'modules': 'dome', 'plugins': 'audio'})
 config.read('config/main.cfg')
 
@@ -82,10 +86,10 @@ def send_telegram(message):
             requests.get(send_message)
         except:
             if __debug__:
-                print "Thought we had an internet connection, but sending Telegram failed"
+                print("Thought we had an internet connection, but sending Telegram failed")
     else:
         if __debug__:
-            print "Tried to send Telegram, but no internet connection"
+            print("Tried to send Telegram, but no internet connection")
 
 
 def system_status():
@@ -118,7 +122,7 @@ def system_status():
 # If logtofile is set, open log file
 if logtofile:
     if __debug__:
-        print "Opening log file: Dir: %s - Filename: %s" % (logdir, logfile)
+        print("Opening log file: Dir: %s - Filename: %s" % (logdir, logfile))
     f = open(logdir + '/' + logfile, 'at')
     f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
             " : ****** r2_control started ******\n")
@@ -150,7 +154,7 @@ app = Flask(__name__, template_folder='templates')
 @app.route('/')
 def index():
     """GET to generate a list of endpoints and their docstrings"""
-    urls = dict([(r.rule, app.view_functions.get(r.endpoint).func_doc)
+    urls = dict([(r.rule, app.view_functions.get(r.endpoint).__doc__)
                  for r in app.url_map.iter_rules()
                  if not r.rule.startswith('/static')])
     return render_template('index.html', urls=urls)
@@ -166,7 +170,7 @@ def servo_list():
     """GET to list all current servos and position"""
     message = ""
     if __debug__:
-        print "Listing servos"
+        print("Listing servos")
     if request.method == 'GET':
         message += pwm_body.list_servos()
         message += pwm_dome.list_servos()
@@ -178,7 +182,7 @@ def servo_list_dome():
     """GET to list all current servos and position"""
     message = ""
     if __debug__:
-        print "Listing servos"
+        print("Listing servos")
     if request.method == 'GET':
         message += pwm_dome.list_servos()
     return message
@@ -189,7 +193,7 @@ def servo_list_body():
     """GET to list all current servos and position"""
     message = ""
     if __debug__:
-        print "Listing servos"
+        print("Listing servos")
     if request.method == 'GET':
         message += pwm_body.list_servos()
     return message
@@ -331,10 +335,10 @@ for x in plugins:
     app.register_blueprint(p[x].api)
 
 if __debug__:
-    print "Modules loaded:"
-    print "============================================"
-    print p
-    print "============================================"
+    print("Modules loaded:")
+    print("============================================")
+    print(p)
+    print("============================================")
 
 #######################
 # System API calls
@@ -364,7 +368,7 @@ def joystick_current():
 
 @app.route('/joystick/<stick>', methods=['GET'])
 def joystick_change(stick):
-    """GET to change jostick to <stick> """
+    """GET to change joystick to <stick> """
     if logtofile:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
                 " : Changing joystick to " + stick + "\n")
@@ -372,16 +376,16 @@ def joystick_change(stick):
         message = "Invalid stick"
         for valid in list_joysticks():
             if __debug__:
-                print "Checking controller type is valid: " + valid
+                print("Checking controller type is valid: " + valid)
             if valid == stick:
                 if __debug__:
-                    print "Valid stick"
+                    print("Valid stick")
                 message = "Valid stick. Changed to " + stick
                 with open("controllers/.current", "w") as current_joy:
                     current_joy.write(stick)
                 if "telegram" in modules:
                     send_telegram("Setting joystick to " + stick)
-                print "End of loop"
+                print("End of loop")
     return message
 
 
