@@ -1,15 +1,18 @@
 #!/usr/bin/python
 
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
-import ConfigParser
+import configparser
 import requests
 import logging
 import time
 
 time.sleep(20)
 
-config = ConfigParser.RawConfigParser()
+config = configparser.RawConfigParser()
 config.read('config.cfg')
 
 baseurl = "http://localhost:5000/"
@@ -26,7 +29,7 @@ def volmute(bot, update):
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
     except:
-        print "Fail...."
+        print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed to Mute")
 
 
@@ -36,7 +39,7 @@ def volmax(bot, update):
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
     except:
-        print "Fail...."
+        print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed to deafen")
 
 
@@ -50,7 +53,7 @@ def sounds(bot, update, args):
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
     except:
-        print "Fail...."
+        print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed...")
 
 def joystick(bot, update, args):
@@ -63,7 +66,7 @@ def joystick(bot, update, args):
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
     except:
-        print "Fail...."
+        print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed...")
 
 
@@ -75,7 +78,7 @@ def status(bot, update):
         chat_id = update.message.chat_id
         bot.send_message(chat_id=chat_id, text=r.content)
     except:
-        print "Fail...."
+        print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed to get status")
 
 def chatid(bot, update):
@@ -83,7 +86,7 @@ def chatid(bot, update):
         chat_id = update.message.chat_id
         bot.send_message(chat_id=chat_id, text=chat_id)
     except:
-        print "Fail...."
+        print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed to get chat_id")
 
 

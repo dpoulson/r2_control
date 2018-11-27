@@ -1,14 +1,19 @@
 #!/usr/bin/python
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
 import pygame
 import requests
 import csv
-import ConfigParser
+import configparser
 import os
 import sys
 import time
 import datetime
 import argparse
-from cStringIO import StringIO
+from io import StringIO
 from collections import defaultdict
 from SabertoothPacketSerial import SabertoothPacketSerial
 
@@ -23,7 +28,7 @@ signal.signal(signal.SIGINT, sig_handler)
 ##########################################################
 # Load config
 _configfile = 'psmove.cfg'
-_config = ConfigParser.SafeConfigParser({ 'log_file': '/home/pi/r2_control/logs/psmove.log',
+_config = configparser.SafeConfigParser({ 'log_file': '/home/pi/r2_control/logs/psmove.log',
                                          'baseurl' : 'http://localhost:5000/',
                                          'keepalive' : 0.25,
                                          'speed_fac' : 0.35,
@@ -48,7 +53,7 @@ _config.set('Axis', 'dome', '3')
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
-    print "Config file does not exist"
+    print("Config file does not exist")
     with open(_configfile, 'wb') as configfile:
         _config.write(configfile)
 
@@ -113,10 +118,10 @@ def locate(user_string="PSMove Controller", x=0, y=0):
 ''' clamp - clamp a value between a min and max '''
 def clamp(n, minn, maxn):
     if n < minn:
-        print "Clamping min"
+        print("Clamping min")
         return minn
     elif n > maxn:
-        print "Clamping max " + str(n)
+        print("Clamping max " + str(n))
         return maxn
     else:
         return n
@@ -124,42 +129,42 @@ def clamp(n, minn, maxn):
 ''' shutdownR2 - Put R2 into a safe state '''
 def shutdownR2():
    if __debug__:
-      print "Running shutdown procedure"
+      print("Running shutdown procedure")
    if __debug__:
-      print "Stopping all motion..."
-      print "...Setting drive to 0"
+      print("Stopping all motion...")
+      print("...Setting drive to 0")
    drive.driveCommand(0)
    if __debug__:
-      print "...Setting turn to 0"
+      print("...Setting turn to 0")
    drive.turnCommand(0)
    if __debug__:
-      print "...Setting dome to 0"
+      print("...Setting dome to 0")
    dome.driveCommand(0)
 
    if __debug__:
-      print "Disable drives"
+      print("Disable drives")
    url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
    try:
       r = requests.get(url)
    except:
-      print "Fail...."
+      print("Fail....")
 
    if __debug__:
-      print "Disable dome"
+      print("Disable dome")
    url = baseurl + "servo/body/ENABLE_DOME/0/0"
    try:
       r = requests.get(url)
    except:
-      print "Fail...."
+      print("Fail....")
 
    if __debug__:
-      print "Bad motivator"
+      print("Bad motivator")
    # Play a sound to alert about a problem
       url = baseurl + "audio/MOTIVATR"
    try:
       r = requests.get(url)
    except:
-      print "Fail...."
+      print("Fail....")
 
    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " ****** PSMove Shutdown ******\n")
 
@@ -179,7 +184,7 @@ f.flush()
 
 if not args.dryrun:
     if __debug__:
-        print "Not a drytest"
+        print("Not a drytest")
     drive = SabertoothPacketSerial(address=int(_config.get('Drive', 'address')), type=_config.get('Drive', 'type'), port=_config.get('Drive', 'port'))
     dome = SabertoothPacketSerial(address=int(_config.get('Dome', 'address')), type=_config.get('Dome', 'type'), port=_config.get('Dome', 'port'))
     drive.driveCommand(0)
@@ -210,7 +215,7 @@ while True:
     pygame.joystick.init()
     num_joysticks = pygame.joystick.get_count()
     if __debug__:
-        print "Waiting for joystick... (count: %s)" % num_joysticks
+        print("Waiting for joystick... (count: %s)" % num_joysticks)
     if num_joysticks != 0:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Joystick found \n")
         f.flush()
@@ -223,13 +228,13 @@ try:
     r = requests.get(url)
 except:
     if __debug__:
-        print "Fail...."
+        print("Fail....")
 
 # Wait for second joystick, or button press.
 count = 0
 while True:
     if __debug__:
-        print "Waiting for another joystick... (count: %s)" % num_joysticks
+        print("Waiting for another joystick... (count: %s)" % num_joysticks)
     pygame.joystick.quit()
     pygame.joystick.init()
     num_joysticks = pygame.joystick.get_count()
@@ -243,12 +248,12 @@ while True:
 pygame.init()
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
 if __debug__:
-    print "Framebuffer size: %d x %d" % (size[0], size[1])
+    print("Framebuffer size: %d x %d" % (size[0], size[1]))
 
 joy = 0
 while joy < num_joysticks:
     if __debug__:
-        print "Initialising joystick " + str(joy)
+        print("Initialising joystick " + str(joy))
     j.append(pygame.joystick.Joystick(joy))
     j[joy].init()
     buttons.append(j[joy].get_numbuttons())
@@ -268,13 +273,13 @@ with open(keys_file, mode='r') as infile:
     reader = csv.reader(infile)
     for row in reader:
         if __debug__:
-            print "Row: %s | %s | %s" % (row[0], row[1], row[2])
+            print("Row: %s | %s | %s" % (row[0], row[1], row[2]))
         keys[row[0]].append(row[1])
         keys[row[0]].append(row[2])
 
-keys.items()
+list(keys.items())
 
-print "Initialised... entering main loop..."
+print("Initialised... entering main loop...")
 
 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : System Initialised \n")
 f.flush()
@@ -287,25 +292,25 @@ while (joystick):
     global previous
     if time.time() - last_command > keepalive: 
         if __debug__:
-            print "Last command sent greater than %s ago, doing keepAlive" % keepalive
+            print("Last command sent greater than %s ago, doing keepAlive" % keepalive)
         drive.keepAlive()
         # Check js0 still there
         if (os.path.exists('/dev/input/js0')): 
            if __debug__:
-              print "Joystick still there...."
+              print("Joystick still there....")
         else:
-           print "No joystick"
+           print("No joystick")
            joystick = False
         # Check for no shutdown file
         if (os.path.exists('/home/pi/r2_control/controllers/.shutdown')):
-            print "Shutdown file is there"
+            print("Shutdown file is there")
             joystick = False
         last_command = time.time()
     try:
         events = pygame.event.get()
     except:
         if __debug__:
-            print "Something went wrong!"
+            print("Something went wrong!")
         shutdownR2()
 	sys.exit(0)
     for event in events:
@@ -319,20 +324,20 @@ while (joystick):
                 x += 1
             combo = buf.getvalue()
             if __debug__:
-                print "Buttons pressed: %s" % combo
+                print("Buttons pressed: %s" % combo)
             if args.curses:
                 locate("                   ", 1, 12)
                 locate(combo, 3, 12)
             # Special key press (Both shoulder plus right) to increase speed of drive
             if combo == "00001010000000001":
               if __debug__:
-                 print "Incrementing drive speed"
+                 print("Incrementing drive speed")
               # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
               speed_fac += 0.05
               if speed_fac > 1:
                  speed_fac = 1
               if __debug__:
-                 print "*** NEW SPEED %s" % speed_fac
+                 print("*** NEW SPEED %s" % speed_fac)
               if args.curses:
                  locate('%4f' % speed_fac, 28, 7)
               drive_mod = speed_fac * invert
@@ -342,11 +347,11 @@ while (joystick):
                  r = requests.get(url)
               except:
                  if __debug__:
-                     print "Fail...."
+                     print("Fail....")
             # Special key press (Both shoulder plus left) to decrease speed of drive
             if combo == "00001010000000010":
               if __debug__:
-                 print "Decrementing drive speed"
+                 print("Decrementing drive speed")
               # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
               speed_fac -= 0.05
               if speed_fac < 0.2:
@@ -358,46 +363,46 @@ while (joystick):
                  r = requests.get(url)
               except:
                   if __debug__:
-                      print "Fail...."
+                      print("Fail....")
             try:
                 newurl = baseurl + keys[combo][0]
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Button Down event : " + combo + "," + keys[combo][0] +" \n")
                 f.flush() 
                 if __debug__:
-                    print "Would run: %s" % keys[combo]
-                    print "URL: %s" % newurl
+                    print("Would run: %s" % keys[combo])
+                    print("URL: %s" % newurl)
                 try:
                     r = requests.get(newurl)
                 except:
                     if __debug__:
-                        print "No connection"
+                        print("No connection")
             except:
                 if __debug__:
-                    print "No combo (pressed)"
+                    print("No combo (pressed)")
             previous = combo
         if event.type == pygame.JOYBUTTONUP:
             if __debug__:
-                print "Buttons released: %s" % previous
+                print("Buttons released: %s" % previous)
             try:
                 newurl = baseurl + keys[previous][1]
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Button Up event : " + previous + "," + keys[previous][1] + "\n")
                 f.flush()
                 if __debug__:
-                    print "Would run: %s" % keys[previous][1]
-                    print "URL: %s" % newurl
+                    print("Would run: %s" % keys[previous][1])
+                    print("URL: %s" % newurl)
                 try:
                     r = requests.get(newurl)
                 except:
                     if __debug__:
-                        print "No connection"
+                        print("No connection")
             except:
                 if __debug__:
-                    print "No combo (released)"
+                    print("No combo (released)")
             previous = ""
         if event.type == pygame.JOYAXISMOTION:
             if event.axis == PSMOVE_AXIS_LEFT_VERTICAL:
                 if __debug__:
-                    print "Value (Drive): %s : Speed Factor : %s" % (event.value, speed_fac)
+                    print("Value (Drive): %s : Speed Factor : %s" % (event.value, speed_fac))
                 if args.curses:
                     locate("                   ", 10, 4)
                     locate('%10f' % (event.value), 10, 4)
@@ -405,7 +410,7 @@ while (joystick):
                 f.flush
                 if not args.dryrun:
                     if __debug__:
-                        print "Not a drytest"
+                        print("Not a drytest")
                     drive.driveCommand(event.value*drive_mod)
                 if args.curses:
                     locate("                   ", 10, 8)
@@ -413,7 +418,7 @@ while (joystick):
                 last_command = time.time()
             elif event.axis == PSMOVE_AXIS_LEFT_HORIZONTAL:
                 if __debug__:
-                    print "Value (Steer): %s" % event.value
+                    print("Value (Steer): %s" % event.value)
                 if args.curses:
                     locate("                   ", 10, 5)
                     locate('%10f' % (event.value), 10, 5)
@@ -421,7 +426,7 @@ while (joystick):
                 f.flush
                 if not args.dryrun:
                     if __debug__:
-                        print "Not a drytest"
+                        print("Not a drytest")
                     drive.turnCommand(event.value*drive_mod)
                 if args.curses:
                     locate("                   ", 10, 9)
@@ -430,5 +435,5 @@ while (joystick):
 
 # If the while loop quits, make sure that the motors are reset.
 if __debug__:
-    print "Exited main loop"
+    print("Exited main loop")
 shutdownR2()

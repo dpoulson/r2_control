@@ -1,7 +1,13 @@
 #!/usr/bin/python
 # 
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import map
+from builtins import range
 import smbus, time, threading, struct, csv, requests
-import ConfigParser
+import configparser
 from threading import Thread
 from time import sleep
 from config import mainconfig
@@ -14,9 +20,9 @@ class i2cMonitor(threading.Thread):
         try:
             send_message = 'https://api.telegram.org/bot' + self.token + '/sendMessage?chat_id=' + self.chat_id + '&parse_mode=Markdown&text=' + message
             requests.get(send_message)
-	except:
-	    if __debug__:
-		print "Failed to send message"
+        except:
+            if __debug__:
+                print("Failed to send message")
 
     def monitor_loop(self):
         f = open(self.logdir + '/power.log', 'at')
@@ -26,31 +32,30 @@ class i2cMonitor(threading.Thread):
                 data = self.bus.read_i2c_block_data(0x04, 0)
             except:
                 if __debug__:
-                    print "Failed to read i2c data"
+                    print("Failed to read i2c data")
                 sleep(1)
             self.extracted[0] = time.time()
             for i in range(0, 8):
                 bytes = data[4 * i:4 * i + 4]
                 self.extracted[i + 1] = struct.unpack('f', "".join(map(chr, bytes)))[0]
             if __debug__:
-                print "Writing csv row"
+                print("Writing csv row")
             writer = csv.writer(f)
             writer.writerow(self.extracted)
             f.flush()
             sleep(self.interval)
             # If telegram messaging is active, do a few checks and notify
             if self.telegram:
-            	if __debug__:
-			print "Telegram enabled"
-	    	if (self.extracted[5] != 0) and (self.extracted[5] < 21) and not self.lowbat:
-			if __debug__:
-				print "Battery low"
-			self.send_telegram("Battery below 21V")
-			self.lowbat = True
-	f.close()
+                if __debug__:
+                    print("Telegram enabled")
+                if (self.extracted[5] != 0) and (self.extracted[5] < 21) and not self.lowbat:
+                    if __debug__:
+                        print("Battery low")
+                    self.send_telegram("Battery below 21V")
+                    self.lowbat = True
+            f.close()
 
     def __init__(self, address, interval):
-
         # Check for telegram config
         self.telegram = False
         self.address = address
@@ -61,14 +66,13 @@ class i2cMonitor(threading.Thread):
         try:
             self.bus = smbus.SMBus(int(mainconfig['busid']))
         except:
-            print "Failed to connect to device on bus"
+            print("Failed to connect to device on bus")
         if __debug__:
-            print "Monitoring...."
+            print("Monitoring....")
         if self.telegram:
-	    self.send_telegram("Monitoring started")
-
+            self.send_telegram("Monitoring started")
         loop = Thread(target=self.monitor_loop)
-	loop.daemon = True
+        loop.daemon = True
         loop.start()
 
     def queryBattery(self):

@@ -1,4 +1,10 @@
-import ConfigParser
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import hex
+from builtins import object
+import configparser
 import smbus, time, struct, os
 import datetime
 import time
@@ -8,11 +14,11 @@ from flask import Blueprint, request
 
 _configfile = 'config/smoke.cfg'
 
-_config = ConfigParser.SafeConfigParser({'address': '0x05', 'logfile': 'smoke.log'})
+_config = configparser.SafeConfigParser({'address': '0x05', 'logfile': 'smoke.log'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
-    print "Config file does not exist"
+    print("Config file does not exist")
     with open(_configfile, 'wb') as configfile:
         _config.write(configfile)
 
@@ -24,7 +30,7 @@ _logfile = _defaults['logfile']
 
 if _logtofile:
     if __debug__:
-        print "Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile)
+        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
     _f = open(_logdir + '/' + _logfile, 'at')
     _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: SmokeControl ******\n")
     _f.flush
@@ -53,32 +59,32 @@ def _smoke_on_duration(duration):
     return message
 
 
-class _SmokeControl:
+class _SmokeControl(object):
 
     def __init__(self, address, logdir):
         self.address = address
         self.bus = smbus.SMBus(int(mainconfig['busid']))
         self.logdir = logdir
         if __debug__:
-            print "Initialising Smoke Control"
+            print("Initialising Smoke Control")
 
     def sendRaw(self, cmd, duration):
 	command = int(hex(ord(cmd)),16)
         hexDuration = list()
         if __debug__:
-            print "Duration: %s" % duration
+            print("Duration: %s" % duration)
         # We don't want to run for longer than 10 seconds, might burn out the coil 
         if int(duration) > 9:
             if __debug__:
-               print "Too long, shortening duration"
+               print("Too long, shortening duration")
             duration = '9'
         hexDuration.append(int(duration,16))
 	if __debug__:
-	    print "Command: %s | hexDuration: %s " % (command, hexDuration)
+	    print("Command: %s | hexDuration: %s " % (command, hexDuration))
         try:
             self.bus.write_i2c_block_data(int(self.address,16), command, hexDuration)
 	except:
-	    print "Failed to send bytes"
+	    print("Failed to send bytes")
         return "Ok"
 
 

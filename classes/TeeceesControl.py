@@ -1,4 +1,9 @@
-import ConfigParser
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+import configparser
 import smbus, time, struct, os
 import datetime
 import time
@@ -8,11 +13,11 @@ from flask import Blueprint, request
 
 _configfile = 'config/teecees.cfg'
 
-_config = ConfigParser.SafeConfigParser({'address': '0x1c', 'logfile': 'vader.log'})
+_config = configparser.SafeConfigParser({'address': '0x1c', 'logfile': 'vader.log'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
-    print "Config file does not exist"
+    print("Config file does not exist")
     with open(_configfile, 'wb') as configfile:
         _config.write(configfile)
 
@@ -24,7 +29,7 @@ _logfile = _defaults['logfile']
 
 if _logtofile:
     if __debug__:
-        print "Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile)
+        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
     _f = open(_logdir + '/' + _logfile, 'at')
     _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: TeeCees ******\n")
     _f.flush
@@ -53,49 +58,49 @@ def _teecees_seq(seq):
         message += _teecees.sendSequence(seq)
     return message
 
-class _TeeceesControl:
+class _TeeceesControl(object):
 
     def __init__(self, address, logdir):
         self.address = address
         self.bus = smbus.SMBus(int(mainconfig['busid']))
         self.logdir = logdir
         if __debug__:
-            print "Initialising TeeCees Control"
+            print("Initialising TeeCees Control")
 
     def sendSequence(self, seq):
         if seq.isdigit():
             if __debug__:
-                print "Integer sent, sending command"
+                print("Integer sent, sending command")
             cmd = 'S' + seq
             self.sendRaw(cmd)
         else: 
             if __debug__:
-                print "Not an integer, decode and send command"
+                print("Not an integer, decode and send command")
             if seq == "leia":
                 if __debug__:
-                    print "Leia mode"
+                    print("Leia mode")
                 self.sendRaw('S1')
             elif seq == "disable":
                 if __debug__:
-                    print "Clear and Disable"
+                    print("Clear and Disable")
                 self.sendRaw('S8')
             elif seq == "enable":
                 if __debug__:
-                    print "Clear and Enable"
+                    print("Clear and Enable")
                 self.sendRaw('S9') 
         return "Ok"
 
     def sendRaw(self, cmd):
         arrayCmd = bytearray(cmd,'utf8')
         if __debug__:
-            print arrayCmd
+            print(arrayCmd)
         for i in arrayCmd:
             if __debug__:
-                print "Sending byte: %c " % i
+                print("Sending byte: %c " % i)
             try:
                 bus.write_byte(self.address, i)
             except:
-                print "Failed to send command to %s" % self.address
+                print("Failed to send command to %s" % self.address)
         return "Ok"
 
 

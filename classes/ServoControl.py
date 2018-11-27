@@ -18,22 +18,27 @@
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
 
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 from ServoThread import ServoThread
-import Queue
+from queue import Queue
 import csv
 import collections
 
 tick_duration = 100
 
 
-class ServoControl:
+class ServoControl(object):
     # servo_list = [] # All servos, listed here.
 
     Servo = collections.namedtuple('Servo', 'name, queue, thread')
 
     def init_config(self, address, servo_config_file):
         """Load in CSV of Servo definitions"""
-        ifile = open('config/%s' % servo_config_file, "rb")
+        ifile = open('config/%s' % servo_config_file, "rt")
         reader = csv.reader(ifile)
         for row in reader:
             servo_channel = int(row[0])
@@ -41,7 +46,7 @@ class ServoControl:
             servo_Min = int(row[2])
             servo_Max = int(row[3])
             servo_home = int(row[4])
-            queue = Queue.Queue()
+            queue = Queue()
             self.servo_list.append(self.Servo(name=servo_name, queue=queue,
                                               thread=ServoThread(address, servo_Max, servo_Min, servo_home,
                                                                  servo_channel, queue)))
@@ -50,7 +55,7 @@ class ServoControl:
                     servo.thread.daemon = True
                     servo.thread.start()
             if __debug__:
-                print "Added servo: %s %s %s %s %s" % (servo_channel, servo_name, servo_Min, servo_Max, servo_home)
+                print("Added servo: %s %s %s %s %s" % (servo_channel, servo_name, servo_Min, servo_Max, servo_home))
         ifile.close()
         self.close_all_servos(0)
 
@@ -61,7 +66,7 @@ class ServoControl:
     def list_servos(self):
         message = ""
         if __debug__:
-            print "Listing servos for address:"
+            print("Listing servos for address:")
         for servo in self.servo_list:
             message += "%s\n" % servo.name
         return message
@@ -70,10 +75,10 @@ class ServoControl:
         try:
             duration = int(duration)
         except:
-            print "Duration is not an int"
+            print("Duration is not an int")
             duration = 0
         if __debug__:
-            print "Closing all servos"
+            print("Closing all servos")
         for servo in self.servo_list:
             servo.queue.put([0, duration])
         return
@@ -82,10 +87,10 @@ class ServoControl:
         try:
             duration = int(duration)
         except:
-            print "Duration is not an int"
+            print("Duration is not an int")
             duration = 0
         if __debug__:
-            print "Opening all servos"
+            print("Opening all servos")
         for servo in self.servo_list:
             servo.queue.put([1, duration])
         return
@@ -94,16 +99,16 @@ class ServoControl:
     # def servo_command(self, servo_name, position, duration):
     def servo_command(self, servo_name, position, duration):
         if __debug__:
-            print "Moving %s to %s over duration %s" % (servo_name, position, duration)
+            print("Moving %s to %s over duration %s" % (servo_name, position, duration))
         current_servo = []
         try:
             position = float(position)
         except:
-            print "Position not a float"
+            print("Position not a float")
         try:
             duration = int(duration)
         except:
-            print "Duration is not an int"
+            print("Duration is not an int")
         for servo in self.servo_list:
             if servo.name == servo_name:
                 current_servo = servo
