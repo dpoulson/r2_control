@@ -29,7 +29,7 @@ class ScriptThread(threading.Thread):
     def run(self):
         print("Starting script thread %s" % self.script)
         while not self._stopevent.isSet():
-            ifile = open('scripts/%s.scr' % self.script, "rb")
+            ifile = open('scripts/%s.scr' % self.script, "rt")
             reader = csv.reader(ifile)
             if self.loop != 1:
                 with lock:

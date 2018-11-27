@@ -53,10 +53,7 @@ class ServoThread(threading.Thread):
                 position = self.destination_position
             else:
                 if __debug__:
-                    print("Current time: %s | destination_start: %s | destination_time: %s | destination_position: %s" +
-                          "| original_position: %s" % (
-                                     current_time, self.destination_start, self.destination_time,
-                                     self.destination_position, self.original_position))
+                    print("Current time: %s | destination_start: %s | destination_time: %s | destination_position: %s | original_position: %s" % (current_time, self.destination_start, self.destination_time, self.destination_position, self.original_position))
                     print("(current_time - self.destination_start): %s " % (current_time - self.destination_start))
                     print("(self.destination_time - self.destination_start): %s " %
                           (self.destination_time - self.destination_start))
