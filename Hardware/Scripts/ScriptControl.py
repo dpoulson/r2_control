@@ -21,16 +21,16 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
-from builtins import object
 import configparser
 import glob
 import os
 import collections
 import datetime
 import time
-from config import mainconfig
+from r2utils import mainconfig
 from flask import Blueprint, request
+standard_library.install_aliases()
+from builtins import object
 
 
 _configfile = 'config/scripts.cfg'
@@ -45,20 +45,21 @@ if not os.path.isfile(_configfile):
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig['logtofile']
-_logdir = mainconfig['logdir']
+_logtofile = mainconfig.mainconfig['logtofile']
+_logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
 
 if _logtofile:
     if __debug__:
         print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
     _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: scripts ******\n")
+    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+             " : ****** Module Started: scripts ******\n")
     _f.flush
 
 
-
 api = Blueprint('scripts', __name__, url_prefix='/scripts')
+
 
 @api.route('/', methods=['GET'])
 @api.route('/list', methods=['GET'])
@@ -83,7 +84,8 @@ def _running_scripts():
 def _stop_script(script_id):
     """GET a script ID to stop that script"""
     if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script stop: " + script_id + "\n")
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                 " : Script stop: " + script_id + "\n")
     message = ""
     if request.method == 'GET':
         if script_id == "all":
@@ -97,12 +99,12 @@ def _stop_script(script_id):
 def _start_script(name, loop):
     """GET to trigger the named script"""
     if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Script loop: " + name + "," + loop + "\n")
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                 " : Script loop: " + name + "," + loop + "\n")
     message = ""
     if request.method == 'GET':
         message += scripts.run_script(name, loop)
     return message
-
 
 
 class ScriptControl(object):
@@ -116,7 +118,6 @@ class ScriptControl(object):
         self.script_dir = script_dir
         if __debug__:
             print("Starting script object with path: %s" % script_dir)
-
 
     def list(self):
         files = ', '.join(glob.glob("./scripts/*.scr"))

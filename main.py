@@ -1,6 +1,5 @@
 #!/usr/bin/python
 """ Main script for R2_Control """
-from __future__ import print_function
 # ===============================================================================
 # Copyright (C) 2014 Darren Poulson
 #
@@ -19,40 +18,38 @@ from __future__ import print_function
 # You should have received a copy of the GNU General Public License
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
-
+from __future__ import print_function
+import os
+import time
+import datetime
 from future import standard_library
+from flask import Flask, request, render_template
+from r2utils import telegram, internet, mainconfig
 standard_library.install_aliases()
 from builtins import str
 from configparser import ConfigParser
-import os
-import sys
-import time
-import datetime
-from r2utils import telegram, internet
-from flask import Flask, request, render_template
 
-sys.path.append("./Hardware/")
-from config import mainconfig
 
-modules = mainconfig['modules'].split(",")
-plugins = mainconfig['plugins'].split(",")
-i2c_bus = mainconfig['busid']
-logtofile = mainconfig['logtofile']
-logdir = mainconfig['logdir']
-logfile = mainconfig['logfile']
+modules = mainconfig.mainconfig['modules'].split(",")
+plugins = mainconfig.mainconfig['plugins'].split(",")
+i2c_bus = mainconfig.mainconfig['busid']
+logtofile = mainconfig.mainconfig['logtofile']
+logdir = mainconfig.mainconfig['logdir']
+logfile = mainconfig.mainconfig['logfile']
 
 config = ConfigParser({'busid': '1', 'logfile': 'test.log', 'logdir': './logs',
-                       'logtofile': True, 'modules': 'dome', 'plugins': 'audio'})
+                       'logtofile': True, 'modules': 'dome', 'plugins': 'Audio'})
 config.read('config/main.cfg')
 
 plugin_names = {
-    'flthy':'FlthyHPControl',
-    'scripts':'Scripts',
-    'audio':'Audio',
-    'vader':'Lights',
-    'dome':'Dome',
-    'gpio':'GPIO',
-    'smoke':'Smoke'}
+    'flthy': 'Lights.FlthyHPControl',
+    'Scripts': 'Scripts',
+    'Audio': 'Audio',
+    'vader': 'Lights.VaderPSIControl',
+    'teecees': 'Lights.TeeceesControl',
+    'Dome': 'Dome',
+    'GPIO': 'GPIO',
+    'Smoke': 'Smoke'}
 
 
 def list_joysticks():
@@ -87,10 +84,10 @@ def system_status():
     status += "Wifi: \t\t\n"
     status += "Internet: \t%s \n" % internet.check()
     status += "Location: \t\n"
-    #status += "Volume: \t%s\n" % p['audio'].ShowVolume()
+    status += "Volume: \t%s\n" % p['audio'].audio.ShowVolume()
     status += "--------------\n"
     status += "Scripts Running:\n"
-    #status += p['scripts'].scripts.list_running()
+    status += p['scripts'].scripts.list_running()
     return status
 
 
@@ -111,17 +108,17 @@ if logtofile:
 if "body" in modules:
     from Hardware.Servo import ServoControl
     pwm_body = ServoControl.ServoControl(int(config.get('body', 'address'), 16),
-                            config.get('body', 'config_file'))
+                                         config.get('body', 'config_file'))
 if "dome" in modules:
     from Hardware.Servo import ServoControl
     pwm_dome = ServoControl.ServoControl(int(config.get('dome', 'address'), 16),
-                            config.get('dome', 'config_file'))
+                                         config.get('dome', 'config_file'))
 
 # Monitoring
 if "monitoring" in modules:
-    from i2cMonitor import i2cMonitor
-    monitor = i2cMonitor(int(config.get('monitoring', 'address'), 16),
-                         float(config.get('monitoring', 'interval')))
+    from Hardware.Monitoring import i2cMonitor
+    monitor = i2cMonitor.i2cMonitor(int(config.get('monitoring', 'address'), 16),
+                                    float(config.get('monitoring', 'interval')))
 
 app = Flask(__name__, template_folder='templates')
 
@@ -309,9 +306,10 @@ def servo_body_open_slow(duration):
         return "Ok"
     return "Fail"
 
+
 p = {}
 for x in plugins:
-    p[x] = __import__(plugin_names[x], fromlist=[x, 'api'])
+    p[x] = __import__("Hardware." + plugin_names[x], fromlist=[x, 'api'])
     app.register_blueprint(p[x].api)
 
 if __debug__:

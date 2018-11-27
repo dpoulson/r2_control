@@ -1,1 +1,1 @@
-from .ScriptControl import api
+from .ScriptControl import api, scripts

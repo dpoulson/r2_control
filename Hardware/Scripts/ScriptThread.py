@@ -1,12 +1,14 @@
 #!/usr/bin/python
 from __future__ import print_function
 from future import standard_library
-standard_library.install_aliases()
 import threading
 import time
 import random
 import csv
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
+standard_library.install_aliases()
 
 script = ""
 loop = False

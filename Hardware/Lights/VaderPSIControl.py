@@ -1,15 +1,16 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 from builtins import object
 import configparser
-import smbus, time, struct, os
+import smbus
+import os
 import datetime
 import time
-from config import mainconfig
-from time import sleep
+from r2utils import mainconfig
 from flask import Blueprint, request
+standard_library.install_aliases()
+
 
 _configfile = 'config/vader.cfg'
 
@@ -23,46 +24,51 @@ if not os.path.isfile(_configfile):
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig['logtofile']
-_logdir = mainconfig['logdir']
+_logtofile = mainconfig.mainconfig['logtofile']
+_logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
 
 if _logtofile:
     if __debug__:
         print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
     _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: VADER PSI ******\n")
+    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+             " : ****** Module Started: VADER PSI ******\n")
     _f.flush
 
 
-
 api = Blueprint('vader', __name__, url_prefix='/vader')
+
 
 @api.route('/raw/<cmd>', methods=['GET'])
 def _vader_raw(cmd):
     """ GET to send a raw command to the vader HP system"""
     if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Vader raw command : " + cmd + "\n")
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                 " : Vader raw command : " + cmd + "\n")
     message = ""
     if request.method == 'GET':
         message += _vader.sendRaw(cmd)
     return message
 
+
 @api.route('/sequence/<seq>', methods=['GET'])
 def _vader_seq(seq):
     """ GET to send a sequence command to the vader HP system"""
     if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Vader sequence command : " + seq + "\n")
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                 " : Vader sequence command : " + seq + "\n")
     message = ""
     if request.method == 'GET':
         message += _vader.sendSequence(seq)
     return message
 
+
 class _VaderPSIControl(object):
 
     def __init__(self, address, logdir):
         self.address = address
-        self.bus = smbus.SMBus(int(mainconfig['busid']))
+        self.bus = smbus.SMBus(int(mainconfig.mainconfig['busid']))
         self.logdir = logdir
         if __debug__:
             print("Initialising VaderPSI Control")

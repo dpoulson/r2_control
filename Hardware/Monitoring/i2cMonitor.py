@@ -3,30 +3,25 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
+import smbus
+import time
+import threading
+import struct
+import csv
+from threading import Thread
+from time import sleep
+from r2utils import mainconfig
+from r2utils import telegram
 standard_library.install_aliases()
 from builtins import map
 from builtins import range
-import smbus, time, threading, struct, csv, requests
-import configparser
-from threading import Thread
-from time import sleep
-from config import mainconfig
 
 
 class i2cMonitor(threading.Thread):
 
-
-    def send_telegram(self, message):
-        try:
-            send_message = 'https://api.telegram.org/bot' + self.token + '/sendMessage?chat_id=' + self.chat_id + '&parse_mode=Markdown&text=' + message
-            requests.get(send_message)
-        except:
-            if __debug__:
-                print("Failed to send message")
-
     def monitor_loop(self):
         f = open(self.logdir + '/power.log', 'at')
-        data = [0,0,0,0,0,0,0,0]
+        data = [0, 0, 0, 0, 0, 0, 0, 0]
         while True:
             try:
                 data = self.bus.read_i2c_block_data(0x04, 0)
@@ -51,7 +46,7 @@ class i2cMonitor(threading.Thread):
                 if (self.extracted[5] != 0) and (self.extracted[5] < 21) and not self.lowbat:
                     if __debug__:
                         print("Battery low")
-                    self.send_telegram("Battery below 21V")
+                    telegram.send("Battery below 21V")
                     self.lowbat = True
             f.close()
 
@@ -60,17 +55,17 @@ class i2cMonitor(threading.Thread):
         self.telegram = False
         self.address = address
         self.interval = interval
-        self.logdir = mainconfig['logdir']
+        self.logdir = mainconfig.mainconfig['logdir']
         self.lowbat = False
         self.extracted = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         try:
-            self.bus = smbus.SMBus(int(mainconfig['busid']))
+            self.bus = smbus.SMBus(int(mainconfig.mainconfig['busid']))
         except:
             print("Failed to connect to device on bus")
         if __debug__:
             print("Monitoring....")
         if self.telegram:
-            self.send_telegram("Monitoring started")
+            telegram.send("Monitoring started")
         loop = Thread(target=self.monitor_loop)
         loop.daemon = True
         loop.start()
