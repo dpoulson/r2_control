@@ -28,11 +28,10 @@ import os
 import sys
 import time
 import datetime
-import socket
-import requests
+from r2utils import telegram, internet
 from flask import Flask, request, render_template
 
-sys.path.append("./classes/")
+sys.path.append("./Hardware/")
 from config import mainconfig
 
 modules = mainconfig['modules'].split(",")
@@ -48,22 +47,13 @@ config.read('config/main.cfg')
 
 plugin_names = {
     'flthy':'FlthyHPControl',
-    'scripts':'ScriptControl',
-    'audio':'AudioLibrary',
-    'vader':'VaderPSIControl',
-    'dome':'DomeControl',
-    'gpio':'GPIOControl',
-    'smoke':'SmokeControl'}
+    'scripts':'Scripts',
+    'audio':'Audio',
+    'vader':'Lights',
+    'dome':'Dome',
+    'gpio':'GPIO',
+    'smoke':'Smoke'}
 
-def check_internet():
-    """ Tries to do a DNS lookup to see if we have an internet connection """
-    try:
-        host = socket.gethostbyname("www.google.com")
-        socket.create_connection((host, 80), 2)
-        internet_connection = True
-    except Exception as e:
-        internet_connection = False
-    return internet_connection
 
 def list_joysticks():
     """ Returns a list of joysticks available """
@@ -73,23 +63,6 @@ def list_joysticks():
         if ".isjoystick" in files:
             result.append(root.replace(path + "/", ''))
     return result
-
-def send_telegram(message):
-    """ Sends a telegram message """
-    global internet_connection
-    if check_internet():
-        try:
-            send_message = 'https://api.telegram.org/bot' + config.get('telegram', 'token')
-            send_message += '/sendMessage?chat_id=' + config.get('telegram', 'chat_id')
-            send_message += '&parse_mode=Markdown&text='
-            send_message += message
-            requests.get(send_message)
-        except:
-            if __debug__:
-                print("Thought we had an internet connection, but sending Telegram failed")
-    else:
-        if __debug__:
-            print("Tried to send Telegram, but no internet connection")
 
 
 def system_status():
@@ -107,17 +80,19 @@ def system_status():
     status = "Current Status\n"
     status += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
     status += "Uptime: \t%s\n" % uptime_string
-    status += "Main Battery: \t%5.3f (balance: %5.3f)\n" % (monitor.queryBattery(),
-                                                            monitor.queryBatteryBalance())
+    if "monitor" in modules:
+        status += "Main Battery: \t%5.3f (balance: %5.3f)\n" % (monitor.queryBattery(),
+                                                                monitor.queryBatteryBalance())
     status += "Remote Battery: %s%%\t\n" % remote_battery
     status += "Wifi: \t\t\n"
-    status += "Internet: \t%s \n" % check_internet()
+    status += "Internet: \t%s \n" % internet.check()
     status += "Location: \t\n"
-    status += "Volume: \t%s\n" % p['audio'].audio.ShowVolume()
+    #status += "Volume: \t%s\n" % p['audio'].ShowVolume()
     status += "--------------\n"
     status += "Scripts Running:\n"
-    status += p['scripts'].scripts.list_running()
+    #status += p['scripts'].scripts.list_running()
     return status
+
 
 # If logtofile is set, open log file
 if logtofile:
@@ -134,12 +109,12 @@ if logtofile:
 
 # Initialise server controllers
 if "body" in modules:
-    from ServoControl import ServoControl
-    pwm_body = ServoControl(int(config.get('body', 'address'), 16),
+    from Hardware.Servo import ServoControl
+    pwm_body = ServoControl.ServoControl(int(config.get('body', 'address'), 16),
                             config.get('body', 'config_file'))
 if "dome" in modules:
-    from ServoControl import ServoControl
-    pwm_dome = ServoControl(int(config.get('dome', 'address'), 16),
+    from Hardware.Servo import ServoControl
+    pwm_dome = ServoControl.ServoControl(int(config.get('dome', 'address'), 16),
                             config.get('dome', 'config_file'))
 
 # Monitoring
@@ -163,7 +138,6 @@ def index():
 #############################
 # Servo API calls
 #
-
 @app.route('/servo/', methods=['GET'])
 @app.route('/servo/list', methods=['GET'])
 def servo_list():
@@ -238,6 +212,7 @@ def servo_dome_close():
         return "Ok"
     return "Fail"
 
+
 @app.route('/servo/dome/close/<duration>', methods=['GET'])
 def servo_dome_close_slow(duration):
     """GET to close all dome servos slowly"""
@@ -249,6 +224,7 @@ def servo_dome_close_slow(duration):
         return "Ok"
     return "Fail"
 
+
 @app.route('/servo/body/close', methods=['GET'])
 def servo_body_close():
     """GET to close all body servos"""
@@ -259,6 +235,7 @@ def servo_body_close():
         pwm_body.close_all_servos(0)
         return "Ok"
     return "Fail"
+
 
 @app.route('/servo/body/close/<duration>', methods=['GET'])
 def servo_body_close_slow(duration):
@@ -296,6 +273,7 @@ def servo_dome_open():
         return "Ok"
     return "Fail"
 
+
 @app.route('/servo/dome/open/<duration>', methods=['GET'])
 def servo_dome_open_slow(duration):
     """GET to open all dome servos slowly"""
@@ -307,6 +285,7 @@ def servo_dome_open_slow(duration):
         return "Ok"
     return "Fail"
 
+
 @app.route('/servo/body/open', methods=['GET'])
 def servo_body_open():
     """GET to open all body servos"""
@@ -317,6 +296,7 @@ def servo_body_open():
         pwm_body.open_all_servos(0)
         return "Ok"
     return "Fail"
+
 
 @app.route('/servo/body/open/<duration>', methods=['GET'])
 def servo_body_open_slow(duration):
@@ -340,6 +320,7 @@ if __debug__:
     print(p)
     print("============================================")
 
+
 #######################
 # System API calls
 @app.route('/joystick', methods=['GET'])
@@ -352,6 +333,7 @@ def joystick_list():
     if request.method == 'GET':
         return '\n'.join(list_joysticks())
     return "Fail"
+
 
 @app.route('/joystick/current', methods=['GET'])
 def joystick_current():
@@ -384,7 +366,7 @@ def joystick_change(stick):
                 with open("controllers/.current", "w") as current_joy:
                     current_joy.write(stick)
                 if "telegram" in modules:
-                    send_telegram("Setting joystick to " + stick)
+                    telegram.send("Setting joystick to " + stick)
                 print("End of loop")
     return message
 
@@ -396,7 +378,7 @@ def shutdown():
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
                 " : ****** Shutting down ****** \n")
     if "telegram" in modules:
-        send_telegram("Night night...")
+        telegram.send("Night night...")
     if request.method == 'GET':
         os.system('shutdown now -h')
         s = open("controllers/.shutdown", "w+")
@@ -414,17 +396,19 @@ def sysstatus():
         message = system_status()
     return message
 
+
 @app.route('/sendstatus', methods=['GET'])
 def sendstatus():
     """GET to send system status via telegram"""
     message = ""
     if request.method == 'GET':
         if "telegram" in modules:
-            send_telegram(system_status())
+            telegram.send(system_status())
             message = "Sent"
         else:
             message = "Telegram module not configured"
     return message
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=__debug__, use_reloader=False, threaded=True)

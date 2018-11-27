@@ -105,8 +105,8 @@ def _start_script(name, loop):
 
 
 
-class _ScriptControl(object):
-    from ScriptThread import ScriptThread
+class ScriptControl(object):
+    from .ScriptThread import ScriptThread
 
     Scripts = collections.namedtuple('Script', 'name, script_id, thread')
 
@@ -175,4 +175,4 @@ class _ScriptControl(object):
         return "Ok"
 
 
-scripts = _ScriptControl(_defaults['script_dir'])
+scripts = ScriptControl(_defaults['script_dir'])

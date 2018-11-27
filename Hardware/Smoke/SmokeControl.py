@@ -19,7 +19,7 @@ _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
     print("Config file does not exist")
-    with open(_configfile, 'wb') as configfile:
+    with open(_configfile, 'wt') as configfile:
         _config.write(configfile)
 
 _defaults = _config.defaults()
@@ -69,7 +69,7 @@ class _SmokeControl(object):
             print("Initialising Smoke Control")
 
     def sendRaw(self, cmd, duration):
-	command = int(hex(ord(cmd)),16)
+        command = int(hex(ord(cmd)),16)
         hexDuration = list()
         if __debug__:
             print("Duration: %s" % duration)
@@ -79,12 +79,12 @@ class _SmokeControl(object):
                print("Too long, shortening duration")
             duration = '9'
         hexDuration.append(int(duration,16))
-	if __debug__:
-	    print("Command: %s | hexDuration: %s " % (command, hexDuration))
+        if __debug__:
+            print("Command: %s | hexDuration: %s " % (command, hexDuration))
         try:
             self.bus.write_i2c_block_data(int(self.address,16), command, hexDuration)
-	except:
-	    print("Failed to send bytes")
+        except:
+            print("Failed to send bytes")
         return "Ok"
 
 

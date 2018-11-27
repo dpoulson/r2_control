@@ -7,7 +7,6 @@ import threading
 from queue import Queue, Empty
 import time
 import Adafruit_PCA9685
-from config import mainconfig
 
 q = Queue
 

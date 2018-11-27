@@ -20,7 +20,7 @@ _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
     print("Config file does not exist")
-    with open(_configfile, 'wb') as configfile:
+    with open(_configfile, 'wt') as configfile:
         _config.write(configfile)
 
 _defaults = _config.defaults()
@@ -64,7 +64,7 @@ def _dome_center():
     return message
 
 @api.route('/position/<degrees>', methods=['GET'])
-def _dome_center(degrees):
+def _dome_position(degrees):
     """ GET to set the dome to face a certain way"""
     if _logtofile:
         _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Dome position command : " + degrees + "\n")
@@ -107,5 +107,5 @@ class _DomeControl(object):
         return "Ok"
 
 
-_dome = _DomePSIControl(address=_defaults['address'], logfile=_defaults['logfile'], dome_address=_defaults['dome_address'], dome_type=_defaults['type'], dome_port=_defaults['port'])
+_dome = _DomeControl(address=_defaults['address'], logfile=_defaults['logfile'], dome_address=_defaults['dome_address'], dome_type=_defaults['type'], dome_port=_defaults['port'])
 
