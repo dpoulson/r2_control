@@ -4,10 +4,10 @@ from __future__ import absolute_import
 from future import standard_library
 standard_library.install_aliases()
 import threading
-import queue
+from queue import Queue, Empty
 import time
 import Adafruit_PCA9685
-from .config import mainconfig
+from config import mainconfig
 
 q = Queue
 
@@ -110,7 +110,7 @@ class ServoThread(threading.Thread):
                     print("Original:    %s " % self.original_position)
                     print("Start time:  %s " % self.destination_start)
                     print("End time:    %s " % self.destination_time)
-            except queue.Empty:
+            except Empty:
                 self.sendCommand()
 
         return

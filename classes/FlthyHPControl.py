@@ -202,17 +202,17 @@ class _FlthyHPControl(object):
 
 
     def sendRaw(self, cmd):
-	command = list(cmd)
-	hexCommand = list()
-	for i in command:
+        command = list(cmd)
+        hexCommand = list()
+        for i in command:
             h=int(hex(ord(i)),16)
-	    hexCommand.append(h)	
-	if __debug__:
-	    print(hexCommand)
+            hexCommand.append(h)	
+        if __debug__:
+            print(hexCommand)
         try:
             self.bus.write_i2c_block_data(int(self.address,16), hexCommand[0], hexCommand[1:])
-	except:
-	    print("Failed to send bytes")
+        except:
+            print("Failed to send bytes")
         return "Ok"
 
 

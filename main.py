@@ -23,7 +23,7 @@ from __future__ import print_function
 from future import standard_library
 standard_library.install_aliases()
 from builtins import str
-import configparser
+from configparser import ConfigParser
 import os
 import sys
 import time
@@ -42,8 +42,8 @@ logtofile = mainconfig['logtofile']
 logdir = mainconfig['logdir']
 logfile = mainconfig['logfile']
 
-config = configparser.SafeConfigParser({'busid': '1', 'logfile': 'test.log', 'logdir': './logs',
-                                        'logtofile': True, 'modules': 'dome', 'plugins': 'audio'})
+config = ConfigParser({'busid': '1', 'logfile': 'test.log', 'logdir': './logs',
+                       'logtofile': True, 'modules': 'dome', 'plugins': 'audio'})
 config.read('config/main.cfg')
 
 plugin_names = {
@@ -427,4 +427,4 @@ def sendstatus():
     return message
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=__debug__, use_reloader=False)
+    app.run(host='0.0.0.0', debug=__debug__, use_reloader=False, threaded=True)

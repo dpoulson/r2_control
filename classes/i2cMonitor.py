@@ -20,9 +20,9 @@ class i2cMonitor(threading.Thread):
         try:
             send_message = 'https://api.telegram.org/bot' + self.token + '/sendMessage?chat_id=' + self.chat_id + '&parse_mode=Markdown&text=' + message
             requests.get(send_message)
-	except:
-	    if __debug__:
-		print("Failed to send message")
+        except:
+            if __debug__:
+                print("Failed to send message")
 
     def monitor_loop(self):
         f = open(self.logdir + '/power.log', 'at')
@@ -46,17 +46,16 @@ class i2cMonitor(threading.Thread):
             sleep(self.interval)
             # If telegram messaging is active, do a few checks and notify
             if self.telegram:
-            	if __debug__:
-			print("Telegram enabled")
-	    	if (self.extracted[5] != 0) and (self.extracted[5] < 21) and not self.lowbat:
-			if __debug__:
-				print("Battery low")
-			self.send_telegram("Battery below 21V")
-			self.lowbat = True
-	f.close()
+                if __debug__:
+                    print("Telegram enabled")
+                if (self.extracted[5] != 0) and (self.extracted[5] < 21) and not self.lowbat:
+                    if __debug__:
+                        print("Battery low")
+                    self.send_telegram("Battery below 21V")
+                    self.lowbat = True
+            f.close()
 
     def __init__(self, address, interval):
-
         # Check for telegram config
         self.telegram = False
         self.address = address
@@ -71,10 +70,9 @@ class i2cMonitor(threading.Thread):
         if __debug__:
             print("Monitoring....")
         if self.telegram:
-	    self.send_telegram("Monitoring started")
-
+            self.send_telegram("Monitoring started")
         loop = Thread(target=self.monitor_loop)
-	loop.daemon = True
+        loop.daemon = True
         loop.start()
 
     def queryBattery(self):

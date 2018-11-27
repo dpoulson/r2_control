@@ -57,7 +57,7 @@ class _GPIOControl(object):
     def __init__(self, gpio_configfile, logdir):
         self._logdir = logdir
         self._gpio_list = []
-        ifile = open('config/%s' % gpio_configfile, "rb")
+        ifile = open('config/%s' % gpio_configfile, "rt")
         reader = csv.reader(ifile)
         GPIO.setmode(GPIO.BCM)
         for row in reader:

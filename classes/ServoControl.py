@@ -24,7 +24,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import object
 from ServoThread import ServoThread
-import queue
+from queue import Queue
 import csv
 import collections
 
@@ -38,7 +38,7 @@ class ServoControl(object):
 
     def init_config(self, address, servo_config_file):
         """Load in CSV of Servo definitions"""
-        ifile = open('config/%s' % servo_config_file, "rb")
+        ifile = open('config/%s' % servo_config_file, "rt")
         reader = csv.reader(ifile)
         for row in reader:
             servo_channel = int(row[0])
@@ -46,7 +46,7 @@ class ServoControl(object):
             servo_Min = int(row[2])
             servo_Max = int(row[3])
             servo_home = int(row[4])
-            queue = queue.Queue()
+            queue = Queue()
             self.servo_list.append(self.Servo(name=servo_name, queue=queue,
                                               thread=ServoThread(address, servo_Max, servo_Min, servo_home,
                                                                  servo_channel, queue)))
