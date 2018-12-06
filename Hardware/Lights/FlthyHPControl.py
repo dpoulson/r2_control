@@ -20,7 +20,7 @@ _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
     print("Config file does not exist")
-    with open(_configfile, 'wb') as configfile:
+    with open(_configfile, 'wt') as configfile:
         _config.write(configfile)
 
 _defaults = _config.defaults()
