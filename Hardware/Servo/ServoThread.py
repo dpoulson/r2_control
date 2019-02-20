@@ -80,13 +80,17 @@ class ServoThread(threading.Thread):
                 self.current_position = position
             except:
                 print("Failed to send command %s/%s -> %s " % (self.Address, self.Channel, position))
-            if self.destination_position == self.current_position:
-                if __debug__: 
-                    print("Reached final position")
-                self.processing = False
-        if self.destination_time + 500 < current_time:
+            # if self.destination_position == self.current_position:
+            #    if __debug__:
+            #        print("Reached final position")
+            #    self.processing = False
+        if (self.destination_time + 300 < current_time) and self.processing == True:
+            # Reset the servo and set processing to False
+            if __debug__:
+                print("Resetting servo")
             try:
                 self.i2c.set_pwm(self.Channel, 4096, 0)
+                self.processing = False
             except:
                 if __debug__:
                     print("Failed to send command (reset) %s/%s" % (self.Address, self.Channel))
