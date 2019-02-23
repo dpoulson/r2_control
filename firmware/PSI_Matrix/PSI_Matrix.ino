@@ -30,8 +30,6 @@
 #include <SoftwareWire.h>
 #include <Wire.h>
 
-#define TCAADDR 0x70
-
 #define SWIPE_SPEED 50              // Speed of swipe
 #define SWIPE_FRONT_ONE 0xb1        // First colour of front PSI
 #define SWIPE_FRONT_TWO 0           // Second colour of front PSI
@@ -42,14 +40,20 @@
 #define SOFT_SDA A0                 // Software i2c SDA pin (for communicating with displays)
 #define SOFT_SCL A1                 // Software i2c SCL pin (for communicating with displays)
 
-#define I2C_ADDRESS 0x06
+#define DISPLAY_ADDRESS 0x65
+
+#define FRONT_ADDRESS 0x06;
+#define REAR_ADDRESS 0x07
+
 char command = (char) 0;
 char which = (char) 0;
-int duration = 5;
+int cycles = 5;
 
 int swipe_direction = 0;
 int swipe_position = 0;
 int count = 0;
+int psi = 2; // Defaults to front PSI
+uint8_t i2c_address = 0x07; 
 
 SoftwareWire sw(SOFT_SDA, SOFT_SCL);
 
@@ -96,18 +100,10 @@ uint64_t heart[] = {
 //////////////////////////////////////
 // i2c stuff
 
-void tcaselect(uint8_t i) {
-  if (i > 7) return;
- 
-  Wire.beginTransmission(TCAADDR);
-  Wire.write(1 << i);
-  Wire.endTransmission();  
-}
-
-int i2cSendBytes(uint8_t address, uint8_t *data, uint8_t len, int psi)
+int i2cSendBytes(uint8_t *data, uint8_t len)
 {
   int ret = 0;
-  sw.beginTransmission(address);
+  sw.beginTransmission(DISPLAY_ADDRESS);
   ret = sw.write(data, len);
   sw.endTransmission();
   return ret;
@@ -148,7 +144,7 @@ void displayFrames(uint64_t *buffer, uint16_t duration_time, bool forever_flag, 
       data[3] = forever_flag;
     }
 
-    i2cSendBytes(0x65, data, 72, 1);
+    i2cSendBytes(data, 72);
   }
 }
 
@@ -176,11 +172,11 @@ void displayFrames(uint8_t *buffer, uint16_t duration_time, bool forever_flag, u
       data[2] = (uint8_t)((duration_time >> 8) & 0xff);
       data[3] = forever_flag;
     }
-    i2cSendBytes(0x65, data, 72, 1);
+    i2cSendBytes(data, 72);
   }
 }
 
-void swipe_main(uint8_t pos, uint16_t duration_time, bool forever_flag, uint8_t frames_number, int psi)
+void swipe_main(uint8_t pos, uint16_t duration_time, bool forever_flag, uint8_t frames_number)
 {
   int ret = 0;
   int colour = 0;
@@ -218,7 +214,7 @@ void swipe_main(uint8_t pos, uint16_t duration_time, bool forever_flag, uint8_t 
     data[2] = (uint8_t)((duration_time >> 8) & 0xff);
     data[3] = forever_flag;
 
-    i2cSendBytes(0x65, data, 72, psi);
+    i2cSendBytes(data, 72);
 
 }
 
@@ -228,18 +224,22 @@ void receiveEvent(uint8_t howMany)
         // Sanity-check
         return;
     }
-
+    Serial.print("HowMany: ");
+    Serial.println(howMany);
     command = Wire.read();
-    which = Wire.read();
-    if (howMany > 2) {
+    Serial.print("Command: ");
+    Serial.println(command);
+    if (howMany > 1) {
         // Assume any following characters are the duration
-        duration = Wire.read();
+        cycles = int(Wire.read());
+        Serial.print("Cycles: ");
+        Serial.println(cycles);
     }
 }
 
 // Routine to display a pulsing heart
-void do_heart(uint8_t pulse_speed) {
-       for(int i=0;i<9;i++) {
+void do_heart(uint8_t cycles, uint8_t pulse_speed) {
+       for(int i=0;i<cycles;i++) {
            for (int i=0;i<4;i++) {
               displayFrames(heart+i*8, 100, true, 1);
               delay(pulse_speed);
@@ -253,6 +253,11 @@ void do_random(uint8_t cycles, uint8_t pulse_speed) {
   uint8_t data[64] = {0, };
   int pixel;
   int colour;
+  Serial.println("Malfuction");
+  Serial.print("Number of cycles: ");
+  Serial.println(cycles);
+  Serial.print("Pulse Speed: ");
+  Serial.println(pulse_speed);
   for(int i=0;i<=cycles;i++) {
     for (int j = 0; j< 8; j++) {
       for (int k = 7; k >= 0; k--) {
@@ -273,14 +278,16 @@ void do_random(uint8_t cycles, uint8_t pulse_speed) {
   for( int i = 0; i < sizeof(blank);  ++i )
     blank[i] = (char)255;
   displayFrames(blank, 100, true, 1);
-  delay(1000);
+  delay(2000);
 }
 
 ////////////////////////////////////////
 // Setup
 void setup()
 {
-    Wire.begin(I2C_ADDRESS);
+    // Do some checking to see which PSI this is
+    
+    Wire.begin(i2c_address);
     sw.begin();
     Wire.onReceive(receiveEvent);
     Serial.begin(115200);
@@ -291,23 +298,16 @@ void setup()
 void loop()
 {
     if (command == 'H') { // Heart
-      do_heart(duration);
+      do_heart(cycles, 100);
       command = (char) 0;
     }
     if (command == 'M') { // Malfunction
-      do_random(duration, 75);
+      do_random(cycles, 100);
       command = (char) 0;
     }
    
-    if (count == 64) {
-        do_heart(150);
-    } 
-    if (count == 64) {
-        do_random(60, 75);
-        count = 0;
-    }
     int x;
-    swipe_main(swipe_position,100, true, 1, 1);
+    swipe_main(swipe_position,100, true, 1);
     if (swipe_direction == 0) {
       if (swipe_position > 7) {
         swipe_direction = 1;
