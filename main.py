@@ -43,6 +43,8 @@ config.read('config/main.cfg')
 
 plugin_names = {
     'flthy': 'Lights.FlthyHPControl',
+    'rseries': 'Lights.RSeriesLogicEngine',
+    'psi_matrix': 'Lights.PSI_Matrix',
     'Scripts': 'Scripts',
     'Audio': 'Audio',
     'vader': 'Lights.VaderPSIControl',
