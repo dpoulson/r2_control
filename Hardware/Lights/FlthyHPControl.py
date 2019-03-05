@@ -15,7 +15,9 @@ from builtins import object
 
 _configfile = 'config/flthy.cfg'
 
-_config = configparser.SafeConfigParser({'address': '0x19', 'logfile': 'flthy.log'})
+_config = configparser.SafeConfigParser({'address': '0x19',
+                                         'logfile': 'flthy.log',
+                                         'reeltwo': 'false'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
@@ -85,12 +87,14 @@ def _flthy_cmd(hp, type, seq, value):
 
 class _FlthyHPControl(object):
 
-    def __init__(self, address, logdir):
+    def __init__(self, address, logdir, reeltwo):
         self.address = address
+        self.reeltwo = bool(reeltwo)
         self.bus = smbus.SMBus(int(mainconfig.mainconfig['busid']))
         self.logdir = logdir
         if __debug__:
             print("Initialising FlthyHP Control")
+            print("Address: %s | Bus: %s | logdir: %s | reeltwo: %s" % (self.address, self.bus, self.logdir, self.reeltwo))
 
     def sendSequence(self, seq):
         if seq.isdigit():
@@ -207,6 +211,11 @@ class _FlthyHPControl(object):
     def sendRaw(self, cmd):
         command = list(cmd)
         hexCommand = list()
+        if self.reeltwo == True:
+            if __debug__:
+               print("ReelTwo Mode");
+            hexCommand.append(int(hex(ord('H')), 16))
+            hexCommand.append(int(hex(ord('P')), 16))
         for i in command:
             h = int(hex(ord(i)), 16)
             hexCommand.append(h)	
@@ -219,5 +228,5 @@ class _FlthyHPControl(object):
         return "Ok"
 
 
-_flthy = _FlthyHPControl(_defaults['address'], _defaults['logfile'])
+_flthy = _FlthyHPControl(_defaults['address'], _defaults['logfile'], _defaults['reeltwo'])
 

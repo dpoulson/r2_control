@@ -9,6 +9,7 @@ _config = configparser.SafeConfigParser({ 'logtofile': True,
                                          'logdir' : './logs',
                                          'logfile' : 'debug.log',
                                          'busid' : '1',
+                                         'plugins' : '',
                                          'modules' : 'scripts,audio'
                                             })
 

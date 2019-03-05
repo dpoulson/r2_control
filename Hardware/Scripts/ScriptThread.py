@@ -84,5 +84,9 @@ class ScriptThread(threading.Thread):
                     urllib.request.urlopen("http://localhost:5000/flthy/raw/%s" % row[1])
                 if row[0] == "smoke":
                     urllib.request.urlopen("http://localhost:5000/smoke/on/%s" % row[1])
+                if row[0] == "psi_matrix":
+                    urllib.request.urlopen("http://localhost:5000/psi_matrix/raw/%s" % row[1]) 
+                if row[0] == "rseries":
+                    urllib.request.urlopen("http://localhost:5000/rseries/raw/%s" % row[1])
         return
 
