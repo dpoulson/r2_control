@@ -59,7 +59,7 @@ class _RSeriesLogicEngine(object):
 
     def __init__(self, address, logdir, reeltwo):
         self.address = address
-        self.reeltwo = bool(reeltwo)
+        self.reeltwo = reeltwo
         self.bus = smbus.SMBus(int(mainconfig.mainconfig['busid']))
         self.logdir = logdir
         if __debug__:
@@ -86,6 +86,6 @@ class _RSeriesLogicEngine(object):
         return "Ok"
 
 
-_rseries = _RSeriesLogicEngine(_defaults['address'], _defaults['logfile'], _defaults['reeltwo'])
+_rseries = _RSeriesLogicEngine(_defaults['address'], _defaults['logfile'], _config.getboolean('DEFAULT', 'reeltwo'))
 
 

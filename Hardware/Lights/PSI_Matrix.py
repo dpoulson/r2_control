@@ -60,10 +60,11 @@ def _psi_matrix_cmd(cmd, duration):
 
 class _PSI_MatrixControl(object):
 
-    def __init__(self, address, logdir):
+    def __init__(self, address, logdir, reeltwo):
         self.address = address
         self.bus = smbus.SMBus(int(mainconfig.mainconfig['busid']))
         self.logdir = logdir
+        self.reeltwo = reeltwo
         if __debug__:
             print("Initialising PSI_Matrix Control")
 
@@ -88,5 +89,5 @@ class _PSI_MatrixControl(object):
         return "Ok"
 
 
-_psi_matrix = _PSI_MatrixControl(_defaults['address'], _defaults['logfile'], _defaults['reeltwo'])
+_psi_matrix = _PSI_MatrixControl(_defaults['address'], _defaults['logfile'], _config.getboolean('DEFAULT', 'reeltwo'))
 
