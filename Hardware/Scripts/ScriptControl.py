@@ -33,7 +33,7 @@ standard_library.install_aliases()
 from builtins import object
 
 
-_configfile = 'config/scripts.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'scripts.cfg'
 
 _config = configparser.SafeConfigParser({'script_dir': './scripts', 'logfile': 'scripts.log'})
 _config.read(_configfile)

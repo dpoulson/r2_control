@@ -12,7 +12,7 @@ standard_library.install_aliases()
 from builtins import object
 
 
-_configfile = 'config/teecees.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'teecees.cfg'
 
 _config = configparser.SafeConfigParser({'address': '0x1c', 'logfile': 'vader.log'})
 _config.read(_configfile)

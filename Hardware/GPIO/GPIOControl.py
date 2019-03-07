@@ -14,16 +14,16 @@ standard_library.install_aliases()
 from builtins import object
 
 
-_configfile = 'config/gpio.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'gpio.cfg'
 
 _config = configparser.SafeConfigParser({'logfile': 'gpio.log', 'gpio_configfile': 'gpio_pins.cfg'})
-_config.read(_configfile)
 
 if not os.path.isfile(_configfile):
     print("Config file does not exist")
     with open(_configfile, 'wb') as configfile:
         _config.write(configfile)
 
+_config.read(_configfile)
 _defaults = _config.defaults()
 
 _logtofile = mainconfig.mainconfig['logtofile']
@@ -61,7 +61,7 @@ class _GPIOControl(object):
     def __init__(self, gpio_configfile, logdir):
         self._logdir = logdir
         self._gpio_list = []
-        ifile = open('config/%s' % gpio_configfile, "rt")
+        ifile = open(mainconfig.mainconfig['config_dir'] + '%s' % gpio_configfile, "rt")
         reader = csv.reader(ifile)
         GPIO.setmode(GPIO.BCM)
         for row in reader:

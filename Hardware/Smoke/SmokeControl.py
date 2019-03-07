@@ -13,7 +13,7 @@ from builtins import hex
 from builtins import object
 
 
-_configfile = 'config/smoke.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'smoke.cfg'
 
 _config = configparser.SafeConfigParser({'address': '0x05', 'logfile': 'smoke.log'})
 _config.read(_configfile)

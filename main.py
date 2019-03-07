@@ -311,6 +311,8 @@ def servo_body_open_slow(duration):
 
 p = {}
 for x in plugins:
+    if __debug__:
+        print("Loading %s" % x)
     p[x] = __import__("Hardware." + plugin_names[x], fromlist=[str(x), 'api'])
     app.register_blueprint(p[x].api)
 

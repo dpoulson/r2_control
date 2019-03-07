@@ -14,7 +14,7 @@ from builtins import str
 from builtins import object
 
 
-_configfile = 'config/dome.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'dome.cfg'
 
 _config = configparser.SafeConfigParser({'address': '0x1c', 'logfile': 'dome.log',
                                          'dome_address': '129', 'port': '/dev/ttyUSB0', 'type': 'Syren'})

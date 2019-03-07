@@ -13,7 +13,7 @@ from builtins import hex
 from builtins import object
 
 
-_configfile = 'config/rseries.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'rseries.cfg'
 
 _config = configparser.SafeConfigParser({'address': '0x20',
                                          'logfile': 'rseries.log',

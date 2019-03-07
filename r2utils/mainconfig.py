@@ -4,12 +4,16 @@ standard_library.install_aliases()
 import configparser
 import os
 
-_configfile = 'config/main.cfg'
+_configdir = '/home/pi/.r2_config/'
+if not os.path.exists(_configdir):
+    os.makedirs(_configdir)
+_configfile = _configdir + 'main.cfg'
 _config = configparser.SafeConfigParser({ 'logtofile': True,
                                          'logdir' : './logs',
                                          'logfile' : 'debug.log',
                                          'busid' : '1',
-                                         'plugins' : '',
+                                         'plugins' : 'GPIO',
+                                         'config_dir': _configdir,
                                          'modules' : 'scripts,audio'
                                             })
 

@@ -13,7 +13,7 @@ from builtins import hex
 from builtins import object
 
 
-_configfile = 'config/psi_matrix.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'psi_matrix.cfg'
 
 _config = configparser.SafeConfigParser({'address': '0x06',
                                          'logfile': 'psi_matrix.log',

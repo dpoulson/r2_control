@@ -13,17 +13,17 @@ from builtins import hex
 from builtins import object
 
 
-_configfile = 'config/flthy.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'flthy.cfg'
 
 _config = configparser.SafeConfigParser({'address': '0x19',
                                          'logfile': 'flthy.log',
                                          'reeltwo': 'false'})
-_config.read(_configfile)
-
 if not os.path.isfile(_configfile):
     print("Config file does not exist")
     with open(_configfile, 'wt') as configfile:
         _config.write(configfile)
+
+_config.read(_configfile)
 
 _defaults = _config.defaults()
 

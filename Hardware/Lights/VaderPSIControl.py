@@ -12,7 +12,7 @@ from flask import Blueprint, request
 standard_library.install_aliases()
 
 
-_configfile = 'config/vader.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'vader.cfg'
 
 _config = configparser.SafeConfigParser({'address': '0x1c', 'logfile': 'vader.log'})
 _config.read(_configfile)

@@ -15,7 +15,7 @@ from builtins import str
 from builtins import object
 
 
-_configfile = 'config/audio.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'audio.cfg'
 
 _config = configparser.SafeConfigParser({'sounds_dir': './scripts', 'logfile': 'audio.log', 'volume': '0.3'})
 _config.read(_configfile)
