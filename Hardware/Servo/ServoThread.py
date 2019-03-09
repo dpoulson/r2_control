@@ -2,12 +2,12 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 import threading
 from queue import Queue, Empty
 import time
 import Adafruit_PCA9685
-from config import mainconfig
+standard_library.install_aliases()
+
 
 q = Queue
 
@@ -37,11 +37,11 @@ class ServoThread(threading.Thread):
         self.processing = False
         threading.Thread.__init__(self)
         try: 
-           self.i2c = Adafruit_PCA9685.PCA9685(address=Address)
-           self.i2c.set_pwm_freq(60)
+            self.i2c = Adafruit_PCA9685.PCA9685(address=Address)
+            self.i2c.set_pwm_freq(60)
         except:
-           if __debug__:
-               print("Failed to initialise the i2c device %s/%s" % (self.Address, self.Channel))
+            if __debug__:
+                print("Failed to initialise the i2c device %s/%s" % (self.Address, self.Channel))
         return
 
     def sendCommand(self):
@@ -53,21 +53,23 @@ class ServoThread(threading.Thread):
                 position = self.destination_position
             else:
                 if __debug__:
-                    print("Current time: %s | destination_start: %s | destination_time: %s | destination_position: %s | original_position: %s" % (
-                                     current_time, self.destination_start, self.destination_time, self.destination_position, self.original_position))
+                    print("Current time: %s | destination_start: %s | destination_time: %s | destination_position: %s | original_position: %s" % (current_time, self.destination_start, self.destination_time, self.destination_position, self.original_position))
                     print("(current_time - self.destination_start): %s " % (current_time - self.destination_start))
-                    print("(self.destination_time - self.destination_start): %s " % (self.destination_time - self.destination_start))
+                    print("(self.destination_time - self.destination_start): %s " %
+                          (self.destination_time - self.destination_start))
                 progress = float(current_time - self.destination_start) / float(self.destination_time - self.destination_start)
                 if __debug__:
                     print("Currently %s way through this move" % progress)
                 if self.original_position > self.destination_position:
-                   if __debug__:
-                      print("Closing slowly...")
-                   position = int(round(self.original_position - ((self.original_position - self.destination_position) * progress)))
+                    if __debug__:
+                        print("Closing slowly...")
+                    position = int(round(self.original_position -
+                                         ((self.original_position - self.destination_position) * progress)))
                 else:
-                   if __debug__:
-                      print("Opening slowly....")
-                   position = int(round(((self.destination_position - self.original_position) * progress) + self.original_position))
+                    if __debug__:
+                        print("Opening slowly....")
+                    position = int(round(((self.destination_position - self.original_position) * progress) +
+                                         self.original_position))
                 if __debug__:
                     print("Current position request: %s " % position)
             try:
@@ -75,16 +77,20 @@ class ServoThread(threading.Thread):
                 self.current_position = position
             except:
                 print("Failed to send command %s/%s -> %s " % (self.Address, self.Channel, position))
-            if self.destination_position == self.current_position:
-                if __debug__: 
-                    print("Reached final position")
-                self.processing = False
-        if (self.destination_time + 500 < current_time): 
+            # if self.destination_position == self.current_position:
+            #    if __debug__:
+            #        print("Reached final position")
+            #    self.processing = False
+        if (self.destination_time + 300 < current_time) and self.processing == True:
+            # Reset the servo and set processing to False
+            if __debug__:
+                print("Resetting servo")
             try:
                 self.i2c.set_pwm(self.Channel, 4096, 0)
+                self.processing = False
             except:
                 if __debug__:
-                   print("Failed to send command (reset) %s/%s" % (self.Address, self.Channel))
+                    print("Failed to send command (reset) %s/%s" % (self.Address, self.Channel))
         return
 
     def run(self):

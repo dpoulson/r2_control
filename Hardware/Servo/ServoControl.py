@@ -21,12 +21,13 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
-from builtins import object
-from ServoThread import ServoThread
+from .ServoThread import ServoThread
 from queue import Queue
 import csv
 import collections
+standard_library.install_aliases()
+from builtins import object
+
 
 tick_duration = 100
 
@@ -49,7 +50,7 @@ class ServoControl(object):
             queue = Queue()
             self.servo_list.append(self.Servo(name=servo_name, queue=queue,
                                               thread=ServoThread(address, servo_Max, servo_Min, servo_home,
-                                                                 servo_channel, queue)))
+                                                                             servo_channel, queue)))
             for servo in self.servo_list:
                 if servo.name == servo_name:
                     servo.thread.daemon = True

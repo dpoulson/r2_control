@@ -1,5 +1,6 @@
 sound,FAILURE
 flthy,A005
+rseries,20000
 dome,all,open
 sleep,0.4
 dome,all,close

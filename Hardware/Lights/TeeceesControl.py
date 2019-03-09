@@ -1,68 +1,74 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
-from builtins import object
 import configparser
-import smbus, time, struct, os
+import smbus
+import os
 import datetime
 import time
-from config import mainconfig
-from time import sleep
+from r2utils import mainconfig
 from flask import Blueprint, request
+standard_library.install_aliases()
+from builtins import object
 
-_configfile = 'config/teecees.cfg'
+
+_configfile = mainconfig.mainconfig['config_dir'] + 'teecees.cfg'
 
 _config = configparser.SafeConfigParser({'address': '0x1c', 'logfile': 'vader.log'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
     print("Config file does not exist")
-    with open(_configfile, 'wb') as configfile:
+    with open(_configfile, 'wt') as configfile:
         _config.write(configfile)
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig['logtofile']
-_logdir = mainconfig['logdir']
+_logtofile = mainconfig.mainconfig['logtofile']
+_logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
 
 if _logtofile:
     if __debug__:
         print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
     _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: TeeCees ******\n")
+    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+             " : ****** Module Started: TeeCees ******\n")
     _f.flush
 
 
-
 api = Blueprint('teecees', __name__, url_prefix='/teecees')
+
 
 @api.route('/raw/<cmd>', methods=['GET'])
 def _teecees_raw(cmd):
     """ GET to send a raw command to the teecees system"""
     if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : teecees raw command : " + cmd + "\n")
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                 " : teecees raw command : " + cmd + "\n")
     message = ""
     if request.method == 'GET':
         message += _teecees.sendRaw(cmd)
     return message
 
+
 @api.route('/sequence/<seq>', methods=['GET'])
 def _teecees_seq(seq):
     """ GET to send a sequence command to the teecees system"""
     if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : teecees sequence command : " + seq + "\n")
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                 " : teecees sequence command : " + seq + "\n")
     message = ""
     if request.method == 'GET':
         message += _teecees.sendSequence(seq)
     return message
 
+
 class _TeeceesControl(object):
 
     def __init__(self, address, logdir):
         self.address = address
-        self.bus = smbus.SMBus(int(mainconfig['busid']))
+        self.bus = smbus.SMBus(int(mainconfig.mainconfig['busid']))
         self.logdir = logdir
         if __debug__:
             print("Initialising TeeCees Control")

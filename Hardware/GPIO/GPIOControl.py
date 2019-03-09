@@ -1,54 +1,58 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
-from builtins import object
 import configparser
-import time, struct, os
+import os
 import datetime
 import time
 import csv
 import collections
 import RPi.GPIO as GPIO
-from config import mainconfig
-from time import sleep
+from r2utils import mainconfig
 from flask import Blueprint, request
+standard_library.install_aliases()
+from builtins import object
 
-_configfile = 'config/gpio.cfg'
+
+_configfile = mainconfig.mainconfig['config_dir'] + 'gpio.cfg'
 
 _config = configparser.SafeConfigParser({'logfile': 'gpio.log', 'gpio_configfile': 'gpio_pins.cfg'})
-_config.read(_configfile)
 
 if not os.path.isfile(_configfile):
     print("Config file does not exist")
     with open(_configfile, 'wb') as configfile:
         _config.write(configfile)
 
+_config.read(_configfile)
 _defaults = _config.defaults()
 
-_logtofile = mainconfig['logtofile']
-_logdir = mainconfig['logdir']
+_logtofile = mainconfig.mainconfig['logtofile']
+_logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
 
 if _logtofile:
     if __debug__:
         print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
     _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : ****** Module Started: GPIOControl ******\n")
+    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+             " : ****** Module Started: GPIOControl ******\n")
     _f.flush
 
 
 api = Blueprint('gpio', __name__, url_prefix='/gpio')
 
+
 @api.route('/<gpio>/<state>', methods=['GET'])
 def _gpio_on(gpio, state):
     """ GET to set the state of a GPIO pin """
     if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : GPIO command : Pin: " + gpio + " State: " + state + "\n")
+        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                 " : GPIO command : Pin: " + gpio + " State: " + state + "\n")
     message = ""
     if request.method == 'GET':
-        message += _gpio.setState(gpio,state)
+        message += _gpio.setState(gpio, state)
     return message
+
 
 class _GPIOControl(object):
 
@@ -57,7 +61,7 @@ class _GPIOControl(object):
     def __init__(self, gpio_configfile, logdir):
         self._logdir = logdir
         self._gpio_list = []
-        ifile = open('config/%s' % gpio_configfile, "rt")
+        ifile = open(mainconfig.mainconfig['config_dir'] + '%s' % gpio_configfile, "rt")
         reader = csv.reader(ifile)
         GPIO.setmode(GPIO.BCM)
         for row in reader:
@@ -75,11 +79,11 @@ class _GPIOControl(object):
         for gpios in self._gpio_list:
             print(gpios)
             if gpios.name == gpio:
-               if __debug__:
-                  print("Setting %s (pin %s) to %s" % (gpio, gpios.pin, state))
-               GPIO.output(int(gpios.pin), int(state)) 
+                if __debug__:
+                    print("Setting %s (pin %s) to %s" % (gpio, gpios.pin, state))
+                GPIO.output(int(gpios.pin), int(state))
         return "Ok"
 
 
-_gpio = _GPIOControl(_defaults['gpio_configfile'],_defaults['logfile'])
+_gpio = _GPIOControl(_defaults['gpio_configfile'], _defaults['logfile'])
 
