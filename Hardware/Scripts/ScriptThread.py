@@ -14,7 +14,7 @@ script = ""
 loop = False
 lock = threading.Lock()
 
-keywords = ['dome', 'body', 'lights', 'sound', 'sleep', 'flthy']
+keywords = ['dome', 'body', 'lights', 'sound', 'sleep', 'flthy', 'rseries', 'psi_matrix' ]
 
 
 class ScriptThread(threading.Thread):

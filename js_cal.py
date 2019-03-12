@@ -18,7 +18,10 @@ def driveServo(channel, pulse):
    pulse_duration = bit_duration*pulse*1000000
    if __debug__:
       print "Channel %s : pulse %5.5f : Duration: %s" % (channel,pulse,pulse_duration)
-   pwm.setPWM(channel, 0, int(pulse))
+   try:
+      pwm.setPWM(channel, 0, int(pulse))
+   except:
+      print "Failed to send command"
 
 pwm = PWM(bus, debug=True)
 pwm.setPWMFreq(freq) # Set frequency to 60 Hz

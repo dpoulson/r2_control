@@ -45,12 +45,12 @@ plugin_names = {
     'flthy': 'Lights.FlthyHPControl',
     'rseries': 'Lights.RSeriesLogicEngine',
     'psi_matrix': 'Lights.PSI_Matrix',
-    'Scripts': 'Scripts',
-    'Audio': 'Audio',
+    'Scripts': 'Scripts.ScriptControl',
+    'Audio': 'Audio.AudioLibrary',
     'vader': 'Lights.VaderPSIControl',
     'teecees': 'Lights.TeeceesControl',
     'Dome': 'Dome',
-    'GPIO': 'GPIO',
+    'GPIO': 'GPIO.GPIOControl',
     'Smoke': 'Smoke'}
 
 
