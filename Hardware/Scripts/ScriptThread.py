@@ -34,11 +34,11 @@ class ScriptThread(threading.Thread):
             if self.loop != 1:
                 with lock:
                     print("....With lock")
-                    for row in reader:
-                        self.parse_row(row)
+                    self.contents = list(reader)
             else:
-                for row in reader:
-                    self.parse_row(row)
+                self.contents = list(reader)
+            for row in self.contents:
+                self.parse_row(row) 
             if self.loop == 1:
                 if __debug__:
                     print("Looping...")
@@ -65,28 +65,31 @@ class ScriptThread(threading.Thread):
                         time.sleep(float(stime))
                     else:
                         time.sleep(float(row[1]))
-                if row[0] == "body":
+                elif row[0] == "body":
                     if row[1] == "all":
                         urllib.request.urlopen("http://localhost:5000/servo/body/%s" % row[2])
                     else:
                         urllib.request.urlopen("http://localhost:5000/servo/body/%s/%s/%s" % (row[1], row[2], row[3]))
-                if row[0] == "dome":
+                elif row[0] == "dome":
                     if row[1] == "all":
                         urllib.request.urlopen("http://localhost:5000/servo/dome/%s" % row[2])
                     else:
                         urllib.request.urlopen("http://localhost:5000/servo/dome/%s/%s/%s" % (row[1], row[2], row[3]))
-                if row[0] == "sound":
+                elif row[0] == "sound":
                     if row[1] == "random":
                         urllib.request.urlopen("http://localhost:5000/audio/random/%s" % row[2])
                     else:
                         urllib.request.urlopen("http://localhost:5000/audio/%s" % row[1])
-                if row[0] == "flthy":
+                elif row[0] == "flthy":
                     urllib.request.urlopen("http://localhost:5000/flthy/raw/%s" % row[1])
-                if row[0] == "smoke":
+                elif row[0] == "smoke":
                     urllib.request.urlopen("http://localhost:5000/smoke/on/%s" % row[1])
-                if row[0] == "psi_matrix":
+                elif row[0] == "psi_matrix":
                     urllib.request.urlopen("http://localhost:5000/psi_matrix/raw/%s" % row[1]) 
-                if row[0] == "rseries":
+                elif row[0] == "rseries":
                     urllib.request.urlopen("http://localhost:5000/rseries/raw/%s" % row[1])
+                else:
+                    if __debug__:
+                        print("Do not understand")
         return
 

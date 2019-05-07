@@ -86,10 +86,10 @@ def system_status():
     status += "Wifi: \t\t\n"
     status += "Internet: \t%s \n" % internet.check()
     status += "Location: \t\n"
-    status += "Volume: \t%s\n" % p['audio'].audio.ShowVolume()
+    status += "Volume: \t%s\n" % p['Audio'].audio.ShowVolume()
     status += "--------------\n"
     status += "Scripts Running:\n"
-    status += p['scripts'].scripts.list_running()
+    status += p['Scripts'].scripts.list_running()
     return status
 
 

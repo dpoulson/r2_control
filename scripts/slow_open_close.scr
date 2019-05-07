@@ -7,4 +7,12 @@ dome,P2,1,5
 dome,P3,1,5
 dome,P4,1,5
 sleep,6
-dome,all,close
+dome,PP1,0,5
+dome,PP2,0,5
+dome,PP5,0,5
+dome,PP6,0,5
+dome,P1,0,5
+dome,P2,0,5
+dome,P3,0,5
+dome,P4,0,5
+

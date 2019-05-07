@@ -81,7 +81,7 @@ class ServoThread(threading.Thread):
 #               if __debug__:
 #                   print("Reached final position")
 #               self.processing = False
-        if (self.destination_time + 400 < current_time) and self.processing == True:
+        if (self.destination_time + 200 < current_time) and self.processing == True:
             # Reset the servo and set processing to False
             if __debug__:
                 print("Resetting servo")
@@ -117,7 +117,8 @@ class ServoThread(threading.Thread):
                     print("Start time:  %s " % self.destination_start)
                     print("End time:    %s " % self.destination_time)
             except Empty:
-                self.sendCommand()
+                if self.processing != False:
+                    self.sendCommand()
 
         return
 
