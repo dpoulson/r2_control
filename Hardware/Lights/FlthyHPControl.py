@@ -33,18 +33,8 @@ _sequence_list = ['leia', 'projector', 'dimpulse', 'cycle', 'shortcircuit', 'col
 _colour_list = ['red', 'yellow', 'green', 'cyan', 'blue', 'magenta', 'orange', 'purple', 'white', 'random']
 _position_list = ['top', 'bottom', 'center', 'left', 'right']
 
-_logtofile = mainconfig.mainconfig['logtofile']
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
-if _logtofile:
-    if __debug__:
-        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
-    _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-             " : ****** Module Started: FlthyHP ******\n")
-    _f.flush
-
 
 api = Blueprint('flthy', __name__, url_prefix='/flthy')
 
@@ -52,9 +42,6 @@ api = Blueprint('flthy', __name__, url_prefix='/flthy')
 @api.route('/raw/<cmd>', methods=['GET'])
 def _flthy_raw(cmd):
     """ GET to send a raw command to the flthy HP system"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Flthy raw command : " + cmd + "\n")
     message = ""
     if request.method == 'GET':
         message += _flthy.sendRaw(cmd)
@@ -64,9 +51,6 @@ def _flthy_raw(cmd):
 @api.route('/sequence/<seq>', methods=['GET'])
 def _flthy_seq(seq):
     """ GET to send a sequence command to the flthy HP system"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Flthy sequence command : " + seq + "\n")
     message = ""
     if request.method == 'GET':
         message += _flthy.sendSequence(seq)
@@ -76,9 +60,6 @@ def _flthy_seq(seq):
 @api.route('/<hp>/<type>/<seq>/<value>', methods=['GET'])
 def _flthy_cmd(hp, type, seq, value):
     """ GET to send a command to the flthy HP system"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Flthy command : " + hp + " " + type + " " + seq + " " + value + "\n")
     message = ""
     if request.method == 'GET':
         message += _flthy.sendCommand(hp, type, seq, value)

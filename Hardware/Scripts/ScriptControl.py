@@ -45,18 +45,8 @@ if not os.path.isfile(_configfile):
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig.mainconfig['logtofile']
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
-if _logtofile:
-    if __debug__:
-        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
-    _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-             " : ****** Module Started: scripts ******\n")
-    _f.flush
-
 
 api = Blueprint('scripts', __name__, url_prefix='/scripts')
 
@@ -83,9 +73,6 @@ def _running_scripts():
 @api.route('/stop/<script_id>', methods=['GET'])
 def _stop_script(script_id):
     """GET a script ID to stop that script"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Script stop: " + script_id + "\n")
     message = ""
     if request.method == 'GET':
         if script_id == "all":
@@ -98,9 +85,6 @@ def _stop_script(script_id):
 @api.route('/<name>/<loop>', methods=['GET'])
 def _start_script(name, loop):
     """GET to trigger the named script"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Script loop: " + name + "," + loop + "\n")
     message = ""
     if request.method == 'GET':
         message += scripts.run_script(name, loop)

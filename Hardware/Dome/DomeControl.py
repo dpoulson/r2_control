@@ -27,18 +27,8 @@ if not os.path.isfile(_configfile):
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig.mainconfig['logtofile']
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
-if _logtofile:
-    if __debug__:
-        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
-    _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-             " : ****** Module Started: DOME ******\n")
-    _f.flush
-
 
 api = Blueprint('dome', __name__, url_prefix='/dome')
 ''' clamp - clamp a value between a min and max '''
@@ -60,9 +50,6 @@ def clamp(n, minn, maxn):
 @api.route('/center', methods=['GET'])
 def _dome_center():
     """ GET to set the dome to face forward"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Dome center command\n")
     message = ""
     if request.method == 'GET':
         message += _dome.position(0)
@@ -72,9 +59,6 @@ def _dome_center():
 @api.route('/position/<degrees>', methods=['GET'])
 def _dome_position(degrees):
     """ GET to set the dome to face a certain way"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Dome position command : " + degrees + "\n")
     message = ""
     if request.method == 'GET':
         message += _dome.position(degrees)
@@ -84,9 +68,6 @@ def _dome_position(degrees):
 @api.route('/turn/<stick>', methods=['GET'])
 def _dome_turn(stick):
     """ GET to set the dome turning"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Dome turn command : " + stick + "\n")
     message = ""
     if request.method == 'GET':
         message += _dome.turn(stick)

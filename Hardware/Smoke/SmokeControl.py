@@ -25,18 +25,8 @@ if not os.path.isfile(_configfile):
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig.mainconfig['logtofile']
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
-if _logtofile:
-    if __debug__:
-        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
-    _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-             " : ****** Module Started: SmokeControl ******\n")
-    _f.flush
-
 
 api = Blueprint('smoke', __name__, url_prefix='/smoke')
 
@@ -44,9 +34,6 @@ api = Blueprint('smoke', __name__, url_prefix='/smoke')
 @api.route('/on', methods=['GET'])
 def _smoke_on():
     """ GET to send a command to the smoke system"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Smoke command : on\n")
     message = ""
     if request.method == 'GET':
         message += _smoke.sendRaw('S', '5')
@@ -56,9 +43,6 @@ def _smoke_on():
 @api.route('/on/<duration>', methods=['GET'])
 def _smoke_on_duration(duration):
     """ GET to turn smoke on for a duration """
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Smoke command : on\n")
     message = ""
     if request.method == 'GET':
         message += _smoke.sendRaw('S', duration)

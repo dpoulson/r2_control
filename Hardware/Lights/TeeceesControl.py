@@ -24,18 +24,8 @@ if not os.path.isfile(_configfile):
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig.mainconfig['logtofile']
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
-if _logtofile:
-    if __debug__:
-        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
-    _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-             " : ****** Module Started: TeeCees ******\n")
-    _f.flush
-
 
 api = Blueprint('teecees', __name__, url_prefix='/teecees')
 
@@ -43,9 +33,6 @@ api = Blueprint('teecees', __name__, url_prefix='/teecees')
 @api.route('/raw/<cmd>', methods=['GET'])
 def _teecees_raw(cmd):
     """ GET to send a raw command to the teecees system"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : teecees raw command : " + cmd + "\n")
     message = ""
     if request.method == 'GET':
         message += _teecees.sendRaw(cmd)
@@ -55,9 +42,6 @@ def _teecees_raw(cmd):
 @api.route('/sequence/<seq>', methods=['GET'])
 def _teecees_seq(seq):
     """ GET to send a sequence command to the teecees system"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : teecees sequence command : " + seq + "\n")
     message = ""
     if request.method == 'GET':
         message += _teecees.sendSequence(seq)

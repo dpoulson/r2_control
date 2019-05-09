@@ -27,18 +27,8 @@ if not os.path.isfile(_configfile):
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig.mainconfig['logtofile']
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
-if _logtofile:
-    if __debug__:
-        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
-    _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-             " : ****** Module Started: PSI_MatrixControl ******\n")
-    _f.flush
-
 
 api = Blueprint('psi_matrix', __name__, url_prefix='/psi_matrix')
 
@@ -49,9 +39,6 @@ def _psi_matrix_cmd(cmd, duration):
        GET to turn psi_matrix on for a duration
 
     """
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : PSI_Matrix command : " + cmd + "\n")
     message = ""
     if request.method == 'GET':
         message += _psi_matrix.sendRaw(cmd, duration)

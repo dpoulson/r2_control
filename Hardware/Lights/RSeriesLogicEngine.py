@@ -27,18 +27,8 @@ if not os.path.isfile(_configfile):
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig.mainconfig['logtofile']
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
-if _logtofile:
-    if __debug__:
-        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
-    _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-             " : ****** Module Started: RSeries Logic Engine ******\n")
-    _f.flush
-
 
 api = Blueprint('rseries', __name__, url_prefix='/rseries')
 
@@ -46,9 +36,6 @@ api = Blueprint('rseries', __name__, url_prefix='/rseries')
 @api.route('/raw/<cmd>', methods=['GET'])
 def _rseries_raw(cmd):
     """ GET to send a raw command to the rseries system"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : RSeries raw command : " + cmd + "\n")
     message = ""
     if request.method == 'GET':
         message += _rseries.sendRaw(cmd)

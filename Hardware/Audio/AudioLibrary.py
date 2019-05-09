@@ -27,18 +27,8 @@ if not os.path.isfile(_configfile):
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig.mainconfig['logtofile']
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
-if _logtofile:
-    if __debug__:
-        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
-    _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-             " : ****** Module Started: audio ******\n")
-    _f.flush
-
 
 _Random_Sounds = ['alarm', 'happy', 'hum', 'misc', 'quote', 'razz', 'sad', 'sent', 'ooh', 'proc', 'whistle', 'scream']
 _Random_Files = ['ALARM', 'Happy', 'HUM__', 'MISC_', 'Quote', 'RAZZ_', 'Sad__', 'SENT_', 'OOH__', 'PROC_', 'WHIST',
@@ -60,10 +50,6 @@ def _audio_list():
 @api.route('/<name>', methods=['GET'])
 def _audio(name):
     """GET to trigger the given sound"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Sound : " + name + "\n")
-        _f.flush
     if request.method == 'GET':
         audio.TriggerSound(name)
     return "Ok"
@@ -82,10 +68,6 @@ def _random_audio_list():
 @api.route('/random/<name>', methods=['GET'])
 def _random_audio(name):
     """GET to play a random sound of a given type"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Sound random: " + name + "\n")
-        _f.flush
     if request.method == 'GET':
         audio.TriggerRandomSound(name)
     return "Ok"
@@ -103,10 +85,6 @@ def _get_volume():
 @api.route('/volume/<level>', methods=['GET'])
 def _set_volume(level):
     """GET to set a specific volume level"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Volume set : " + level + "\n")
-        _f.flush
     message = ""
     if request.method == 'GET':
         message += audio.SetVolume(level)

@@ -24,18 +24,8 @@ if not os.path.isfile(_configfile):
 
 _defaults = _config.defaults()
 
-_logtofile = mainconfig.mainconfig['logtofile']
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
-if _logtofile:
-    if __debug__:
-        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
-    _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-             " : ****** Module Started: VADER PSI ******\n")
-    _f.flush
-
 
 api = Blueprint('vader', __name__, url_prefix='/vader')
 
@@ -43,9 +33,6 @@ api = Blueprint('vader', __name__, url_prefix='/vader')
 @api.route('/raw/<cmd>', methods=['GET'])
 def _vader_raw(cmd):
     """ GET to send a raw command to the vader HP system"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Vader raw command : " + cmd + "\n")
     message = ""
     if request.method == 'GET':
         message += _vader.sendRaw(cmd)
@@ -55,9 +42,6 @@ def _vader_raw(cmd):
 @api.route('/sequence/<seq>', methods=['GET'])
 def _vader_seq(seq):
     """ GET to send a sequence command to the vader HP system"""
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : Vader sequence command : " + seq + "\n")
     message = ""
     if request.method == 'GET':
         message += _vader.sendSequence(seq)

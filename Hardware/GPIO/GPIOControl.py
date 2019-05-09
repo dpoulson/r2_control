@@ -26,18 +26,8 @@ if not os.path.isfile(_configfile):
 _config.read(_configfile)
 _defaults = _config.defaults()
 
-_logtofile = mainconfig.mainconfig['logtofile']
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
-if _logtofile:
-    if __debug__:
-        print("Opening log file: Dir: %s - Filename: %s" % (_logdir, _logfile))
-    _f = open(_logdir + '/' + _logfile, 'at')
-    _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-             " : ****** Module Started: GPIOControl ******\n")
-    _f.flush
-
 
 api = Blueprint('gpio', __name__, url_prefix='/gpio')
 
@@ -45,9 +35,6 @@ api = Blueprint('gpio', __name__, url_prefix='/gpio')
 @api.route('/<gpio>/<state>', methods=['GET'])
 def _gpio_on(gpio, state):
     """ GET to set the state of a GPIO pin """
-    if _logtofile:
-        _f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                 " : GPIO command : Pin: " + gpio + " State: " + state + "\n")
     message = ""
     if request.method == 'GET':
         message += _gpio.setState(gpio, state)
