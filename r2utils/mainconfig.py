@@ -12,7 +12,7 @@ _config = configparser.SafeConfigParser({ 'logtofile': True,
                                          'logdir' : './logs',
                                          'logfile' : 'debug.log',
                                          'busid' : '1',
-                                         'plugins' : 'GPIO',
+                                         'plugins' : 'GPIO,Audio',
                                          'config_dir': _configdir,
                                          'modules' : 'scripts,audio'
                                             })

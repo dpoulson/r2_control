@@ -40,7 +40,7 @@ logdir = mainconfig.mainconfig['logdir']
 logfile = mainconfig.mainconfig['logfile']
 
 config = ConfigParser({'busid': '1', 'logfile': 'test.log', 'logdir': './logs',
-                       'modules': 'dome', 'plugins': 'Audio', 'loglevel': 'ERROR'})
+                       'modules': 'dome', 'plugins': 'Audio,GPIO', 'loglevel': 'ERROR'})
 config.read('config/main.cfg')
 
 plugin_names = {
@@ -97,6 +97,10 @@ def system_status():
 
 # Setup logging
 log_filename = logdir + '/' + logfile
+# Create target Directory if don't exist
+if not os.path.exists(logdir):
+    os.mkdir(logdir)
+    print("Creating logdir " + logdir);
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename=log_filename,
