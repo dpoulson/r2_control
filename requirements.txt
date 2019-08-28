@@ -68,4 +68,4 @@ subprocess32==3.5.4
 traitlets==4.3.2
 urllib3==1.25.3
 wcwidth==0.1.7
-Werkzeug==0.14.1
+Werkzeug==0.15.3
