@@ -23,7 +23,7 @@ def driveServo(channel, pulse):
    except:
       print "Failed to send command"
 
-i2c = Adafruit_PCA9685.PCA9685(address=Address)
+i2c = Adafruit_PCA9685.PCA9685(address=bus)
 i2c.set_pwm_freq(60)
 
 
