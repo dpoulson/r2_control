@@ -44,7 +44,8 @@ void setup() {
   // encoder pin on interrupt 1 (pin 3)
   attachInterrupt(1, doEncoderB, CHANGE);
 
-  Serial.begin (9600);
+  Serial.begin (115200);
+  Serial.println("Starting...");
 }
 
 void loop() {
@@ -60,8 +61,12 @@ void changePos(int x) {
          encoder0Pos = (numberTeeth*4) - 1;
   #if (DEBUG>0) 
     Serial.print(encoder0Pos);
+    Serial.print(",");
     Serial.print(digitalRead(encoder0PinA));
-    Serial.println(digitalRead(encoder0PinB));
+    Serial.print(",");
+    Serial.print(digitalRead(encoder0PinB));
+    Serial.print(",");
+    Serial.println(calcDegrees());
   #endif
 }
 
@@ -104,5 +109,3 @@ void doEncoderB() {
       changePos(-1);         // CCW
   }
 }
-
-

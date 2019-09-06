@@ -3,7 +3,7 @@
 #import modules
 import sys
 sys.path.append('/home/pi/r2_control/classes/')
-from Adafruit_PWM_Servo_Driver import PWM
+import Adafruit_PCA9685
 import time
 import os
 
@@ -19,12 +19,13 @@ def driveServo(channel, pulse):
    if __debug__:
       print "Channel %s : pulse %5.5f : Duration: %s" % (channel,pulse,pulse_duration)
    try:
-      pwm.setPWM(channel, 0, int(pulse))
+      i2c.set_pwm(channel, 0, int(pulse))
    except:
       print "Failed to send command"
 
-pwm = PWM(bus, debug=True)
-pwm.setPWMFreq(freq) # Set frequency to 60 Hz
+i2c = Adafruit_PCA9685.PCA9685(address=Address)
+i2c.set_pwm_freq(60)
+
 
 while True:
    global pulse
