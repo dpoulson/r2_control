@@ -25,12 +25,13 @@ from .ServoThread import ServoThread
 from queue import Queue
 import csv
 import collections
+from flask import Blueprint, request
 standard_library.install_aliases()
 from builtins import object
-
+from r2utils import mainconfig
 
 tick_duration = 100
-
+_configdir = mainconfig.mainconfig['config_dir']
 
 class ServoControl(object):
     # servo_list = [] # All servos, listed here.
@@ -39,24 +40,25 @@ class ServoControl(object):
 
     def init_config(self, address, servo_config_file):
         """Load in CSV of Servo definitions"""
-        ifile = open('config/%s' % servo_config_file, "rt")
+        ifile = open('%s/%s' % (%_configdir, servo_config_file), "rt")
         reader = csv.reader(ifile)
         for row in reader:
-            servo_channel = int(row[0])
-            servo_name = row[1]
-            servo_Min = int(row[2])
-            servo_Max = int(row[3])
-            servo_home = int(row[4])
-            queue = Queue()
-            self.servo_list.append(self.Servo(name=servo_name, queue=queue,
+            if row[0] != "":
+                servo_channel = int(row[0])
+                servo_name = row[1]
+                servo_Min = int(row[2])
+                servo_Max = int(row[3])
+                servo_home = int(row[4])
+                queue = Queue()
+                self.servo_list.append(self.Servo(name=servo_name, queue=queue,
                                               thread=ServoThread(address, servo_Max, servo_Min, servo_home,
                                                                              servo_channel, queue)))
-            for servo in self.servo_list:
-                if servo.name == servo_name:
-                    servo.thread.daemon = True
-                    servo.thread.start()
-            if __debug__:
-                print("Added servo: %s %s %s %s %s" % (servo_channel, servo_name, servo_Min, servo_Max, servo_home))
+                for servo in self.servo_list:
+                    if servo.name == servo_name:
+                        servo.thread.daemon = True
+                        servo.thread.start()
+                if __debug__:
+                    print("Added servo: %s %s %s %s %s" % (servo_channel, servo_name, servo_Min, servo_Max, servo_home))
         ifile.close()
         self.close_all_servos(0)
 
