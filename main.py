@@ -94,6 +94,20 @@ def system_status():
     status += p['Scripts'].scripts.list_running()
     return status
 
+def system_status_csv():
+    """ Collects the system status and returns a csv string """
+    with open('/proc/uptime', 'r') as f:
+        uptime_seconds = float(f.readline().split()[0])
+        uptime_string = str(datetime.timedelta(seconds=uptime_seconds))
+    try:
+        with open('/sys/class/power_supply/sony_controller_battery_00:19:c1:5f:78:b9/capacity',
+                  'r') as b:
+            remote_battery = int(b.readline().split()[0])
+    except:
+        remote_battery = 0
+
+    status = "%s,%s,%s,%s,%s,%s" % (uptime_string, monitor.queryBattery(), monitor.queryBatteryBalance(), remote_battery, internet.check(), p['Audio'].audio.ShowVolume())
+    return status
 
 # Setup logging
 log_filename = logdir + '/' + logfile
@@ -362,6 +376,7 @@ def shutdown():
 
 
 @app.route('/status', methods=['GET'])
+@app.route('/status/display', methods=['GET'])
 def sysstatus():
     """GET to display system status"""
     message = ""
@@ -370,7 +385,7 @@ def sysstatus():
     return message
 
 
-@app.route('/sendstatus', methods=['GET'])
+@app.route('/status/send', methods=['GET'])
 def sendstatus():
     """GET to send system status via telegram"""
     message = ""
@@ -381,6 +396,15 @@ def sendstatus():
         else:
             message = "Telegram module not configured"
     return message
+
+@app.route('/status/csv', methods=['GET'])
+def sendstatus():
+    """GET to display a CSV of current stats"""
+    message = ""
+    if request.method == 'GET':
+        message = system_status_csv()
+    return message
+
 
 
 if __name__ == '__main__':
