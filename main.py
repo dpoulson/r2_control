@@ -398,7 +398,7 @@ def sendstatus():
     return message
 
 @app.route('/status/csv', methods=['GET'])
-def sendstatus():
+def sendstatuscsv():
     """GET to display a CSV of current stats"""
     message = ""
     if request.method == 'GET':
