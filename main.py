@@ -41,7 +41,7 @@ logfile = mainconfig.mainconfig['logfile']
 
 config = ConfigParser({'busid': '1', 'logfile': 'test.log', 'logdir': './logs',
                        'modules': 'dome', 'plugins': 'Audio,GPIO', 'loglevel': 'ERROR'})
-config.read('config/main.cfg')
+config.read('/home/pi/.r2_config/main.cfg')
 
 plugin_names = {
     'flthy': 'Lights.FlthyHPControl',

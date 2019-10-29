@@ -40,7 +40,7 @@ class ServoControl(object):
 
     def init_config(self, address, servo_config_file):
         """Load in CSV of Servo definitions"""
-        ifile = open('%s/%s' % (%_configdir, servo_config_file), "rt")
+        ifile = open('%s/%s' % (_configdir, servo_config_file), "rt")
         reader = csv.reader(ifile)
         for row in reader:
             if row[0] != "":
