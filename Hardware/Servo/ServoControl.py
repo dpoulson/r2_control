@@ -34,12 +34,26 @@ tick_duration = 100
 _configdir = mainconfig.mainconfig['config_dir']
 
 class ServoControl(object):
-    # servo_list = [] # All servos, listed here.
+    """ 
+    Main servo control class. This is used for each adafruit 16 channel
+    pwm modules (or clones). The class will create a thread for each
+    channel configured, and an associated queue to pass commands via.
+    """
 
     Servo = collections.namedtuple('Servo', 'name, queue, thread')
 
     def init_config(self, address, servo_config_file):
-        """Load in CSV of Servo definitions"""
+        """
+        Load in CSV of Servo definitions
+
+        Parameters
+        ----------
+        address : int
+             i2c address of the module
+        servo_config_file : string
+             location of the config file containing servo details
+        """
+
         ifile = open('%s/%s' % (_configdir, servo_config_file), "rt")
         reader = csv.reader(ifile)
         for row in reader:

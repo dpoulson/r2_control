@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 """ Main script for R2_Control """
 # ===============================================================================
 # Copyright (C) 2014 Darren Poulson
@@ -404,6 +404,18 @@ def sendstatuscsv():
     if request.method == 'GET':
         message = system_status_csv()
     return message
+
+@app.route('/internet', methods=['GET'])
+def sendstatusinternet():
+    """GET to display internet status"""
+    message = ""
+    if request.method == 'GET':
+        if (internet.check()):
+            message = "True"
+        else:
+            message = "False"
+    return message
+
 
 
 

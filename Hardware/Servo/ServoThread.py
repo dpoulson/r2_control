@@ -97,7 +97,6 @@ class ServoThread(threading.Thread):
         if __debug__:
             print("Starting Thread")
         while True:
-            self.sendCommand()
             try:
                 command = self.q.get(False)
                 position = command[0]
@@ -116,6 +115,7 @@ class ServoThread(threading.Thread):
                     print("Original:    %s " % self.original_position)
                     print("Start time:  %s " % self.destination_start)
                     print("End time:    %s " % self.destination_time)
+                self.sendCommand()                            # Main Command Loop
             except Empty:
                 if self.processing != False:
                     self.sendCommand()

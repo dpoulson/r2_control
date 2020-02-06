@@ -78,7 +78,9 @@ def _get_volume():
     """GET returns current volume level"""
     message = ""
     if request.method == 'GET':
-        message += audio.ShowVolume()
+        message += str(audio.ShowVolume())
+        if __debug__:
+            print("Sending: %s" % message)
     return message
 
 
@@ -92,14 +94,54 @@ def _set_volume(level):
 
 
 class _AudioLibrary(object):
+    """
+    The class for playing audio samples via pygame mixer
+
+    Sounds are stored in a single directory. The following prefixes are used
+    to group sets of sounds for random play. Any other filenames can be played 
+    as normal.
+
+    'ALARM',
+    'Happy',
+    'HUM__',
+    'MISC_',
+    'Quote',
+    'RAZZ_',
+    'Sad__',
+    'SENT_',
+    'OOH__',
+    'PROC_',
+    'WHIST',
+    'SCREA'
+    """
 
     def __init__(self, sounds_dir, volume):
+        """ 
+        Init of AudioLibrary class
+
+        Parameters
+        ----------
+        sounds_dir : str
+             Directory containing sound files
+        volume : float
+             Initial volume level
+        """
+ 
         if __debug__:
             print("Initiating audio")
         mixer.init()
         mixer.music.set_volume(float(volume))
 
     def TriggerSound(self, data):
+        """
+        Play a sound
+
+        Parameters
+        ----------
+        data : str
+             Name of file (not including extension)
+        """
+
         if __debug__:
             print("Playing %s" % data)
         audio_file = "./sounds/" + data + ".mp3"
@@ -114,6 +156,15 @@ class _AudioLibrary(object):
             print("Play")
 
     def TriggerRandomSound(self, data):
+        """
+        Take one of the prefixes and play a random sound from the library
+
+        Parameters
+        ----------
+        data : str
+             Sound group prefix
+        """
+ 
         idx = _Random_Sounds.index(data)
         prefix = _Random_Files[idx]
         print("Random index: %s, prefix=%s" % (idx, prefix))
@@ -133,20 +184,35 @@ class _AudioLibrary(object):
             print("Play")
 
     def ListSounds(self):
+        """ Returns the list of sounds available """
         files = ', '.join(glob.glob("./sounds/*.mp3"))
         files = files.replace("./sounds/", "", -1)
         files = files.replace(".mp3", "", -1)
         return files
 
     def ListRandomSounds(self):
+        """ Returns the list of sound groups """
         types = ', '.join(_Random_Sounds)
         return types
 
     def ShowVolume(self):
-        cur_vol = str(mixer.music.get_volume())
+        """ Returns the current volume """
+        cur_vol = mixer.music.get_volume()
+        if __debug__:
+            print("Current volume: %s" % cur_vol)
         return cur_vol
 
     def SetVolume(self, level):
+        """
+        Changes the volume level
+
+        Parameters
+        ----------
+        level : str
+             Either a string of up/down to increment/decrement the volume, or
+             an explicitly set volume between 0 and 1
+        """
+
         if level == "up":
             if __debug__:
                 print("Increasing volume")
@@ -158,7 +224,7 @@ class _AudioLibrary(object):
         else:
             if __debug__:
                 print("Volume level explicitly states")
-            new_level = level
+            new_level = float(level)
         if new_level < 0:
             new_level = 0
         if __debug__:
