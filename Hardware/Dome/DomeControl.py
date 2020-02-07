@@ -2,13 +2,12 @@ from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
 import configparser
-import smbus
 import os
 import datetime
 import time
 from r2utils import mainconfig
 from flask import Blueprint, request
-from SabertoothPacketSerial import SabertoothPacketSerial
+from .DomeThread import DomeThread
 standard_library.install_aliases()
 from builtins import str
 from builtins import object
@@ -55,6 +54,13 @@ def _dome_center():
         message += _dome.position(0)
     return message
 
+@api.route('/position', methods=['GET'])
+def _dome_get_position():
+    """ GET to retrieve current position"""
+    message = ""
+    if request.method == 'GET':
+        message += _dome.get_position()
+    return message
 
 @api.route('/position/<degrees>', methods=['GET'])
 def _dome_position(degrees):
@@ -64,7 +70,6 @@ def _dome_position(degrees):
         message += _dome.position(degrees)
     return message
 
-
 @api.route('/turn/<stick>', methods=['GET'])
 def _dome_turn(stick):
     """ GET to set the dome turning"""
@@ -73,24 +78,46 @@ def _dome_turn(stick):
         message += _dome.turn(stick)
     return message
 
+@api.route('/random/<value>', methods=['GET'])
+def _dome_random(value):
+    """ GET to set the dome random on/off"""
+    message = ""
+    if request.method == 'GET':
+        message += _dome.random(value)
+    return message
+
+@api.route('/random', methods=['GET'])
+def _dome_random_status():
+    """ GET to set the dome random status"""
+    message = ""
+    if request.method == 'GET':
+        message += _dome.get_random()
+    return message
+
 
 class _DomeControl(object):
 
-    def __init__(self, address, logfile, dome_address, dome_type, dome_port):
-        self.address = address
-        self.bus = smbus.SMBus(int(mainconfig.mainconfig['busid']))
-        self.logfile = logfile
-        self.dome_serial = SabertoothPacketSerial(address=int(dome_address),
-                                                  type=dome_type, port=dome_port)
-        if __debug__:
-            print("Initialising Dome Control")
+    def __init__(self):
+        self.dome = DomeThread(129, "Syren", "/dev/ttyUSB0")
+        self.dome.start()
 
     def _read_position(self):
         """ Read the dome position"""
         return "Ok"
 
     def position(self, position):
+        self.dome.set_position(position)
         return "Ok"
+
+    def random(self, value):
+        self.dome.set_random(value)
+        return "Ok"
+
+    def get_random(self):
+        return self.dome.get_random()
+
+    def get_position(self):
+        return self.dome.get_position()
 
     def turn(self, stick):
         """ Turns the dome depending on the value of stick """
@@ -98,7 +125,5 @@ class _DomeControl(object):
         return "Ok"
 
 
-_dome = _DomeControl(address=_defaults['address'], logfile=_defaults['logfile'],
-                     dome_address=_defaults['dome_address'], dome_type=_defaults['type'],
-                     dome_port=_defaults['port'])
+_dome = _DomeControl()
 
