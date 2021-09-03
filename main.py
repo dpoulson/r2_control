@@ -31,17 +31,13 @@ standard_library.install_aliases()
 from builtins import str
 from configparser import ConfigParser
 
-
-modules = mainconfig.mainconfig['modules'].split(",")
 plugins = mainconfig.mainconfig['plugins'].split(",")
+servos = mainconfig.mainconfig['servos'].split(",")
 i2c_bus = mainconfig.mainconfig['busid']
 logtofile = mainconfig.mainconfig['logtofile']
 logdir = mainconfig.mainconfig['logdir']
 logfile = mainconfig.mainconfig['logfile']
 
-config = ConfigParser({'busid': '1', 'logfile': 'test.log', 'logdir': './logs',
-                       'modules': 'dome', 'plugins': 'Audio,GPIO', 'loglevel': 'ERROR'})
-config.read('/home/pi/.r2_config/main.cfg')
 
 plugin_names = {
     'flthy': 'Lights.FlthyHPControl',
@@ -125,25 +121,6 @@ logging.info("**** Starting r2_control")
 ######################################
 # initialise modules
 
-# Initialise server controllers
-if "body" in modules:
-    from Hardware.Servo import ServoControl
-    logging.info("Adding Body ServoControl")
-    pwm_body = ServoControl.ServoControl(int(config.get('body', 'address'), 16),
-                                         config.get('body', 'config_file'))
-if "dome" in modules:
-    from Hardware.Servo import ServoControl
-    logging.info("Adding Dome ServoControl")
-    pwm_dome = ServoControl.ServoControl(int(config.get('dome', 'address'), 16),
-                                         config.get('dome', 'config_file'))
-
-# Monitoring
-if "monitoring" in modules:
-    from Hardware.Monitoring import i2cMonitor
-    logging.info("Adding Hardware Monitoring")
-    monitor = i2cMonitor.i2cMonitor(int(config.get('monitoring', 'address'), 16),
-                                    float(config.get('monitoring', 'interval')))
-
 app = Flask(__name__, template_folder='templates')
 
 
@@ -156,157 +133,13 @@ def index():
     return render_template('index.html', urls=urls)
 
 
-#############################
-# Servo API calls
-#
-@app.route('/servo/', methods=['GET'])
-@app.route('/servo/list', methods=['GET'])
-def servo_list():
-    """GET to list all current servos and position"""
-    message = ""
-    logging.info("Listing servos")
-    if request.method == 'GET':
-        message += pwm_body.list_servos()
-        message += pwm_dome.list_servos()
-    return message
-
-
-@app.route('/servo/dome/list', methods=['GET'])
-def servo_list_dome():
-    """GET to list all current servos and position"""
-    message = ""
-    logging.info("Listing dome servos")
-    if request.method == 'GET':
-        message += pwm_dome.list_servos()
-    return message
-
-
-@app.route('/servo/body/list', methods=['GET'])
-def servo_list_body():
-    """GET to list all current servos and position"""
-    message = ""
-    logging.info("Listing body servos")
-    if request.method == 'GET':
-        message += pwm_body.list_servos()
-    return message
-
-
-@app.route('/servo/<part>/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
-def servo_move(part, servo_name, servo_position, servo_duration):
-    """GET will move a selected servo to the required position over a set duration"""
-    logging.info(
-                "Servo move: " + servo_name + "," + servo_position +
-                "," + servo_duration)
-    if request.method == 'GET':
-        if part == 'body':
-            pwm_body.servo_command(servo_name, servo_position, servo_duration)
-        if part == 'dome':
-            pwm_dome.servo_command(servo_name, servo_position, servo_duration)
-    return "Ok"
-
-
-@app.route('/servo/close', methods=['GET'])
-def servo_close():
-    """GET to close all servos"""
-    logging.info("All Servo close")
-    if request.method == 'GET':
-        pwm_body.close_all_servos(0)
-        pwm_dome.close_all_servos(0)
-        return "Ok"
-    return "Fail"
-
-
-@app.route('/servo/dome/close', methods=['GET'])
-def servo_dome_close():
-    """GET to close all dome servos"""
-    logging.info("All dome Servo close")
-    if request.method == 'GET':
-        pwm_dome.close_all_servos(0)
-        return "Ok"
-    return "Fail"
-
-
-@app.route('/servo/dome/close/<duration>', methods=['GET'])
-def servo_dome_close_slow(duration):
-    """GET to close all dome servos slowly"""
-    logging.info("Servo close dome slow")
-    if request.method == 'GET':
-        pwm_dome.close_all_servos(duration)
-        return "Ok"
-    return "Fail"
-
-
-@app.route('/servo/body/close', methods=['GET'])
-def servo_body_close():
-    """GET to close all body servos"""
-    logging.info("Servo close body")
-    if request.method == 'GET':
-        pwm_body.close_all_servos(0)
-        return "Ok"
-    return "Fail"
-
-
-@app.route('/servo/body/close/<duration>', methods=['GET'])
-def servo_body_close_slow(duration):
-    """GET to close all body servos slowly"""
-    logging.info("Servo close body slow") 
-    if request.method == 'GET':
-        pwm_body.close_all_servos(duration)
-        return "Ok"
-    return "Fail"
-
-
-@app.route('/servo/open', methods=['GET'])
-def servo_open():
-    """GET to open all servos"""
-    logging.info("All Servo close")
-    if request.method == 'GET':
-        pwm_body.open_all_servos(0)
-        pwm_dome.open_all_servos(0)
-        return "Ok"
-    return "Fail"
-
-
-@app.route('/servo/dome/open', methods=['GET'])
-def servo_dome_open():
-    """GET to open all dome servos"""
-    logging.info("Servo open dome")
-    if request.method == 'GET':
-        pwm_dome.open_all_servos(0)
-        return "Ok"
-    return "Fail"
-
-
-@app.route('/servo/dome/open/<duration>', methods=['GET'])
-def servo_dome_open_slow(duration):
-    """GET to open all dome servos slowly"""
-    logging.info("Servo open dome slow")
-    if request.method == 'GET':
-        pwm_dome.open_all_servos(duration)
-        return "Ok"
-    return "Fail"
-
-
-@app.route('/servo/body/open', methods=['GET'])
-def servo_body_open():
-    """GET to open all body servos"""
-    logging.info("Servo open body")
-    if request.method == 'GET':
-        pwm_body.open_all_servos(0)
-        return "Ok"
-    return "Fail"
-
-
-@app.route('/servo/body/open/<duration>', methods=['GET'])
-def servo_body_open_slow(duration):
-    """GET to open all body servos" slowly """
-    logging.info("Servo open body slow") 
-    if request.method == 'GET':
-        pwm_body.open_all_servos(duration)
-        return "Ok"
-    return "Fail"
-
-
+# Initialise server controllers
+from Hardware.Servo import ServoBlueprint
+from Hardware.Servo import ServoControl
+for x in servos:
+    logging.info("Loading Servo Control Board: %s" % x)
+    app.register_blueprint(ServoBlueprint.construct_blueprint(x), url_prefix="/" + x)
+    
 p = {}
 for x in plugins:
     logging.info("Loading %s" % x)
@@ -397,6 +230,7 @@ def sendstatus():
             message = "Telegram module not configured"
     return message
 
+
 @app.route('/status/csv', methods=['GET'])
 def sendstatuscsv():
     """GET to display a CSV of current stats"""
@@ -404,6 +238,7 @@ def sendstatuscsv():
     if request.method == 'GET':
         message = system_status_csv()
     return message
+
 
 @app.route('/internet', methods=['GET'])
 def sendstatusinternet():
@@ -415,8 +250,6 @@ def sendstatusinternet():
         else:
             message = "False"
     return message
-
-
 
 
 if __name__ == '__main__':

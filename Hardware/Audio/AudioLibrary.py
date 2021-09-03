@@ -21,7 +21,7 @@ _config = configparser.SafeConfigParser({'sounds_dir': './scripts', 'logfile': '
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
-    print("Config file does not exist")
+    print("Config file does not exist (Audio)")
     with open(_configfile, 'wt') as configfile:
         _config.write(configfile)
 

@@ -25,7 +25,12 @@ from .ServoThread import ServoThread
 from queue import Queue
 import csv
 import collections
+import os
+import datetime
+import time
+from pathlib import Path
 from flask import Blueprint, request
+import configparser
 standard_library.install_aliases()
 from builtins import object
 from r2utils import mainconfig
@@ -42,7 +47,7 @@ class ServoControl(object):
 
     Servo = collections.namedtuple('Servo', 'name, queue, thread')
 
-    def init_config(self, address, servo_config_file):
+    def init_config(self, name):
         """
         Load in CSV of Servo definitions
 
@@ -54,7 +59,9 @@ class ServoControl(object):
              location of the config file containing servo details
         """
 
-        ifile = open('%s/%s' % (_configdir, servo_config_file), "rt")
+        list_file = Path(_configdir + 'servo_' + name + '_list.cfg')
+        list_file.touch(exist_ok=True)
+        ifile = open(list_file, "rt")
         reader = csv.reader(ifile)
         for row in reader:
             if row[0] != "":
@@ -76,14 +83,34 @@ class ServoControl(object):
         ifile.close()
         self.close_all_servos(0)
 
-    def __init__(self, address, servo_config_file):
+    def __init__(self, name):
         self.servo_list = []
-        self.init_config(address, servo_config_file)
+
+        _configfile = mainconfig.mainconfig['config_dir'] + 'servo_' + name + '.cfg'
+        _config = configparser.SafeConfigParser({'address': '0x40',
+                                         'logfile': 'servo_' + name + '.log'})
+        _config.read(_configfile)
+
+        if not os.path.isfile(_configfile):
+            print("Config file does not exist (Servo: " + name + ")")
+            with open(_configfile, 'wt') as configfile:
+                _config.write(configfile)
+
+        _defaults = _config.defaults()
+
+        _logdir = mainconfig.mainconfig['logdir']
+        _logfile = _defaults['logfile']
+
+        self.address = _defaults['address']
+        self.init_config(name)
+        if __debug__:
+            print("Initialised servo module " + name + " at address " + self.address);
+
 
     def list_servos(self):
         message = ""
         if __debug__:
-            print("Listing servos for address:")
+            print("Listing servos for address:" + self.address)
         for servo in self.servo_list:
             message += "%s\n" % servo.name
         return message
@@ -131,3 +158,5 @@ class ServoControl(object):
                 current_servo = servo
         current_servo.queue.put([position, duration])
 
+
+#servo = _ServoControl("body")

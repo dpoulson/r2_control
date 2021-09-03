@@ -12,15 +12,15 @@ _config = configparser.SafeConfigParser({ 'logtofile': True,
                                          'logdir' : './logs',
                                          'logfile' : 'debug.log',
                                          'busid' : '1',
-                                         'plugins' : 'GPIO,Audio',
+                                         'plugins' : 'GPIO,Audio,Scripts',
                                          'config_dir': _configdir,
-                                         'modules' : 'scripts,audio'
+                                         'servos' : 'body,dome'
                                             })
 
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
-    print("Config file does not exist")
+    print("Config file does not exist (Main Config)")
     with open(_configfile, 'wt') as configfile:
         _config.write(configfile)
 

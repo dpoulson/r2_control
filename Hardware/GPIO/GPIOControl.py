@@ -19,8 +19,8 @@ _configfile = mainconfig.mainconfig['config_dir'] + 'gpio.cfg'
 _config = configparser.SafeConfigParser({'logfile': 'gpio.log', 'gpio_configfile': 'gpio_pins.cfg'})
 
 if not os.path.isfile(_configfile):
-    print("Config file does not exist")
-    with open(_configfile, 'wb') as configfile:
+    print("Config file does not exist  (GPIO)")
+    with open(_configfile, 'wt') as configfile:
         _config.write(configfile)
 
 _config.read(_configfile)
