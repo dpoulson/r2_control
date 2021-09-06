@@ -34,7 +34,6 @@ matplotlib==2.2.4
 monotonic==1.5
 mysmbus==0.1
 numpy==1.16.2
-odrive==0.4.11
 pathlib2==2.3.4
 pexpect==4.7.0
 pickleshare==0.7.5
