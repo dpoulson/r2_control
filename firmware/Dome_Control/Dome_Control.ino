@@ -3,27 +3,30 @@
 #include "dome/Logics.h"
 #include "dome/HoloLights.h"
 #include "dome/LogicEngineController.h"
-#include "dome/PSIMatrix.h"
+#include "dome/NeoPixelPSI.h"
 #include "i2c/I2CReceiver.h"
 
-LogicEngineDeathStarFLD<> FLD(1, LogicEngineFLDDefault);
-LogicEngineDeathStarRLD<> RLD(2, LogicEngineRLDDefault);
+LogicEngineDeathStarFLD<> FLD(LogicEngineFLDDefault, 1);
+LogicEngineDeathStarRLD<> RLD(LogicEngineRLDDefault, 2);
 LogicEngineControllerDefault controller(FLD, RLD);
 
-HoloLights frontHP(10, 10);
-HoloLights rearHP(12, 12);
-HoloLights topHP(13, 13);
+HoloLights frontHP(10);
+HoloLights rearHP(12);
+HoloLights topHP(13);
 
-PSIMatrix rearPSI(22,23,2);
-PSIMatrix frontPSI(24,25,1);
+NeoPixelPSI fpsi(3);
+NeoPixelPSI rpsi(4);
 
 I2CReceiver i2cReceiver(0x0a);
 ////////////////////////////////////////////////////////////////////////////////
 
 void setup()
 {
+
     REELTWO_READY();
     SetupEvent::ready();
+    rpsi.set_color(1, 0, 255, 0);
+    rpsi.set_color(2, 255, 255, 0);
 
 }
 

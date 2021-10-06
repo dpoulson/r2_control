@@ -230,7 +230,7 @@ const int RCRange[2] = {1250, 1750};     // {Min, Max}
 ///*****        uncomment the following if you have the RGBW version.     *****///
 ///*****                                                                  *****///
 //////////////////////////////////////////////////////////////////////////////////
-#define NEO_JEWEL_RGBW
+//#define NEO_JEWEL_RGBW
 
 //////////////////////////////////////////////////////////////////////////////////
 ///*****                          LED Brightness                          *****///
@@ -1258,5 +1258,3 @@ void i2cEvent(int howMany)
   stringComplete = true;                                // Once done, set a flag so the main loop can do something about it. 
   statusLEDOn();
 }
-
-
