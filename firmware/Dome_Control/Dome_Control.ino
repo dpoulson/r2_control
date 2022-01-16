@@ -14,8 +14,8 @@ HoloLights frontHP(10);
 HoloLights rearHP(12);
 HoloLights topHP(13);
 
-NeoPixelPSI fpsi(3);
-NeoPixelPSI rpsi(4);
+NeoPixelPSI fpsi(3,8);
+NeoPixelPSI rpsi(4,8);
 
 I2CReceiver i2cReceiver(0x0a);
 ////////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ void setup()
     REELTWO_READY();
     SetupEvent::ready();
     rpsi.set_color(1, 0, 255, 0);
-    rpsi.set_color(2, 255, 255, 0);
+    rpsi.set_color(2, 128, 128, 0);
 
 }
 
