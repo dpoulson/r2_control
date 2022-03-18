@@ -34,7 +34,6 @@ numpy==1.21.0
 pathlib2==2.3.4
 pexpect==4.7.0
 pickleshare==0.7.5
-prompt-toolkit==1.0.16
 ptyprocess==0.6.0
 pycparser==2.19
 Pygments==2.7.4
