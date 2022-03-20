@@ -5,7 +5,9 @@ Current controllers are:
 * PS3 - Controls over bluetooth rather than an xbee as the standard PS2 controller.
 * PSMove - A stealthier option to control R2.
 * WWW - Web based control from tablet or mobile (or computer). Allows all sorts of custom control, but not good for steering.
-* Telegram - Instant messaging interface for getting more detailed information whilst driving with a remote
+* Telegram - Instant messaging interface for getting more detailed information whilst driving with a remote.
+* XBox360Controller - Alternative to PS3.
+* sBusPythonDrive - Suitable for R/C Transmitter.
 
 
 ## Joystick Wrapper

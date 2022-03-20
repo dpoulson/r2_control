@@ -1,0 +1,852 @@
+@font-face {
+    font-family: StarWars;
+    src: url('../fonts/rebellion-webfont.woff') format('woff'),
+        url(../fonts/Rebellion.otf);
+}
+
+@font-face {
+    font-family: StarJedi;
+    src: url('../fonts/starjedi-webfont.woff') format('woff'),
+        url(../fonts/StarJedi.otf);
+}
+
+@font-face {
+    font-family: Atures700;
+    src: url('../fonts/atures700-webfont.woff') format('woff'),
+    url(../fonts/Atures700.otf);
+}
+
+@font-face {
+    font-family: AnakinMono;
+    src: url('../fonts/anakinmono-webfont.woff') format('woff'),
+    url(../fonts/AnakinMono.otf);
+}
+
+@font-face {
+    font-family: AureBesh;
+    src: url(../fonts/Aurebesh.otf);
+}
+
+* {
+    box-sizing: border-box
+}
+
+body, html {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+
+body {
+    background: black;
+    color: white;
+    font-family: Atures700, sans-serif;
+    font-size: 15px;
+    margin: 0;
+    padding: 0;
+}
+
+body.blueprint {
+    background: #1A2851;
+}
+
+body.galactic {
+    background: #0D1014;
+}
+
+.flexrow {
+    flex-direction: row;
+    min-height: 1.25rem;
+}
+
+a:link {
+    text-decoration: none;
+    color: white;
+}
+a:active {
+    text-decoration: none;
+    color: white;
+}
+a:hover {
+    text-decoration: none;
+    color: white;
+}
+a:focus {
+    text-decoration: none;
+    color: white;
+}
+a:visited {
+    text-decoration: none;
+    color: white;
+}
+
+.wrapper {
+    overflow: hidden;
+    display: flex;
+    flex-flow: wrap;
+}
+
+header {
+    width: 100vw;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+}
+
+header a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    padding: 6px;
+}
+
+header h1 {
+    font-size: 1.75rem;
+    font-weight: normal;
+    line-height: 60px;
+    padding: 0 0 0 10%;
+    margin: 0;
+}
+
+.header {
+    width: 80%;
+    display: inline-flex;
+    border: none;
+    color: white;
+}
+
+.leftheader {
+    width: 10%;
+    display: inline-flex;
+    font-family: sans-serif;
+}
+
+.rightheader {
+    width: 10%;
+    display: inline-flex;
+    font-family: sans-serif;
+}
+
+.blueprint header {
+    background: #1A2851;
+    border: 1px solid #668CFF;
+    font-family: StarWars, sans-serif;
+}
+
+.galactic header {
+    background: #0D1014;
+    font-family: StarJedi, sans-serif;
+}
+
+.contentfluid {
+    width: 100vw;
+    height: calc(100vh - 112px);
+    display: flex;
+    flex-flow: row;
+}
+
+aside {
+    width: 250px;
+    height: calc(100vh - 112px);
+    color: white;
+    border: none;
+    font-family: Atures700, sans-serif;
+    font-size: 1rem;
+    flex-direction: column;
+    position: relative;
+}
+#leftaside {
+    display: none;
+    text-align: left;
+    margin-left: -249px;
+    transition: 0.6s;
+}
+#rightaside {
+    display: none;
+    text-align: right;
+    margin-right: -249px;
+    transition: 0.6s;
+}
+#leftaside.show {
+    display: flex;
+    text-align: left;
+    margin-left: 0;
+    transition: 0.6s;
+}
+#rightaside.show {
+    display: flex;
+    text-align: right;
+    margin-right: 0;
+    transition: 0.6s;
+}
+#leftaside a {
+    padding: 0 0 0 1.25rem;
+}
+#rightaside a {
+    padding: 0 1.25rem 0 0;
+}
+aside .bottommenu {
+    bottom: 0;
+    position: absolute;
+}
+
+.blueprint aside {
+    background: #1A2851;
+    color: white;
+    border-left: 1px solid #668CFF;
+    border-right: 1px solid #668CFF;
+}
+
+.galactic aside {
+    background: #0D1014;
+    color: white;
+}
+
+aside ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+aside li {
+    width: 100%;
+    display: inline-block;
+}
+
+aside a {
+    width: 100%;
+    display: block;
+    text-decoration: none;
+    line-height: 44px;
+    height: inherit;
+}
+
+.blueprint aside .topmenu li {
+    border-bottom: 1px solid #668CFF;
+}
+.blueprint aside a:after {
+    content: "";
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background-size: 22px 22px;
+    background-repeat: no-repeat;
+}
+.blueprint aside#leftaside .topmenu a:after {
+    background-image: url("../images/blueprintleftbtn.svg");
+    bottom: -1px;
+    right: -1px;
+}
+.blueprint aside#leftaside .topmenu li:last-of-type a:after {
+    background-image: url("../images/blueprintleftbtnL.svg");
+    bottom: -1px;
+    right: -1px;
+}
+.blueprint aside#leftaside .bottommenu a:after {
+    background-image: url("../images/blueprintleftbtnB.svg");
+    top: -1px;
+    right: -1px;
+}
+.blueprint aside#leftaside .bottommenu li:first-of-type a:after {
+    background-image: url("../images/blueprintleftbtnBF.svg");
+    top: -1px;
+    right: -1px;
+}
+.blueprint aside#rightaside .topmenu a:after {
+    background-image: url("../images/blueprintrightbtn.svg");
+    bottom: -1px;
+    left: -1px;
+}
+.blueprint aside#rightaside .topmenu li:last-of-type  a:after {
+    background-image: url("../images/blueprintrightbtnL.svg");
+    bottom: -1px;
+    left: -1px;
+}
+.blueprint aside#rightaside .bottommenu a:after {
+    background-image: url("../images/blueprintrightbtnB.svg");
+    top: -1px;
+    left: -1px;
+}
+.blueprint aside#rightaside .bottommenu li:first-of-type a:after {
+    background-image: url("../images/blueprintrightbtnBF.svg");
+    top: -1px;
+    left: -1px;
+}
+.blueprint aside .bottommenu li {
+    border-top: 1px solid #668CFF;
+}
+.blueprint aside a, .blueprint aside a:active, .blueprint aside a:hover, .blueprint aside a:focus, .blueprint aside a:visited {
+    position: relative;
+    background: black;
+}
+.galactic aside li {
+    border: 1px solid #6DB0F3;
+    margin-bottom: 4px;
+}
+.galactic aside a:after {
+    content: "";
+    position: absolute;
+    width: 35px;
+    height: 30px;
+    background-size: 35px 30px;
+    background-repeat: no-repeat;
+}
+.galactic aside#leftaside .topmenu a:after {
+    background-image: url("../images/galacticleftbtn.svg");
+    bottom: -1px;
+    right: -1px;
+}
+.galactic aside#leftaside .bottommenu a:after {
+    background-image: url("../images/galacticleftbtnB.svg");
+    top: -1px;
+    right: -1px;
+}
+.galactic aside#rightaside .topmenu a:after {
+    background-image: url("../images/galacticrightbtn.svg");
+    bottom: -1px;
+    left: -1px;
+}
+.galactic aside#rightaside .bottommenu a:after {
+    background-image: url("../images/galacticrightbtnB.svg");
+    top: -1px;
+    left: -1px;
+}
+.galactic aside a, .galactic aside a:active, .galactic aside a:hover, .galactic aside a:focus, .galactic aside a:visited {
+    position: relative;
+    background: black;
+}
+
+.content {
+    width: calc(100vw - 250px);
+    height: calc(100vh - 112px);
+    display: flex;
+    flex-direction: column;
+}
+
+.servowrapper, .audiowrapper {
+    width: calc(100vw - 250px);
+    height: calc(100vh - 112px);
+    display: flex;
+    flex-direction: row;
+}
+
+footer {
+    display: flex;
+    flex-flow: row;
+}
+
+.footer {
+    width: 100vw;
+    background: black;
+    border: none;
+    color: white;
+    font-family: "Andale Mono", sans-serif;
+    font-size: .875rem;
+    text-align: center;
+    line-height: 20px;
+}
+
+.blueprint .footer {
+    background: #1A2851;
+    border: 1px solid #668CFF;
+    color: white;
+}
+
+.galactic .footer {
+    background: #0D1014;
+    color: #6DB0F3;
+}
+
+.diagram {
+    margin: 1rem;
+    flex-direction: column;
+}
+
+.table {
+    width: 100%;
+    display: block;
+    margin: 1rem;
+    flex-direction: column;
+}
+
+.table table {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+}
+
+.blueprint .table table {
+    background: black;
+    border: 1px solid #668CFF;
+}
+
+.galactic .table table {
+    background: black;
+    border: 1px solid #6DB0F3;
+    box-shadow: 0 0 6px 2px #6DB0F3;
+}
+
+.table th {
+    padding: .5rem;
+}
+
+.blueprint .table th {
+    background: #0D1014;
+    border: 1px solid #668CFF;
+}
+.blueprint .table tr:nth-child(even) {
+    background: #1b2129;
+}
+.galactic .table th {
+    border: 1px solid #6DB0F3;
+}
+
+.table td {
+    padding: .5rem;
+    text-align: left;
+}
+
+.table td a {
+    display: block;
+    padding: .75rem;
+    text-align: center;
+}
+
+.table td a.open {
+    display: block;
+    padding: .75rem;
+    text-align: center;
+    background: #5C9918;
+}
+
+.table td a.close {
+    display: block;
+    padding: .75rem;
+    text-align: center;
+    background: #770000;
+}
+
+.blueprint .table td {
+
+}
+
+.galactic .table td {
+
+}
+
+.items {
+    display: flex;
+    flex-flow: column;
+}
+
+h3.current, h3.avail {
+    font-size: 1.125rem;
+    font-weight: normal;
+    line-height: 30px;
+    padding: 1rem 1rem 0;
+    margin: 0;
+}
+
+.items .current {
+    flex: 1 0;
+    background: black;
+    border: 1px solid #333;
+    color: white;
+    margin: 1rem;
+    font-family: Atures700, sans-serif;
+    font-size: 1rem;
+    line-height: 44px;
+}
+
+.blueprint .items .current {
+    background: black;
+    border: 1px solid #668CFF;
+}
+
+.galactic .items .current {
+    background: black;
+    border: 1px solid #F8E71C;
+    box-shadow: 0 0 6px 2px #F8E71C;
+}
+
+.items .item {
+    flex: 1 0;
+    color: white;
+    margin: 1rem;
+    font-family: Atures700, sans-serif;
+    font-size: 1rem;
+    line-height: 44px;
+}
+
+.items .item img, .items .current img {
+    float: right;
+    margin: 2px 6rem 2px 0;
+}
+
+.blueprint .items .item {
+    background: #4965B8;
+    border: 1px solid #668CFF;
+}
+
+.galactic .items .item {
+    background: #0D1014;
+    border: 1px solid #6DB0F3;
+    box-shadow: 0 0 6px 2px #6DB0F3;
+}
+
+.items .item a, .items .current {
+    display: block;
+    padding-left: 6rem;
+}
+
+.leftsound {
+    display: flex;
+    flex-direction: column;
+    margin: 0 1rem;
+}
+
+.slidecontainer {
+    width: 3rem;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    margin: 1rem .5rem 0 0;
+    background: black;
+    border: 1px solid grey;
+}
+.blueprint .slidecontainer {
+    border: 1px solid #668CFF;
+}
+.galactic .slidecontainer {
+    background: transparent;
+    border: 1px solid #6DB0F3;
+    box-shadow: 0 0 6px 2px #6DB0F3;
+}
+
+.graduation {
+    width: 3rem;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0 0;
+    background: rgb(8,172,0);
+    background: linear-gradient(0deg, rgba(8,172,0,1) 0%, rgba(247,28,28,1) 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 0);
+}
+.blueprint .graduation {
+    background: rgb(8,172,0);
+    background: linear-gradient(0deg, rgba(8,172,0,1) 0%, rgba(247,28,28,1) 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 0);
+}
+.galactic .graduation {
+    background: rgba(109,176,243,.6);
+    background: linear-gradient(0deg, rgba(109,176,243,.3) 0%, rgba(109,176,243,.4) 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 0);
+}
+
+.volumetitle {
+    text-align: center;
+    margin: 1rem .5rem 0;
+}
+
+.blueprint .ui-widget-content {
+    width: 6px;
+    border-radius: 3px;
+    background-color: #D8D8D8;
+    left: calc(1.5rem - 4px);
+}
+.ui-slider-vertical {
+    height: 100vh;
+}
+
+.ui-slider-vertical.ui-slider-pips {
+    margin: .6rem -4rem .6rem 0;
+}
+
+.ui-slider-vertical.ui-slider-pips .ui-slider-pip {
+    left: -6px;
+}
+
+.blueprint .ui-slider-vertical.ui-slider-pips .ui-slider-line {
+    width: .5rem;
+    height: 3px;
+    background: transparent;
+    margin-top: -2px;
+    left: -1.5rem;
+    transition: all 0.4s ease;
+}
+
+.galactic .ui-slider-vertical.ui-slider-pips .ui-slider-line {
+    display: none;
+}
+
+.blueprint #flat-slider-vertical .ui-slider-range {
+    display: none;
+}
+
+.galactic #flat-slider-vertical .ui-slider-range {
+    width: calc(3rem - 2px);
+    bottom: -0.6rem;
+    background-color: #161F38;
+}
+
+.blueprint .ui-slider .ui-slider-handle {
+    position: absolute;
+    left: calc(-1.5rem + 3px);
+    z-index: 2;
+    width: 3rem;
+    height: 1.2rem;
+    cursor: pointer;
+    -ms-touch-action: none;
+    touch-action: none;
+    background: rgb(208, 208, 208);
+    background: linear-gradient(0deg, rgb(208, 208, 208) 0%, rgb(144, 144, 144) 100%);
+    border: 1px solid #201F1F;
+    border-radius: 1px;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+}
+.blueprint .ui-slider .ui-slider-handle:focus-visible {
+    outline: 2px solid rgba(102, 140, 255, 0.5);
+    border-radius: 2px;
+}
+
+.galactic .ui-slider .ui-slider-handle {
+    position: absolute;
+    left: -1px;
+    z-index: 2;
+    width: 3rem;
+    height: 1.2rem;
+    cursor: pointer;
+    -ms-touch-action: none;
+    touch-action: none;
+    background: #6DB0F3;
+}
+.galactic .ui-slider .ui-slider-handle:focus-visible {
+    outline: 2px solid rgba(109, 176, 243, 0.5);
+    border-radius: 2px;
+}
+
+#flat-slider.ui-slider .ui-slider-handle.ui-state-hover,
+#flat-slider.ui-slider .ui-slider-handle.ui-state-focus,
+#flat-slider.ui-slider .ui-slider-handle.ui-state-active {
+    border-color: black; }
+
+#flat-slider.ui-slider.ui-slider-vertical {
+    width: 3rem;
+    height: 80%;
+    display: inline-block;
+    margin: 0 15%; }
+
+#flat-slider.ui-slider.ui-slider-vertical .ui-slider-pip .ui-slider-line {
+    height: 2px;
+    width: 10px;
+    margin-top: -1px;
+}
+
+.blueprint #flat-slider-vertical .ui-slider-pip[class*=ui-slider-pip-selected] .ui-slider-line {
+    width: 3rem;
+    background: black;
+    margin-top: -2px;
+    left: calc(-4rem + 1px);
+}
+
+.galactic #flat-slider-vertical .ui-slider-pip[class*=ui-slider-pip-selected] .ui-slider-line,
+.galactic #flat-slider-vertical .ui-slider-pip.ui-slider-pip-inrange .ui-slider-line {
+    display: none; }
+
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: 1px solid grey;
+    color: white;
+}
+
+.blueprint .tab {
+    overflow: hidden;
+    border: 1px solid #668CFF;
+    color: white;
+}
+
+.galactic .tab {
+    border: 1px solid #6DB0F3;
+    box-shadow: 0 0 6px 2px #6DB0F3;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: 1px solid transparent;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    color: white;
+}
+
+/* Create an active/current tab button class */
+.tab button.active {
+    background-color: grey;
+}
+
+.blueprint .tab button.active {
+    background-color: #668CFF;
+}
+
+.galactic .tab button.active {
+    background-color: transparent;
+    border: 1px solid #F8E71C;
+}
+
+/* Change background color of tab buttons on hover */
+.tab button:hover, .tab button:focus {
+    background-color: grey;
+}
+
+.blueprint .tab button:hover, .tab button:focus {
+    background-color: #668CFF
+}
+
+.galactic .tab button:hover, .tab button:focus {
+    background-color: transparent;
+    border: 1px solid #F8E71C;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
+}
+
+.audioitems {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+
+.audioitems .audioitem {
+    flex: 0 0 125px;
+    color: white;
+    margin: 1rem;
+    font-family: Atures700, sans-serif;
+    font-size: 1rem;
+    line-height: 125px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.blueprint .audioitems .audioitem {
+    background: #4965B8;
+    border: 2px solid #668CFF;
+    border-radius: 125px;
+}
+
+.blueprint .audioitems .audioitem:active {
+    margin-top: 1.25rem;
+    margin-bottom: .75rem;
+    background-color: #668CFF;
+}
+
+.galactic .audioitems .audioitem {
+    border: 2px solid #6DB0F3;
+    box-shadow: 0 0 6px 2px #6DB0F3;
+    border-radius: 125px;
+}
+
+.galactic .audioitems .audioitem:active {
+    margin-top: 1.25rem;
+    margin-bottom: .75rem;
+    background-color: black;
+    border: 2px solid #F8E71C;
+}
+
+.shutdown {
+    width: 60%;
+    margin: 2rem auto;
+    background: #770000;
+    border: 1px solid #EB0000;
+    text-align: center;
+    position: relative;
+}
+.blueprint .shutdown {
+    font-family: StarWars, sans-serif;
+    padding: 1rem 1rem 1rem;
+}
+.galactic .shutdown {
+    font-family: StarJedi, sans-serif;
+    padding: .6rem 1rem 1rem;
+}
+.blueprint .shutdown:before {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: -1px;
+    margin: -20px;
+    width: 40px;
+    height: 40px;
+    transform: rotate(45deg);
+    background-color: #192851;
+    border-right: 1px solid #EB0000;
+}
+
+.blueprint .shutdown:after {
+    content: "";
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    margin: -20px;
+    width: 40px;
+    height: 40px;
+    transform: rotate(45deg);
+    background-color: #192851;
+    border-left: 1px solid #EB0000;
+}
+
+.galactic .shutdown:before {
+    content: "";
+    position: absolute;
+    width: 65px;
+    height: 50px;
+    background-size: 65px 50px;
+    background-repeat: no-repeat;
+    background-image: url("../images/shutdownTL.svg");
+    top: -1px;
+    left: -1px;
+}
+
+.galactic .shutdown:after {
+    content: "";
+    position: absolute;
+    width: 65px;
+    height: 50px;
+    background-size: 65px 50px;
+    background-repeat: no-repeat;
+    background-image: url("../images/shutdownBR.svg");
+    bottom: -1px;
+    right: -1px;
+}
+
+.shutdown a {
+    display: block;
+    font-size: 1.75rem;
+}
+.shutdown a:active {
+    background: #EB0000;
+}
+.shutdown a:hover, .shutdown a:focus {
+    background: #EB0000;
+}
+.shutdown a:visited {
+    background: #770000;
+}
+
+.message {
+    width: 60%;
+    margin: 2rem auto;
+    font-size: 1.75rem;
+    text-align: center;
+    padding: 1.6rem 1rem 1rem;
+}
+
