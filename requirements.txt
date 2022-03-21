@@ -37,7 +37,6 @@ pickleshare==0.7.5
 ptyprocess==0.6.0
 pycparser==2.19
 Pygments==2.7.4
-PyGObject==3.30.4
 pyinotify==0.9.6
 pyOpenSSL==19.0.0
 pyparsing==2.4.2
@@ -60,4 +59,4 @@ spidev==3.4
 subprocess32==3.5.4
 traitlets==4.3.2
 wcwidth==0.1.7
-Werkzeug==0.15.3
+
