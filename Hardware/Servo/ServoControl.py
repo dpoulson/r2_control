@@ -72,7 +72,7 @@ class ServoControl(object):
                 servo_home = int(row[4])
                 queue = Queue()
                 self.servo_list.append(self.Servo(name=servo_name, queue=queue,
-                                              thread=ServoThread(address, servo_Max, servo_Min, servo_home,
+                                              thread=ServoThread(self.address, servo_Max, servo_Min, servo_home,
                                                                              servo_channel, queue)))
                 for servo in self.servo_list:
                     if servo.name == servo_name:

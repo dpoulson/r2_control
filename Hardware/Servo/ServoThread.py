@@ -36,12 +36,11 @@ class ServoThread(threading.Thread):
         self.destination_time = 0
         self.processing = False
         threading.Thread.__init__(self)
-        try: 
-            self.i2c = Adafruit_PCA9685.PCA9685(address=Address)
+        try:
+            self.i2c = Adafruit_PCA9685.PCA9685(address=int(self.Address,16), busnum=int(1))
             self.i2c.set_pwm_freq(60)
         except:
-            if __debug__:
-                print("Failed to initialise the i2c device %s/%s" % (self.Address, self.Channel))
+            print("Failed to initialise servo at %s/%s" % (self.Address, self.Channel))
         return
 
     def sendCommand(self):
@@ -119,6 +118,7 @@ class ServoThread(threading.Thread):
             except Empty:
                 if self.processing != False:
                     self.sendCommand()
+            time.sleep(0.005)
 
         return
 

@@ -136,6 +136,8 @@ def index():
 # Initialise server controllers
 from Hardware.Servo import ServoBlueprint
 from Hardware.Servo import ServoControl
+if __debug__:
+    print("Servos loading.... %s" % servos)
 for x in servos:
     logging.info("Loading Servo Control Board: %s" % x)
     app.register_blueprint(ServoBlueprint.construct_blueprint(x), url_prefix="/" + x)

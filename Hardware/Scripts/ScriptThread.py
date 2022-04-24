@@ -67,14 +67,14 @@ class ScriptThread(threading.Thread):
                         time.sleep(float(row[1]))
                 elif row[0] == "body":
                     if row[1] == "all":
-                        urllib.request.urlopen("http://localhost:5000/servo/body/%s" % row[2])
+                        urllib.request.urlopen("http://localhost:5000/body/%s" % row[2])
                     else:
-                        urllib.request.urlopen("http://localhost:5000/servo/body/%s/%s/%s" % (row[1], row[2], row[3]))
+                        urllib.request.urlopen("http://localhost:5000/body/%s/%s/%s" % (row[1], row[2], row[3]))
                 elif row[0] == "dome":
                     if row[1] == "all":
-                        urllib.request.urlopen("http://localhost:5000/servo/dome/%s" % row[2])
+                        urllib.request.urlopen("http://localhost:5000/dome/%s" % row[2])
                     else:
-                        urllib.request.urlopen("http://localhost:5000/servo/dome/%s/%s/%s" % (row[1], row[2], row[3]))
+                        urllib.request.urlopen("http://localhost:5000/dome/%s/%s/%s" % (row[1], row[2], row[3]))
                 elif row[0] == "sound":
                     if row[1] == "random":
                         urllib.request.urlopen("http://localhost:5000/audio/random/%s" % row[2])
