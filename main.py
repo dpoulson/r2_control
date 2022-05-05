@@ -121,6 +121,7 @@ logging.info("**** Starting r2_control")
 
 ######################################
 # initialise modules
+print(mainconfig.mainconfig['telegram'])
 if mainconfig.mainconfig['telegram'] == True:
     # Enable telegram
     tg = telegram.Telegram

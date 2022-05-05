@@ -64,7 +64,7 @@ class _Monitoring(object):
         data = [0, 0, 0, 0, 0, 0, 0, 0]
         while True:
             try:
-                data = self.bus.read_i2c_block_data(0x04, 0)
+                data = self.bus.read_i2c_block_data(self.address, 0)
             except:
                 if __debug__:
                     print("Failed to read i2c data")
@@ -102,7 +102,8 @@ class _Monitoring(object):
         except:
             print("Failed to connect to device on bus")
         if __debug__:
-            print("Monitoring....")
+            print("Initialising Monitoring")
+            print("Address: %s | Bus: %s | logdir: %s" % (self.address, self.bus, self.logdir))
         if self.telegram:
             telegram.send("Monitoring started")
         loop = Thread(target=self.monitor_loop, args=(self.extracted, ))
