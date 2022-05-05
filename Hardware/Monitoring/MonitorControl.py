@@ -15,11 +15,40 @@ from r2utils import telegram
 standard_library.install_aliases()
 from builtins import map
 from builtins import range
+from flask import Blueprint, request
 
 
-class i2cMonitor(threading.Thread):
+_configfile = mainconfig.mainconfig['config_dir'] + 'monitoring.cfg'
 
-    def monitor_loop(self):
+_config = configparser.SafeConfigParser({'address': '0x04',
+                                         'logfile': 'monitoring.log',
+                                         'interval': '0.5'})
+_config.read(_configfile)
+
+if not os.path.isfile(_configfile):
+    print("Config file does not exist (Monitoring)")
+    with open(_configfile, 'wt') as configfile:
+        _config.write(configfile)
+
+_defaults = _config.defaults()
+
+_logdir = mainconfig.mainconfig['logdir']
+_logfile = _defaults['logfile']
+
+api = Blueprint('monitoring', __name__, url_prefix='/monitoring')
+
+@api.route('/', methods=['GET'])
+@api.route('/status', methods=['GET'])
+def _audio_list():
+    """GET gives a comma separated list of stats"""
+    message = ""
+    if request.method == 'GET':
+        message += monitoring.queryBattery()
+    return message
+
+class _Monitoring(object):
+
+    def monitor_loop(self, extracted):
         f = open(self.logdir + '/power.log', 'at')
         data = [0, 0, 0, 0, 0, 0, 0, 0]
         while True:
@@ -29,10 +58,10 @@ class i2cMonitor(threading.Thread):
                 if __debug__:
                     print("Failed to read i2c data")
                 sleep(1)
-            self.extracted[0] = time.time()
+            extracted[0] = time.time()
             for i in range(0, 8):
-                bytes = data[4 * i:4 * i + 4]
-                self.extracted[i + 1] = struct.unpack('f', "".join(map(chr, bytes)))[0]
+                bytes = bytearray(data[4 * i:4 * i + 4])
+                extracted[i + 1] = struct.unpack('f', bytes)
             if __debug__:
                 print("Writing csv row")
             writer = csv.writer(f)
@@ -66,7 +95,7 @@ class i2cMonitor(threading.Thread):
             print("Monitoring....")
         if self.telegram:
             telegram.send("Monitoring started")
-        loop = Thread(target=self.monitor_loop)
+        loop = Thread(target=self.monitor_loop, args=(self.extracted, ))
         loop.daemon = True
         loop.start()
 
@@ -88,3 +117,5 @@ class i2cMonitor(threading.Thread):
     def queryCurrentDome(self):
         return self.extracted[4]
 
+
+monitoring = _Monitoring(_defaults['address'], _defaults['interval'])

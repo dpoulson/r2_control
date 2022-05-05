@@ -77,7 +77,7 @@ def system_status():
     status = "Current Status\n"
     status += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
     status += "Uptime: \t%s\n" % uptime_string
-    if "monitor" in modules:
+    if "monitor" in plugins:
         status += "Main Battery: \t%5.3f (balance: %5.3f)\n" % (monitor.queryBattery(),
                                                                 monitor.queryBatteryBalance())
     status += "Remote Battery: %s%%\t\n" % remote_battery
