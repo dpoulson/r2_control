@@ -45,7 +45,7 @@ def _battery():
     """GET gives a comma separated list of stats"""
     message = ""
     if request.method == 'GET':
-        message += monitoring.queryBattery()
+        message += str(monitoring.queryBattery())
     return message
 
 @api.route('/balance', methods=['GET'])
@@ -53,7 +53,7 @@ def _balance():
     """GET gives the current battery balance"""
     message = ""
     if request.method == 'GET':
-        message += monitoring.queryBatteryBalance()
+        message += str(monitoring.queryBatteryBalance())
     return message
 
 
