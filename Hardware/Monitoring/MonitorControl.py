@@ -64,7 +64,7 @@ class _Monitoring(object):
         data = [0, 0, 0, 0, 0, 0, 0, 0]
         while True:
             try:
-                data = self.bus.read_i2c_block_data(self.address, 0)
+                data = self.bus.read_i2c_block_data(0x04, 0)
             except:
                 if __debug__:
                     print("Failed to read i2c data")
