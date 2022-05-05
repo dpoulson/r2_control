@@ -267,8 +267,8 @@ while (joystick):
     if difference > keepalive:
         if __debug__:
             print("Last command sent greater than %s ago, doing keepAlive" % keepalive)
-        drive.keepAlive()
-        dome.keepAlive()
+        #drive.keepAlive()
+        #dome.keepAlive()
         # Check js0 still there
         if os.path.exists('/dev/input/js0'):
             if __debug__:

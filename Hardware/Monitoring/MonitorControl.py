@@ -88,7 +88,7 @@ class _Monitoring(object):
                         print("Battery low")
                     telegram.send("Battery below 21V")
                     self.lowbat = True
-            f.close()
+        f.close()
 
     def __init__(self, address, interval):
         # Check for telegram config
@@ -111,22 +111,22 @@ class _Monitoring(object):
         loop.start()
 
     def queryBattery(self):
-        return self.extracted[5]
+        return self.extracted[5][0]
 
     def queryBatteryBalance(self):
-        return self.extracted[7] - self.extracted[6]
+        return self.extracted[7][0] - self.extracted[6][0]
 
     def queryCurrentMain(self):
-        return self.extracted[1]
+        return self.extracted[1][0]
 
     def queryCurrentLeft(self):
-        return self.extracted[2]
+        return self.extracted[2][0]
 
     def queryCurrentRight(self):
-        return self.extracted[3]
+        return self.extracted[3][0]
 
     def queryCurrentDome(self):
-        return self.extracted[4]
+        return self.extracted[4][0]
 
 
 monitoring = _Monitoring(_defaults['address'], _defaults['interval'])
