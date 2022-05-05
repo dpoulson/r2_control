@@ -125,7 +125,8 @@ print(mainconfig.mainconfig['telegram'])
 if mainconfig.mainconfig['telegram'] == True:
     # Enable telegram
     tg = telegram.Telegram
-
+    tg.send("Testing")
+    
 app = Flask(__name__, template_folder='templates')
 
 
@@ -144,8 +145,9 @@ from Hardware.Servo import ServoControl
 if __debug__:
     print("Servos loading.... %s" % servos)
 for x in servos:
-    logging.info("Loading Servo Control Board: %s" % x)
-    app.register_blueprint(ServoBlueprint.construct_blueprint(x), url_prefix="/" + x)
+    if x != '':
+        logging.info("Loading Servo Control Board: %s" % x)
+        app.register_blueprint(ServoBlueprint.construct_blueprint(x), url_prefix="/" + x)
     
 p = {}
 for x in plugins:
