@@ -7,6 +7,7 @@ import smbus
 import time
 import threading
 import struct
+import os
 import csv
 import configparser
 from threading import Thread
