@@ -88,7 +88,6 @@ class _Monitoring(object):
                         print("Battery low")
                     telegram.send("Battery below 21V")
                     self.lowbat = True
-        f.close()
 
     def __init__(self, address, interval):
         # Check for telegram config

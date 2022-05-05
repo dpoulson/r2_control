@@ -121,6 +121,9 @@ logging.info("**** Starting r2_control")
 
 ######################################
 # initialise modules
+if mainconfig.mainconfig['telegram'] == True:
+    # Enable telegram
+    tg = telegram.Telegram
 
 app = Flask(__name__, template_folder='templates')
 
@@ -226,8 +229,8 @@ def sendstatus():
     """GET to send system status via telegram"""
     message = ""
     if request.method == 'GET':
-        if "telegram" in modules:
-            telegram.send(system_status())
+        if mainconfig.mainconfig['telegram']:
+            tg.send(system_status())
             message = "Sent"
         else:
             message = "Telegram module not configured"
