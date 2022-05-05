@@ -24,7 +24,7 @@ _configfile = mainconfig.mainconfig['config_dir'] + 'monitoring.cfg'
 
 _config = configparser.SafeConfigParser({'address': '0x04',
                                          'logfile': 'monitoring.log',
-                                         'interval': '0.5'})
+                                         'interval': 0.5})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
@@ -40,13 +40,22 @@ _logfile = _defaults['logfile']
 api = Blueprint('monitoring', __name__, url_prefix='/monitoring')
 
 @api.route('/', methods=['GET'])
-@api.route('/status', methods=['GET'])
-def _audio_list():
+@api.route('/battery', methods=['GET'])
+def _battery():
     """GET gives a comma separated list of stats"""
     message = ""
     if request.method == 'GET':
         message += monitoring.queryBattery()
     return message
+
+@api.route('/balance', methods=['GET'])
+def _balance():
+    """GET gives the current battery balance"""
+    message = ""
+    if request.method == 'GET':
+        message += monitoring.queryBatteryBalance()
+    return message
+
 
 class _Monitoring(object):
 
@@ -85,7 +94,7 @@ class _Monitoring(object):
         # Check for telegram config
         self.telegram = False
         self.address = address
-        self.interval = interval
+        self.interval = float(interval)
         self.logdir = mainconfig.mainconfig['logdir']
         self.lowbat = False
         self.extracted = [0, 0, 0, 0, 0, 0, 0, 0, 0]
