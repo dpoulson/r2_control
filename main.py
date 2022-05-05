@@ -49,7 +49,8 @@ plugin_names = {
     'teecees': 'Lights.TeeceesControl',
     'Dome': 'Dome',
     'GPIO': 'GPIO.GPIOControl',
-    'Smoke': 'Smoke'}
+    'Smoke': 'Smoke',
+    'Monitoring': 'Monitoring'}
 
 
 def list_joysticks():
