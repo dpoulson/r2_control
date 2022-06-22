@@ -30,7 +30,7 @@ kiwisolver==1.1.0
 MarkupSafe==1.1.0
 matplotlib==2.2.4
 mysmbus==0.1
-numpy==1.21.0
+numpy==1.22.0
 pathlib2==2.3.4
 pexpect==4.7.0
 pickleshare==0.7.5
