@@ -261,6 +261,7 @@ joystick = True
 
 # Main loop
 while (joystick):
+    time.sleep(0.005)
     global previous
     #driveDome(dome_stick)
     difference = float(time.time() - last_command)

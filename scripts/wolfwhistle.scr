@@ -1,7 +1,8 @@
+rseries,59004
 sound,WOLFWSTL
-sleep,0.5
+sleep,0.3
 dome,P1,1,0
-sleep,0.2
+sleep,0.05
 dome,P1,0,0
 sleep,0.1
 dome,P1,1,0
