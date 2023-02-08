@@ -11,7 +11,7 @@ chardet==3.0.4
 Click==7.0
 colorama==0.3.7
 configparser==3.5.0b2
-cryptography==3.3.2
+cryptography==39.0.1
 cycler==0.10.0
 decorator==4.4.0
 entrypoints==0.3
