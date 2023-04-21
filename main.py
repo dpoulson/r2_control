@@ -43,9 +43,9 @@ logfile = mainconfig.mainconfig['logfile']
 plugin_names = {
     'flthy': 'Lights.FlthyHPControl',
     'rseries': 'Lights.RSeriesLogicEngine',
-    'psi_matrix': 'Lights.PSI_Matrix',
     'Scripts': 'Scripts.ScriptControl',
     'Audio': 'Audio.AudioLibrary',
+    'Vocalizer': 'Audio.Vocalizer',
     'vader': 'Lights.VaderPSIControl',
     'teecees': 'Lights.TeeceesControl',
     'Dome': 'Dome',
