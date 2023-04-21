@@ -121,7 +121,7 @@ log_filename = logdir + '/' + logfile
 # Create target Directory if don't exist
 if not os.path.exists(logdir):
     os.mkdir(logdir)
-    print("Creating logdir " + logdir);
+    print("Creating logdir " + logdir)
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename=log_filename,

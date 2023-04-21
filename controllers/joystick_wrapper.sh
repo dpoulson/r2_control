@@ -9,5 +9,5 @@ echo "Joystick selected: $CURRENT"
 
 cd /home/pi/r2_control/controllers/$CURRENT
 
-/usr/bin/python -O ./r2_$CURRENT.py
+/usr/bin/python -O ./r2_"$CURRENT".py
 

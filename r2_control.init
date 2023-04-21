@@ -17,7 +17,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin
 case "$1" in
   start)
     log_begin_msg "Starting r2_control"
-    cd /home/pi/r2_control
+    cd /home/pi/r2_control || exit
     python -O main.py
     log_end_msg $?
     exit 0
