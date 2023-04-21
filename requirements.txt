@@ -5,7 +5,7 @@ asn1crypto==0.24.0
 backports.functools-lru-cache==1.5
 backports.shutil-get-terminal-size==1.0.0
 blinker==1.4
-certifi==2019.6.16
+certifi==2022.12.7
 cffi==1.12.3
 chardet==3.0.4
 Click==7.0
