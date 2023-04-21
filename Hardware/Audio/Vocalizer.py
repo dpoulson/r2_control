@@ -17,7 +17,7 @@ from builtins import object
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'vocalizer.cfg'
 
-_config = configparser.SafeConfigParser({'logfile': 'vocalizer.log', 'port': '/dev/ttyUSB1'})
+_config = configparser.SafeConfigParser({'logfile': 'vocalizer.log', 'port': '/dev/ttyUSB1', 'baudrate': '9600'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
@@ -29,7 +29,6 @@ _defaults = _config.defaults()
 
 _logdir = mainconfig.mainconfig['logdir']
 _logfile = _defaults['logfile']
-
 
 api = Blueprint('vocalizer', __name__, url_prefix='/voc')
 
@@ -85,7 +84,9 @@ class _Vocalizer(object):
 
     """
 
-    def __init__(self, port):
+    _conn = None
+
+    def __init__(self, port, baudrate):
         """ 
         Init of Vocalizer class
 
@@ -97,6 +98,10 @@ class _Vocalizer(object):
  
         if __debug__:
             print("Initiating vocalizer")
+        try:
+            self._conn = serial.Serial(port, baudrate=baudrate)
+        except:
+            print("Failed to open serial port %s" % port)
 
 
     def TriggerSound(self, data):
@@ -108,10 +113,31 @@ class _Vocalizer(object):
         data : str
              type of sound to generate (happy, sad, angry, scared, or overload)
         """
-
+        code = None
         if __debug__:
             print("Playing %s" % data)
+
+        if data == "happy":
+            code = "SH0"
+        elif data == "sad":
+            code = "SS0"
+        elif data == "angry":
+            code = "SM0"
+        elif data == "scared":
+            code = "SC0"
+        elif data == "overload":
+            code = "SE"
+        else:
+            code = "PSV"
+        
+        try:
+            sent = self._conn.write(code)
+        except:
+            print("Failed to send command to vocalizer")
+        
+        if __debug__:
+            print("Command sent to vocalizer")
         
 
 
-vocalizer = _Vocalizer(_defaults['port'])
+vocalizer = _Vocalizer(_defaults['port'], _defaults['baudrate'])
