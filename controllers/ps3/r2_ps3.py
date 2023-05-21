@@ -279,7 +279,7 @@ while (joystick):
             joystick = False
             shutdownR2()
         # Check for no shutdown file
-        if os.path.exists('/home/pi/r2_control/controllers/.shutdown'):
+        if os.path.exists('/home/pi/.r2_config/.shutdown'):
             print("Shutdown file is there")
             joystick = False
             shutdownR2()

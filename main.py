@@ -113,7 +113,13 @@ def system_status_csv():
     except:
         remote_battery = 0
 
-    status = "%s,%s,%s,%s,%s,%s" % (uptime_string, monitor.queryBattery(), monitor.queryBatteryBalance(), remote_battery, internet.check(), p['Audio'].audio.ShowVolume())
+    battery = 0
+    batteryBalance = 0
+    if "Monitoring" in plugins:
+        battery = p['Monitoring'].monitoring.queryBattery()
+        batteryBalance = p['Monitoring'].monitoring.queryBatteryBalance()
+
+    status = "%s,%s,%s,%s,%s,%s" % (uptime_string, battery, batteryBalance, remote_battery, internet.check(), p['Audio'].audio.ShowVolume())
     return status
 
 # Setup logging
@@ -224,7 +230,7 @@ def shutdown():
         tg.send("Night night...")
     if request.method == 'GET':
         os.system('shutdown now -h')
-        s = open("controllers/.shutdown", "w+")
+        s = open("/home/pi/.r2_config/.shutdown", "w+")
         s.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
         s.flush()
         s.close()
