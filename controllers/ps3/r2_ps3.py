@@ -17,8 +17,11 @@ import argparse
 from io import StringIO
 from collections import defaultdict
 from SabertoothPacketSerial import SabertoothPacketSerial
-
+from shutil import copyfile
+import odrive
 import signal
+sys.path.insert(0, '/home/pi/r2_control')
+from r2utils import telegram, internet, mainconfig
 
 def sig_handler(signal, frame):
     """ Handle signals """
@@ -29,7 +32,8 @@ signal.signal(signal.SIGINT, sig_handler)
 
 ##########################################################
 # Load config
-_configfile = 'ps3.cfg'
+_configfile = mainconfig.mainconfig['config_dir'] + 'ps3.cfg'
+_keysfile = mainconfig.mainconfig['config_dir'] + 'ps3_keys.csv'
 _config = configparser.SafeConfigParser({'log_file': '/home/pi/r2_control/logs/ps3.log',
                                          'baseurl' : 'http://localhost:5000/',
                                          'keepalive' : 0.25,
@@ -58,35 +62,34 @@ if not os.path.isfile(_configfile):
     with open(_configfile, 'wb') as configfile:
         _config.write(configfile)
 
-
-mainconfig = _config.defaults()
+ps3config = _config.defaults()
 
 ##########################################################
 # Set variables
 # Log file location
-log_file = mainconfig['log_file']
+log_file = ps3config['log_file']
 
 # How often should the script send a keepalive (s)
-keepalive = float(mainconfig['keepalive'])
+keepalive = float(ps3config['keepalive'])
 
 # Speed factor. This multiplier will define the max value to be sent to the drive system.
 # eg. 0.5 means that the value of the joystick position will be halved
 # Should never be greater than 1
-speed_fac = float(mainconfig['speed_fac'])
+speed_fac = float(ps3config['speed_fac'])
 
 # Invert. Does the drive need to be inverted. 1 = no, -1 = yes
-invert = int(mainconfig['invert'])
+invert = int(ps3config['invert'])
 
 drive_mod = speed_fac * invert
 
 # Deadband: the amount of deadband on the sticks
-deadband = float(mainconfig['deadband'])
+deadband = float(ps3config['deadband'])
 
 # Exponential curve constant. Set this to 0 < curve < 1 to give difference response curves for axis
-curve = float(mainconfig['curve'])
+curve = float(ps3config['curve'])
 
 dome_speed = 0
-accel_rate = float(mainconfig['accel_rate'])
+accel_rate = float(ps3config['accel_rate'])
 dome_stick = 0
 
 # Set Axis definitions
@@ -94,7 +97,7 @@ PS3_AXIS_LEFT_VERTICAL = int(_config.get('Axis', 'drive'))
 PS3_AXIS_LEFT_HORIZONTAL = int(_config.get('Axis', 'turn'))
 PS3_AXIS_RIGHT_HORIZONTAL = int(_config.get('Axis', 'dome'))
 
-baseurl = mainconfig['baseurl']
+baseurl = ps3config['baseurl']
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
@@ -116,6 +119,43 @@ def locate(user_string="PS3 Controller", x=0, y=0):
     # Plot the user_string at the starting at position HORIZ, VERT...
     print("\033["+VERT+";"+HORIZ+"f"+user_string)
 
+
+def steering(x, y, drive_mod):
+￼   """ Combine Axis output to power differential drive motors """
+￼   # convert to polar
+￼   r = math.hypot(x, y)
+￼   t = math.atan2(y, x)
+
+    # rotate by 45 degrees
+    t += math.pi / 4
+
+    # back to cartesian
+    left = r * math.cos(t)
+    right = r * math.sin(t)
+
+    # rescale the new coords
+    left = left * math.sqrt(2)
+    right = right * math.sqrt(2)
+
+    # clamp to -1/+1
+    left = (max(-1, min(left, 1)))*drive_mod
+    right = (max(-1, min(right, 1)))*drive_mod
+
+    if not args.dryrun:
+        if _config.get('Drive', 'type') == "Sabertooth":
+            drive.motor(0,left)
+            drive.motor(1,right)
+        elif _config.get('Drive', 'type') == "ODrive":
+            drive.axis0.controller.vel_ramp_target = left*1000
+            drive.axis1.controller.vel_ramp_target = right*1000
+    if args.curses:
+        #locate("                   ", 13, 11)
+        #locate("                   ", 13, 12)
+        locate('%10f' % left, 13, 11)
+        locate('%10f' % right, 13, 12)
+
+    return left, right
+
 def clamp(n, minn, maxn):
     """ Clamp a number between two values """
     if n < minn:
@@ -136,11 +176,7 @@ def shutdownR2():
     if __debug__:
         print("Stopping all motion...")
         print("...Setting drive to 0")
-    drive.driveCommand(0)
-    if __debug__:
-        print("...Setting turn to 0")
-    drive.turnCommand(0)
-    if __debug__:
+    steering(0,0,drive_mod)
         print("...Setting dome to 0")
     dome.driveCommand(0)
 
@@ -190,14 +226,21 @@ f.flush()
 if not args.dryrun:
     if __debug__:
         print("Not a drytest")
-    drive = SabertoothPacketSerial(address=int(_config.get('Drive', 'address')),
+    if _config.get('Drive', 'type') == "Sabertooth":
+        drive = SabertoothPacketSerial(address=int(_config.get('Drive', 'address')),
                                    type=_config.get('Drive', 'type'),
                                    port=_config.get('Drive', 'port'))
-    dome = SabertoothPacketSerial(address=int(_config.get('Dome', 'address')),
-                                  type=_config.get('Dome', 'type'),
-                                  port=_config.get('Dome', 'port'))
-    drive.driveCommand(0)
-    drive.turnCommand(0)
+    elif _config.get('Drive', 'type') == "ODrive":
+        print("finding an odrive...")
+        drive = odrive.find_any() #"serial:" + _config.get('Drive', 'port'))
+        #drive.axis0.controller.config.control_mode = CTRL_MODE_VELOCITY_CONTROL
+        #drive.axis1.controller.config.control_mode = CTRL_MODE_VELOCITY_CONTROL
+        drive.axis1.controller.vel_ramp_enable = True
+        drive.axis0.controller.vel_ramp_enable = True
+
+    #dome = SabertoothPacketSerial(address=int(_config.get('Dome', 'address')),
+    #                              type=_config.get('Dome', 'type'),
+    #                              port=_config.get('Dome', 'port'))
 
 pygame.display.init()
 
@@ -209,7 +252,9 @@ if args.curses:
     locate("Joystick Input", 18, 3)
     locate("Drive Value (    )", 16, 7)
     locate('%4s' % speed_fac, 29, 7)
-    locate("Last button", 3, 11)
+    locate("Motor 1: ", 3, 11)
+￼   locate("Motor 2: ", 3, 12)
+    locate("Last button", 3, 13)
 
 while True:
     pygame.joystick.quit()
@@ -233,9 +278,13 @@ j = pygame.joystick.Joystick(0)
 j.init()
 buttons = j.get_numbuttons()
 
+# Check theres a keys config file:
+if not os.path.isfile(_keysfile):
+    copyfile('keys-default.csv', _keysfile)
+
 # Read in key combos from csv file
 keys = defaultdict(list)
-with open('keys.csv', mode='r') as infile:
+with open(_keysfile, mode='r') as infile:
     reader = csv.reader(infile)
     for row in reader:
         if __debug__:
@@ -259,17 +308,19 @@ f.flush()
 last_command = time.time()
 joystick = True
 
+previous = ""
+_throttle = 0
+_turning = 0
+
 # Main loop
 while (joystick):
     time.sleep(0.005)
-    global previous
-    #driveDome(dome_stick)
+    global previous, _throttle, _turning
+    steering(_turning, _throttle, drive_mod)
     difference = float(time.time() - last_command)
     if difference > keepalive:
         if __debug__:
             print("Last command sent greater than %s ago, doing keepAlive" % keepalive)
-        #drive.keepAlive()
-        #dome.keepAlive()
         # Check js0 still there
         if os.path.exists('/dev/input/js0'):
             if __debug__:
@@ -301,8 +352,8 @@ while (joystick):
             if __debug__:
                 print("Buttons pressed: %s" % combo)
             if args.curses:
-                locate("                   ", 1, 12)
-                locate(combo, 3, 12)
+                locate("                   ", 1, 14)
+                locate(combo, 3, 14)
             # Special key press (All 4 plus triangle) to increase speed of drive
             if combo == "00001111000000001":
                 if __debug__:
@@ -332,6 +383,10 @@ while (joystick):
                 speed_fac -= 0.05
                 if speed_fac < 0.2:
                     speed_fac = 0.2
+                if __debug__:
+￼                   print("*** NEW SPEED %s" % speed_fac)
+￼               if args.curses:
+￼                   locate('%4f' % speed_fac, 28, 7)
                 drive_mod = speed_fac * invert
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
                         " : Speed Decrease : " + str(speed_fac) + " \n")
@@ -385,16 +440,6 @@ while (joystick):
                 if args.curses:
                     locate("                   ", 10, 4)
                     locate('%10f' % (event.value), 10, 4)
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                        " : Forward/Back : " + str(event.value*drive_mod) + "\n")
-                f.flush
-                if not args.dryrun:
-                    if __debug__:
-                        print("Not a drytest")
-                    drive.driveCommand(event.value*drive_mod)
-                if args.curses:
-                    locate("                   ", 10, 8)
-                    locate('%10f' % (event.value*drive_mod), 10, 8)
                 last_command = time.time()
             elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
                 if __debug__:
@@ -402,16 +447,7 @@ while (joystick):
                 if args.curses:
                     locate("                   ", 10, 5)
                     locate('%10f' % (event.value), 10, 5)
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                        " : Left/Right : " + str(event.value*drive_mod) + "\n")
-                f.flush
-                if not args.dryrun:
-                    if __debug__:
-                        print("Not a drytest")
-                    drive.turnCommand(event.value*drive_mod)
-                if args.curses:
-                    locate("                   ", 10, 9)
-                    locate('%10f' % (event.value*drive_mod), 10, 9)
+                _turning = event.value
                 last_command = time.time()
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
                 if __debug__:
