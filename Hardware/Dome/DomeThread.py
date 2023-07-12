@@ -3,9 +3,9 @@ from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
 import threading
-from queue import Queue, Empty
 import time
 standard_library.install_aliases()
+
 
 class DomeThread(threading.Thread):
 
@@ -31,7 +31,7 @@ class DomeThread(threading.Thread):
         return
 
     def get_position(self):
-        msg = '%s,%s' % (self.position_setpoint,self.current_position)
+        msg = '%s,%s' % (self.position_setpoint, self.current_position)
         return msg
 
     def get_random(self):
@@ -44,6 +44,3 @@ class DomeThread(threading.Thread):
             print("Dome set to position: %s | Random: %s" % (self.position_setpoint, self.random))
             time.sleep(0.5)
         return
-
-
-

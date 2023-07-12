@@ -26,20 +26,18 @@ from queue import Queue
 import csv
 import collections
 import os
-import datetime
-import time
 from pathlib import Path
-from flask import Blueprint, request
 import configparser
-standard_library.install_aliases()
 from builtins import object
 from r2utils import mainconfig
+standard_library.install_aliases()
 
 tick_duration = 100
 _configdir = mainconfig.mainconfig['config_dir']
 
+
 class ServoControl(object):
-    """ 
+    """
     Main servo control class. This is used for each adafruit 16 channel
     pwm modules (or clones). The class will create a thread for each
     channel configured, and an associated queue to pass commands via.
@@ -72,8 +70,8 @@ class ServoControl(object):
                 servo_home = int(row[4])
                 queue = Queue()
                 self.servo_list.append(self.Servo(name=servo_name, queue=queue,
-                                              thread=ServoThread(self.address, servo_Max, servo_Min, servo_home,
-                                                                             servo_channel, queue)))
+                                                  thread=ServoThread(self.address, servo_Max, servo_Min, servo_home,
+                                                                                             servo_channel, queue)))
                 for servo in self.servo_list:
                     if servo.name == servo_name:
                         servo.thread.daemon = True
@@ -88,7 +86,7 @@ class ServoControl(object):
 
         _configfile = mainconfig.mainconfig['config_dir'] + 'servo_' + name + '.cfg'
         _config = configparser.SafeConfigParser({'address': '0x40',
-                                         'logfile': 'servo_' + name + '.log'})
+                                                'logfile': 'servo_' + name + '.log'})
         _config.read(_configfile)
 
         if not os.path.isfile(_configfile):
@@ -98,14 +96,13 @@ class ServoControl(object):
 
         _defaults = _config.defaults()
 
-        _logdir = mainconfig.mainconfig['logdir']
-        _logfile = _defaults['logfile']
+        # _logdir = mainconfig.mainconfig['logdir']
+        # _logfile = _defaults['logfile']
 
         self.address = _defaults['address']
         self.init_config(name)
         if __debug__:
-            print("Initialised servo module " + name + " at address " + self.address);
-
+            print("Initialised servo module " + name + " at address " + self.address)
 
     def list_servos(self):
         message = ""
@@ -159,4 +156,4 @@ class ServoControl(object):
         current_servo.queue.put([position, duration])
 
 
-#servo = _ServoControl("body")
+# servo = _ServoControl("body")

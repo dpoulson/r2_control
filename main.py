@@ -28,9 +28,10 @@ import logging.handlers
 from future import standard_library
 from flask import Flask, request, render_template
 from r2utils import telegram, internet, mainconfig
-standard_library.install_aliases()
 from builtins import str
-from configparser import ConfigParser
+from Hardware.Servo import ServoBlueprint
+standard_library.install_aliases()
+
 
 plugins = mainconfig.mainconfig['plugins'].split(",")
 servos = mainconfig.mainconfig['servos'].split(",")
@@ -74,11 +75,11 @@ def system_status():
         controllers = glob.glob('/sys/class/power_supply/*')
         if __debug__:
             print("Controllers: %s" % controllers)
-        for controller in controllers: 
+        for controller in controllers:
             path = controller + "/capacity"
             if __debug__:
                 print("Controller path: %s" % path)
-            with open(path,'r') as b:
+            with open(path, 'r') as b:
                 remote_battery += str(int(b.readline().split()[0])) + " "
                 if __debug__:
                     print("Remote battery: %s" % remote_battery)
@@ -101,6 +102,7 @@ def system_status():
     status += p['Scripts'].scripts.list_running()
     return status
 
+
 def system_status_csv():
     """ Collects the system status and returns a csv string """
     with open('/proc/uptime', 'r') as f:
@@ -119,8 +121,10 @@ def system_status_csv():
         battery = p['Monitoring'].monitoring.queryBattery()
         batteryBalance = p['Monitoring'].monitoring.queryBatteryBalance()
 
-    status = "%s,%s,%s,%s,%s,%s" % (uptime_string, battery, batteryBalance, remote_battery, internet.check(), p['Audio'].audio.ShowVolume())
+    status = "%s,%s,%s,%s,%s,%s" % (uptime_string, battery, batteryBalance,
+                                    remote_battery, internet.check(), p['Audio'].audio.ShowVolume())
     return status
+
 
 # Setup logging
 log_filename = logdir + '/' + logfile
@@ -143,10 +147,10 @@ if mainconfig.mainconfig['telegram'] == "True":
     if __debug__:
         print("Enabled Telegram")
     tg = telegram.Telegram()
-    if __debug__: 
+    if __debug__:
         print(tg)
     tg.send("R2 Starting up....")
-    
+
 app = Flask(__name__, template_folder='templates')
 
 
@@ -160,15 +164,13 @@ def index():
 
 
 # Initialise server controllers
-from Hardware.Servo import ServoBlueprint
-from Hardware.Servo import ServoControl
 if __debug__:
     print("Servos loading.... %s" % servos)
 for x in servos:
     if x != '':
         logging.info("Loading Servo Control Board: %s" % x)
         app.register_blueprint(ServoBlueprint.construct_blueprint(x), url_prefix="/" + x)
-    
+
 p = {}
 for x in plugins:
     logging.info("Loading %s" % x)

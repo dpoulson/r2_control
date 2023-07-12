@@ -21,16 +21,10 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
-import os
-import datetime
-import time
-from pathlib import Path
 from flask import Blueprint, request
-import configparser
-standard_library.install_aliases()
-from builtins import object
-from r2utils import mainconfig
 from .ServoControl import ServoControl
+standard_library.install_aliases()
+
 
 def construct_blueprint(name):
 
@@ -47,14 +41,12 @@ def construct_blueprint(name):
             message += _servo.list_servos()
         return message
 
-
     @api.route('/<servo_name>/<servo_position>/<servo_duration>', methods=['GET'])
     def _servo_move(servo_name, servo_position, servo_duration):
         """GET will move a selected servo to the required position over a set duration"""
         if request.method == 'GET':
             _servo.servo_command(servo_name, servo_position, servo_duration)
         return "Ok"
-
 
     @api.route('/close/<duration>', methods=['GET'])
     def _servo_close_slow(duration):
@@ -64,7 +56,6 @@ def construct_blueprint(name):
             return "Ok"
         return "Fail"
 
-
     @api.route('/close', methods=['GET'])
     def _servo_close():
         """GET to close all servos"""
@@ -73,7 +64,6 @@ def construct_blueprint(name):
             return "Ok"
         return "Fail"
 
-
     @api.route('/open', methods=['GET'])
     def _servo_open():
         """GET to open all servos"""
@@ -81,7 +71,6 @@ def construct_blueprint(name):
             _servo.open_all_servos(0)
             return "Ok"
         return "Fail"
-
 
     @api.route('/open/<duration>', methods=['GET'])
     def _servo_open_slow(duration):

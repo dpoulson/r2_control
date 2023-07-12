@@ -3,15 +3,13 @@ from __future__ import absolute_import
 from future import standard_library
 import configparser
 import os
-import datetime
-import time
 import csv
 import collections
 import RPi.GPIO as GPIO
 from r2utils import mainconfig
 from flask import Blueprint, request
-standard_library.install_aliases()
 from builtins import object
+standard_library.install_aliases()
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'gpio.cfg'
@@ -75,4 +73,3 @@ class _GPIOControl(object):
 
 
 _gpio = _GPIOControl(_defaults['gpio_configfile'], _defaults['logfile'])
-

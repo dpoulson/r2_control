@@ -6,13 +6,11 @@ import random
 import configparser
 from pygame import mixer  # Load the required library
 import os
-import datetime
-import time
 from r2utils import mainconfig
 from flask import Blueprint, request
-standard_library.install_aliases()
 from builtins import str
 from builtins import object
+standard_library.install_aliases()
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'audio.cfg'
@@ -98,7 +96,7 @@ class _AudioLibrary(object):
     The class for playing audio samples via pygame mixer
 
     Sounds are stored in a single directory. The following prefixes are used
-    to group sets of sounds for random play. Any other filenames can be played 
+    to group sets of sounds for random play. Any other filenames can be played
     as normal.
 
     'ALARM',
@@ -116,7 +114,7 @@ class _AudioLibrary(object):
     """
 
     def __init__(self, sounds_dir, volume):
-        """ 
+        """
         Init of AudioLibrary class
 
         Parameters
@@ -126,7 +124,7 @@ class _AudioLibrary(object):
         volume : float
              Initial volume level
         """
- 
+
         if __debug__:
             print("Initiating audio")
         mixer.init()
@@ -164,7 +162,7 @@ class _AudioLibrary(object):
         data : str
              Sound group prefix
         """
- 
+
         idx = _Random_Sounds.index(data)
         prefix = _Random_Files[idx]
         print("Random index: %s, prefix=%s" % (idx, prefix))

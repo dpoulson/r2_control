@@ -5,11 +5,11 @@ from r2utils import internet, mainconfig
 
 
 class Telegram(object):
-  
+
     def __init__(self):
         _configfile = mainconfig.mainconfig['config_dir'] + 'telegram.cfg'
         _config = configparser.SafeConfigParser({'token': '',
-                                         'chat_id': ''})
+                                                 'chat_id': ''})
         _config.read(_configfile)
 
         if not os.path.isfile(_configfile):
@@ -24,14 +24,14 @@ class Telegram(object):
 
     def send(self, message):
         """ Sends a telegram message """
-        if __debug__: 
+        if __debug__:
             print("Trying to send a telegram")
         if internet.check():
             try:
                 send_message = self.preamble + message
                 requests.get(send_message)
                 if __debug__:
-                   print(send_message)
+                    print(send_message)
             except:
                 if __debug__:
                     print("Thought we had an internet connection, but sending Telegram failed")

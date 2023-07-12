@@ -4,14 +4,11 @@ from future import standard_library
 import configparser
 import smbus
 import os
-import datetime
-import time
 from r2utils import mainconfig
 from flask import Blueprint, request
-standard_library.install_aliases()
 from builtins import hex
 from builtins import object
-
+standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'smoke.cfg'
 
@@ -59,24 +56,23 @@ class _SmokeControl(object):
             print("Initialising Smoke Control")
 
     def sendRaw(self, cmd, duration):
-        command = int(hex(ord(cmd)),16)
+        command = int(hex(ord(cmd)), 16)
         hexDuration = list()
         if __debug__:
             print("Duration: %s" % duration)
-        # We don't want to run for longer than 10 seconds, might burn out the coil 
+        # We don't want to run for longer than 10 seconds, might burn out the coil
         if int(duration) > 9:
             if __debug__:
-               print("Too long, shortening duration")
+                print("Too long, shortening duration")
             duration = '9'
-        hexDuration.append(int(duration,16))
+        hexDuration.append(int(duration, 16))
         if __debug__:
             print("Command: %s | hexDuration: %s " % (command, hexDuration))
         try:
-            self.bus.write_i2c_block_data(int(self.address,16), command, hexDuration)
+            self.bus.write_i2c_block_data(int(self.address, 16), command, hexDuration)
         except:
             print("Failed to send bytes")
         return "Ok"
 
 
 _smoke = _SmokeControl(_defaults['address'], _defaults['logfile'])
-

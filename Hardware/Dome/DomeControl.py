@@ -3,14 +3,12 @@ from __future__ import absolute_import
 from future import standard_library
 import configparser
 import os
-import datetime
-import time
 from r2utils import mainconfig
 from flask import Blueprint, request
 from .DomeThread import DomeThread
-standard_library.install_aliases()
 from builtins import str
 from builtins import object
+standard_library.install_aliases()
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'dome.cfg'
@@ -54,6 +52,7 @@ def _dome_center():
         message += _dome.position(0)
     return message
 
+
 @api.route('/position', methods=['GET'])
 def _dome_get_position():
     """ GET to retrieve current position"""
@@ -61,6 +60,7 @@ def _dome_get_position():
     if request.method == 'GET':
         message += _dome.get_position()
     return message
+
 
 @api.route('/position/<degrees>', methods=['GET'])
 def _dome_position(degrees):
@@ -70,6 +70,7 @@ def _dome_position(degrees):
         message += _dome.position(degrees)
     return message
 
+
 @api.route('/turn/<stick>', methods=['GET'])
 def _dome_turn(stick):
     """ GET to set the dome turning"""
@@ -78,6 +79,7 @@ def _dome_turn(stick):
         message += _dome.turn(stick)
     return message
 
+
 @api.route('/random/<value>', methods=['GET'])
 def _dome_random(value):
     """ GET to set the dome random on/off"""
@@ -85,6 +87,7 @@ def _dome_random(value):
     if request.method == 'GET':
         message += _dome.random(value)
     return message
+
 
 @api.route('/random', methods=['GET'])
 def _dome_random_status():
@@ -126,4 +129,3 @@ class _DomeControl(object):
 
 
 _dome = _DomeControl()
-

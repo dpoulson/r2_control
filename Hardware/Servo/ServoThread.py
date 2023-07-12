@@ -37,7 +37,7 @@ class ServoThread(threading.Thread):
         self.processing = False
         threading.Thread.__init__(self)
         try:
-            self.i2c = Adafruit_PCA9685.PCA9685(address=int(self.Address,16), busnum=int(1))
+            self.i2c = Adafruit_PCA9685.PCA9685(address=int(self.Address, 16), busnum=int(1))
             self.i2c.set_pwm_freq(60)
         except:
             print("Failed to initialise servo at %s/%s" % (self.Address, self.Channel))
@@ -52,7 +52,8 @@ class ServoThread(threading.Thread):
                 position = self.destination_position
             else:
                 if __debug__:
-                    print("Current time: %s | destination_start: %s | destination_time: %s | destination_position: %s | original_position: %s" % (current_time, self.destination_start, self.destination_time, self.destination_position, self.original_position))
+                    print("Current time: %s | destination_start: %s | destination_time: %s | destination_position: %s | original_position: %s" %
+                          (current_time, self.destination_start, self.destination_time, self.destination_position, self.original_position))
                     print("(current_time - self.destination_start): %s " % (current_time - self.destination_start))
                     print("(self.destination_time - self.destination_start): %s " %
                           (self.destination_time - self.destination_start))
@@ -80,7 +81,7 @@ class ServoThread(threading.Thread):
 #               if __debug__:
 #                   print("Reached final position")
 #               self.processing = False
-        if (self.destination_time + 200 < current_time) and self.processing == True:
+        if (self.destination_time + 200 < current_time) and self.processing is True:
             # Reset the servo and set processing to False
             if __debug__:
                 print("Resetting servo")
@@ -116,9 +117,8 @@ class ServoThread(threading.Thread):
                     print("End time:    %s " % self.destination_time)
                 self.sendCommand()                            # Main Command Loop
             except Empty:
-                if self.processing != False:
+                if self.processing is not False:
                     self.sendCommand()
             time.sleep(0.005)
 
         return
-

@@ -1,21 +1,21 @@
 from __future__ import print_function
 from future import standard_library
-standard_library.install_aliases()
 import configparser
 import os
+standard_library.install_aliases()
 
 _configdir = '/home/pi/.r2_config/'
 if not os.path.exists(_configdir):
     os.makedirs(_configdir)
 _configfile = _configdir + 'main.cfg'
-_config = configparser.SafeConfigParser({ 'logtofile': True,
-                                         'logdir' : './logs',
-                                         'logfile' : 'debug.log',
-                                         'busid' : '1',
-                                         'plugins' : 'GPIO,Audio,Scripts',
+_config = configparser.SafeConfigParser({'logtofile': True,
+                                         'logdir': './logs',
+                                         'logfile': 'debug.log',
+                                         'busid': '1',
+                                         'plugins': 'GPIO,Audio,Scripts',
                                          'config_dir': _configdir,
-                                         'servos' : 'body,dome'
-                                            })
+                                         'servos': 'body,dome'
+                                         })
 
 _config.read(_configfile)
 
@@ -26,5 +26,3 @@ if not os.path.isfile(_configfile):
 
 
 mainconfig = _config.defaults()
-
-

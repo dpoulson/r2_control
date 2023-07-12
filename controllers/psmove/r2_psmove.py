@@ -290,12 +290,12 @@ joystick = True
 # Main loop
 while (joystick):
     global previous
-    if time.time() - last_command > keepalive: 
+    if time.time() - last_command > keepalive:
         if __debug__:
             print("Last command sent greater than %s ago, doing keepAlive" % keepalive)
         drive.keepAlive()
         # Check js0 still there
-        if (os.path.exists('/dev/input/js0')): 
+        if (os.path.exists('/dev/input/js0')):
            if __debug__:
               print("Joystick still there....")
         else:
@@ -330,44 +330,44 @@ while (joystick):
                 locate(combo, 3, 12)
             # Special key press (Both shoulder plus right) to increase speed of drive
             if combo == "00001010000000001":
-              if __debug__:
-                 print("Incrementing drive speed")
-              # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
-              speed_fac += 0.05
-              if speed_fac > 1:
-                 speed_fac = 1
-              if __debug__:
-                 print("*** NEW SPEED %s" % speed_fac)
-              if args.curses:
-                 locate('%4f' % speed_fac, 28, 7)
-              drive_mod = speed_fac * invert
-              f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Speed Increase : " + str(speed_fac) + " \n")
-              url = baseurl + "audio/Happy006"
-              try:
-                 r = requests.get(url)
-              except:
-                 if __debug__:
-                     print("Fail....")
+                if __debug__:
+                    print("Incrementing drive speed")
+                # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
+                speed_fac += 0.05
+                if speed_fac > 1:
+                    speed_fac = 1
+                if __debug__:
+                    print("*** NEW SPEED %s" % speed_fac)
+                if args.curses:
+                    locate('%4f' % speed_fac, 28, 7)
+                drive_mod = speed_fac * invert
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Speed Increase : " + str(speed_fac) + " \n")
+                url = baseurl + "audio/Happy006"
+                try:
+                    r = requests.get(url)
+                except:
+                    if __debug__:
+                        print("Fail....")
             # Special key press (Both shoulder plus left) to decrease speed of drive
             if combo == "00001010000000010":
-              if __debug__:
-                 print("Decrementing drive speed")
-              # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
-              speed_fac -= 0.05
-              if speed_fac < 0.2:
-                 speed_fac = 0.2
-              drive_mod = speed_fac * invert
-              f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Speed Decrease : " + str(speed_fac) + " \n")
-              url = baseurl + "audio/Sad__019"
-              try:
-                 r = requests.get(url)
-              except:
-                  if __debug__:
-                      print("Fail....")
+                if __debug__:
+                    print("Decrementing drive speed")
+                # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
+                speed_fac -= 0.05
+                if speed_fac < 0.2:
+                    speed_fac = 0.2
+                drive_mod = speed_fac * invert
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Speed Decrease : " + str(speed_fac) + " \n")
+                url = baseurl + "audio/Sad__019"
+                try:
+                    r = requests.get(url)
+                except:
+                    if __debug__:
+                        print("Fail....")
             try:
                 newurl = baseurl + keys[combo][0]
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Button Down event : " + combo + "," + keys[combo][0] +" \n")
-                f.flush() 
+                f.flush()
                 if __debug__:
                     print("Would run: %s" % keys[combo])
                     print("URL: %s" % newurl)
