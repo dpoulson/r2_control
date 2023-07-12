@@ -2,13 +2,13 @@
 
 from __future__ import print_function
 from future import standard_library
-standard_library.install_aliases()
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 import configparser
 import requests
 import logging
 import time
+standard_library.install_aliases()
 
 time.sleep(20)
 
@@ -56,6 +56,7 @@ def sounds(bot, update, args):
         print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed...")
 
+
 def joystick(bot, update, args):
     url = baseurl + "joystick/"
     if len(args) == 0:
@@ -70,7 +71,6 @@ def joystick(bot, update, args):
         bot.send_message(chat_id=update.message.chat_id, text="Failed...")
 
 
-
 def status(bot, update):
     url = baseurl + "status"
     try:
@@ -80,6 +80,7 @@ def status(bot, update):
     except:
         print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed to get status")
+
 
 def chatid(bot, update):
     try:

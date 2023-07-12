@@ -8,7 +8,7 @@ def main():
     blue = (0, 0, 255)
     DISPLAY.fill(WHITE)
     pygame.mouse.set_visible(False)
-    pygame.draw.rect(DISPLAY, blue,(280, 200, 50, 250))
+    pygame.draw.rect(DISPLAY, blue, (280, 200, 50, 250))
     pygame.display.update()
     pygame.mouse.set_pos(280, 200)
     while True:
@@ -17,4 +17,6 @@ def main():
             pygame.draw.rect(DISPLAY, blue, (pos[0], pos[1], 50, 250))
             pygame.display. update()
             DISPLAY.fill(WHITE)
+
+
 main()

@@ -8,7 +8,6 @@ Partly inspired by the following libraries/codes:
 import os
 import select
 import struct
-import sys
 import time
 import warnings
 from array import array

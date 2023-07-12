@@ -25,13 +25,10 @@ import configparser
 import glob
 import os
 import collections
-import datetime
-import time
 from r2utils import mainconfig
 from flask import Blueprint, request
-standard_library.install_aliases()
 from builtins import object
-
+standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'scripts.cfg'
 

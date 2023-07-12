@@ -3,15 +3,12 @@ from __future__ import absolute_import
 from future import standard_library
 import smbus
 import os
-import datetime
-import time
 from r2utils import mainconfig
 from flask import Blueprint, request
 import configparser
-standard_library.install_aliases()
 from builtins import hex
 from builtins import object
-
+standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'flthy.cfg'
 
@@ -83,7 +80,7 @@ class _FlthyHPControl(object):
                 print("Integer sent, sending command")
             cmd = 'S' + seq
             self.sendRaw(cmd)
-        else: 
+        else:
             if __debug__:
                 print("Not an integer, decode and send command")
             if seq == "leia":
@@ -97,7 +94,7 @@ class _FlthyHPControl(object):
             elif seq == "enable":
                 if __debug__:
                     print("Clear and Enable")
-                self.sendRaw('S9') 
+                self.sendRaw('S9')
         return "Ok"
 
     def sendCommand(self, hp, type, seq, value):
@@ -186,20 +183,20 @@ class _FlthyHPControl(object):
                     valueCmd = value
 
         cmd = hpCmd + typeCmd + seqCmd + valueCmd
-        self.sendRaw(cmd) 
+        self.sendRaw(cmd)
         return "OK"
 
     def sendRaw(self, cmd):
         command = list(cmd)
         hexCommand = list()
-        if self.reeltwo == True:
+        if self.reeltwo is True:
             if __debug__:
-               print("ReelTwo Mode");
+                print("ReelTwo Mode")
             hexCommand.append(int(hex(ord('H')), 16))
             hexCommand.append(int(hex(ord('P')), 16))
         for i in command:
             h = int(hex(ord(i)), 16)
-            hexCommand.append(h)	
+            hexCommand.append(h)
         if __debug__:
             print(hexCommand)
         try:
@@ -210,4 +207,3 @@ class _FlthyHPControl(object):
 
 
 _flthy = _FlthyHPControl(_defaults['address'], _defaults['logfile'], _config.getboolean('DEFAULT', 'reeltwo'))
-

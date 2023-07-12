@@ -1,11 +1,9 @@
 #!/usr/bin/python
-# 
 from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
 import smbus
 import time
-import threading
 import struct
 import os
 import csv
@@ -14,11 +12,9 @@ from threading import Thread
 from time import sleep
 from r2utils import mainconfig
 from r2utils import telegram
-standard_library.install_aliases()
-from builtins import map
 from builtins import range
 from flask import Blueprint, request
-
+standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'monitoring.cfg'
 
@@ -39,6 +35,7 @@ _logfile = _defaults['logfile']
 
 api = Blueprint('monitoring', __name__, url_prefix='/monitoring')
 
+
 @api.route('/', methods=['GET'])
 @api.route('/battery', methods=['GET'])
 def _battery():
@@ -47,6 +44,7 @@ def _battery():
     if request.method == 'GET':
         message += str(monitoring.queryBattery())
     return message
+
 
 @api.route('/balance', methods=['GET'])
 def _balance():

@@ -14,7 +14,7 @@ script = ""
 loop = False
 lock = threading.Lock()
 
-keywords = ['dome', 'body', 'lights', 'sound', 'sleep', 'flthy', 'rseries', 'psi_matrix' ]
+keywords = ['dome', 'body', 'lights', 'sound', 'sleep', 'flthy', 'rseries', 'psi_matrix']
 
 
 class ScriptThread(threading.Thread):
@@ -38,7 +38,7 @@ class ScriptThread(threading.Thread):
             else:
                 self.contents = list(reader)
             for row in self.contents:
-                self.parse_row(row) 
+                self.parse_row(row)
             if self.loop == 1:
                 if __debug__:
                     print("Looping...")
@@ -85,11 +85,10 @@ class ScriptThread(threading.Thread):
                 elif row[0] == "smoke":
                     urllib.request.urlopen("http://localhost:5000/smoke/on/%s" % row[1])
                 elif row[0] == "psi_matrix":
-                    urllib.request.urlopen("http://localhost:5000/psi_matrix/raw/%s" % row[1]) 
+                    urllib.request.urlopen("http://localhost:5000/psi_matrix/raw/%s" % row[1])
                 elif row[0] == "rseries":
                     urllib.request.urlopen("http://localhost:5000/rseries/raw/%s" % row[1])
                 else:
                     if __debug__:
                         print("Do not understand")
         return
-

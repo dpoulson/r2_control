@@ -4,12 +4,10 @@ from future import standard_library
 import configparser
 import smbus
 import os
-import datetime
-import time
 from r2utils import mainconfig
 from flask import Blueprint, request
-standard_library.install_aliases()
 from builtins import object
+standard_library.install_aliases()
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'teecees.cfg'
@@ -63,7 +61,7 @@ class _TeeceesControl(object):
                 print("Integer sent, sending command")
             cmd = 'S' + seq
             self.sendRaw(cmd)
-        else: 
+        else:
             if __debug__:
                 print("Not an integer, decode and send command")
             if seq == "leia":
@@ -77,11 +75,11 @@ class _TeeceesControl(object):
             elif seq == "enable":
                 if __debug__:
                     print("Clear and Enable")
-                self.sendRaw('S9') 
+                self.sendRaw('S9')
         return "Ok"
 
     def sendRaw(self, cmd):
-        arrayCmd = bytearray(cmd,'utf8')
+        arrayCmd = bytearray(cmd, 'utf8')
         if __debug__:
             print(arrayCmd)
         for i in arrayCmd:
@@ -95,4 +93,3 @@ class _TeeceesControl(object):
 
 
 _teecees = _TeeceesControl(_defaults['address'], _defaults['logfile'])
-

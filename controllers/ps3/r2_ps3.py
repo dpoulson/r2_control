@@ -2,7 +2,6 @@
 """ PS3 Joystick controller """
 from __future__ import print_function
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from builtins import range
 import pygame
@@ -22,12 +21,15 @@ from shutil import copyfile
 import odrive
 import signal
 sys.path.insert(0, '/home/pi/r2_control')
-from r2utils import telegram, internet, mainconfig
+from r2utils import mainconfig
+standard_library.install_aliases()
+
 
 def sig_handler(signal, frame):
     """ Handle signals """
     print('Cleaning Up')
     sys.exit(0)
+
 
 signal.signal(signal.SIGINT, sig_handler)
 
@@ -36,13 +38,13 @@ signal.signal(signal.SIGINT, sig_handler)
 _configfile = mainconfig.mainconfig['config_dir'] + 'ps3.cfg'
 _keysfile = mainconfig.mainconfig['config_dir'] + 'ps3_keys.csv'
 _config = configparser.SafeConfigParser({'log_file': '/home/pi/r2_control/logs/ps3.log',
-                                         'baseurl' : 'http://localhost:5000/',
-                                         'keepalive' : 0.25,
-                                         'speed_fac' : 0.35,
-                                         'invert' : 1,
-                                         'accel_rate' : 0.025,
-                                         'curve' : 0.6,
-                                         'deadband' : 0.2})
+                                         'baseurl': 'http://localhost:5000/',
+                                         'keepalive': 0.25,
+                                         'speed_fac': 0.35,
+                                         'invert': 1,
+                                         'accel_rate': 0.025,
+                                         'curve': 0.6,
+                                         'deadband': 0.2})
 
 _config.add_section('Dome')
 _config.set('Dome', 'address', '129')
@@ -103,6 +105,7 @@ baseurl = ps3config['baseurl']
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
+
 ################################################################################
 ################################################################################
 # Custom Functions
@@ -112,10 +115,14 @@ def locate(user_string="PS3 Controller", x=0, y=0):
     # syntax and concatination, etc, etc, errors.
     x = int(x)
     y = int(y)
-    if x >= 80: x = 80
-    if y >= 40: y = 40
-    if x <= 0: x = 0
-    if y <= 0: y = 0
+    if x >= 80:
+        x = 80
+    if y >= 40:
+        y = 40
+    if x <= 0:
+        x = 0
+    if y <= 0:
+        y = 0
     HORIZ = str(x)
     VERT = str(y)
     # Plot the user_string at the starting at position HORIZ, VERT...
@@ -145,18 +152,19 @@ def steering(x, y, drive_mod):
 
     if not args.dryrun:
         if _config.get('Drive', 'type') == "Sabertooth":
-            drive.motor(0,left)
-            drive.motor(1,right)
+            drive.motor(0, left)
+            drive.motor(1, right)
         elif _config.get('Drive', 'type') == "ODrive":
             drive.axis0.controller.input_vel = left*10
             drive.axis1.controller.input_vel = right*10
     if args.curses:
-        #locate("                   ", 13, 11)
-        #locate("                   ", 13, 12)
+        # locate("                   ", 13, 11)
+        # locate("                   ", 13, 12)
         locate('%10f' % left, 13, 11)
         locate('%10f' % right, 13, 12)
 
     return left, right
+
 
 def clamp(n, minn, maxn):
     """ Clamp a number between two values """
@@ -171,6 +179,7 @@ def clamp(n, minn, maxn):
     else:
         return n
 
+
 def shutdownR2():
     """ shutdownR2 - Put R2 into a safe state """
     if __debug__:
@@ -178,7 +187,7 @@ def shutdownR2():
     if __debug__:
         print("Stopping all motion...")
         print("...Setting drive to 0")
-    steering(0,0,drive_mod)
+    steering(0, 0, drive_mod)
     print("...Setting dome to 0")
     dome.driveCommand(0)
 
@@ -186,7 +195,7 @@ def shutdownR2():
         print("Disable drives")
     url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
     try:
-        r = requests.get(url)
+        requests.get(url)
     except:
         print("Fail....")
 
@@ -194,7 +203,7 @@ def shutdownR2():
         print("Disable dome")
     url = baseurl + "servo/body/ENABLE_DOME/0/0"
     try:
-        r = requests.get(url)
+        requests.get(url)
     except:
         print("Fail....")
 
@@ -203,14 +212,13 @@ def shutdownR2():
     # Play a sound to alert about a problem
     url = baseurl + "audio/MOTIVATR"
     try:
-        r = requests.get(url)
+        requests.get(url)
     except:
         print("Fail....")
 
     f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
             " ****** PS3 Shutdown ******\n")
 
-#######################################################
 
 parser = argparse.ArgumentParser(description='PS3 controller for r2_control.')
 parser.add_argument('--curses', '-c', action="store_true", dest="curses", required=False,
@@ -219,7 +227,7 @@ parser.add_argument('--dryrun', '-d', action="store_true", dest="dryrun", requir
                     default=False, help='Output in a nice readable format')
 args = parser.parse_args()
 
-#### Open a log file
+# Open a log file
 f = open(log_file, 'at')
 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
         " : ****** ps3 started ******\n")
@@ -250,7 +258,7 @@ if not args.dryrun:
     elif _config.get('Drive', 'type') == "ODrive":
         print("***** Using ODRIVE for main drive ***** ")
         print("finding an odrive...")
-        drive = odrive.find_any() #"serial:" + _config.get('Drive', 'port'))
+        drive = odrive.find_any()  # "serial:" + _config.get('Drive', 'port'))
         drive.axis0.config.watchdog_timeout = 0.5
         drive.axis1.config.watchdog_timeout = 0.5
         drive.axis0.watchdog_feed()
@@ -263,8 +271,8 @@ if not args.dryrun:
         drive.axis1.config.enable_watchdog = True
         drive.axis0.requested_state = 8
         drive.axis1.requested_state = 8
-        #drive.axis1.controller.vel_ramp_enable = True
-        #drive.axis0.controller.vel_ramp_enable = True
+        # drive.axis1.controller.vel_ramp_enable = True
+        # drive.axis0.controller.vel_ramp_enable = True
     else:
         print("No drive configured....")
 
@@ -333,7 +341,7 @@ _turning = 0
 # Main loop
 while (joystick):
     time.sleep(0.005)
-    #global previous, _throttle, _turning
+    # global previous, _throttle, _turning
     steering(_turning, _throttle, drive_mod)
     difference = float(time.time() - last_command)
     if _config.get("Drive", "type") == "ODrive":
@@ -417,7 +425,7 @@ while (joystick):
             try:
                 newurl = baseurl + keys[combo][0]
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
-                        " : Button Down event : " + combo + "," + keys[combo][0] +" \n")
+                        " : Button Down event : " + combo + "," + keys[combo][0] + " \n")
                 f.flush()
                 if __debug__:
                     print("Would run: %s" % keys[combo])
@@ -491,4 +499,3 @@ while (joystick):
 if __debug__:
     print("Exited main loop")
 shutdownR2()
-

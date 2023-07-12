@@ -85,7 +85,7 @@ class SBUSReceiver():
         self.sbusChannels[0] = ((toInt(self.sbusFrame[1]) | toInt(self.sbusFrame[2]) << 8) & 0x07FF)
         self.sbusChannels[1] = ((toInt(self.sbusFrame[2]) >> 3 | toInt(self.sbusFrame[3]) << 5) & 0x07FF)
         self.sbusChannels[2] = ((toInt(self.sbusFrame[3]) >> 6 | toInt(self.sbusFrame[4]) << 2 | toInt(self.sbusFrame[5]) << 10) & 0x07FF)
-        self.sbusChannels[3] = ((toInt(self.sbusFrame[5]) >> 1 | toInt(self.sbusFrame[6]) <<7) & 0x07FF)
+        self.sbusChannels[3] = ((toInt(self.sbusFrame[5]) >> 1 | toInt(self.sbusFrame[6]) << 7) & 0x07FF)
         self.sbusChannels[4] = ((toInt(self.sbusFrame[6]) >> 4 | toInt(self.sbusFrame[7]) << 4) & 0x07FF)
         self.sbusChannels[5] = ((toInt(self.sbusFrame[7]) >> 7 | toInt(self.sbusFrame[8]) << 1 | toInt(self.sbusFrame[9]) << 9) & 0x07FF)
         self.sbusChannels[6] = ((toInt(self.sbusFrame[9]) >> 2 | toInt(self.sbusFrame[10]) << 6) & 0x07FF)
