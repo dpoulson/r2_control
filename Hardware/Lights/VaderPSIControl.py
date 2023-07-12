@@ -88,7 +88,7 @@ class _VaderPSIControl(object):
             if __debug__:
                 print("Sending byte: %c " % i)
             try:
-                bus.write_byte(self.address, i)
+                self.bus.write_byte(self.address, i)
             except:
                 print("Failed to send command to %s" % self.address)
         return "Ok"

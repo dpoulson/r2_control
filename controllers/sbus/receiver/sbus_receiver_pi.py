@@ -172,5 +172,5 @@ if __name__ == '__main__':
 
 		#anywere in your code you can call sbus.get_rx_channels() to get all data or sbus.get_rx_channels()[n] to get value of n channel
 		#or get_rx_channel(self, num_ch) to get channel you whant.
-		print sbus.get_failsafe_status(), sbus.get_rx_channels(), str(sbus.ser.inWaiting()).zfill(4) , (time.time()-sbus.lastFrameTime)
+		print(sbus.get_failsafe_status(), sbus.get_rx_channels(), str(sbus.ser.inWaiting()).zfill(4) , (time.time()-sbus.lastFrameTime))
 

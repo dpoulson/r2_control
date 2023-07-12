@@ -8,6 +8,7 @@ from pygame import mixer  # Load the required library
 import os
 import datetime
 import time
+import serial
 from r2utils import mainconfig
 from flask import Blueprint, request
 standard_library.install_aliases()
@@ -40,7 +41,7 @@ def _play_happy():
     """GET to play HAPPY sound"""
     message = ""
     if request.method == 'GET':
-        audio.TriggerSound('happy')
+        vocalizer.TriggerSound('happy')
     return message
 
 @api.route('/sad', methods=['GET'])
@@ -48,7 +49,7 @@ def _play_sad():
     """GET to play SAD sound"""
     message = ""
     if request.method == 'GET':
-        audio.TriggerSound('sad')
+        vocalizer.TriggerSound('sad')
     return message
 
 @api.route('/angry', methods=['GET'])
@@ -56,7 +57,7 @@ def _play_angry():
     """GET to play ANGRY sound"""
     message = ""
     if request.method == 'GET':
-        audio.TriggerSound('angry')
+        vocalizer.TriggerSound('angry')
     return message
 
 @api.route('/scared', methods=['GET'])
@@ -64,7 +65,7 @@ def _play_scared():
     """GET to play SCARED sound"""
     message = ""
     if request.method == 'GET':
-        audio.TriggerSound('scared')
+        vocalizer.TriggerSound('scared')
     return message
 
 @api.route('/overload', methods=['GET'])
@@ -72,7 +73,7 @@ def _play_overload():
     """GET to play OVERLOAD sound"""
     message = ""
     if request.method == 'GET':
-        audio.TriggerSound('overload')
+        vocalizer.TriggerSound('overload')
     return message
 
 

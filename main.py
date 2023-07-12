@@ -217,8 +217,6 @@ def joystick_change(stick):
                 message = "Valid stick. Changed to " + stick
                 with open("controllers/.current", "w") as current_joy:
                     current_joy.write(stick)
-                if "telegram" in modules:
-                    telegram.send("Setting joystick to " + stick)
     return message
 
 

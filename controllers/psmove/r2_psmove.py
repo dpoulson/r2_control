@@ -312,7 +312,7 @@ while (joystick):
         if __debug__:
             print("Something went wrong!")
         shutdownR2()
-	sys.exit(0)
+        sys.exit(0)
     for event in events:
         if event.type == pygame.JOYBUTTONDOWN:
             buf = StringIO()

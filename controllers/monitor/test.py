@@ -17,7 +17,7 @@ printSDLVariables()
 try:
     pygame.init()
 except pygame.error:
-    print("Driver '{0}' failed!".format(driver))
+    print("Driver '{0}' failed!".format('fbcon'))
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
 print("Detected screen size: {0}".format(size))
 
