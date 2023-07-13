@@ -196,7 +196,7 @@ def shutdownR2():
     url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
     try:
         requests.get(url)
-    except:
+    except Exception:
         print("Fail....")
 
     if __debug__:
@@ -204,7 +204,7 @@ def shutdownR2():
     url = baseurl + "servo/body/ENABLE_DOME/0/0"
     try:
         requests.get(url)
-    except:
+    except Exception:
         print("Fail....")
 
     if __debug__:
@@ -213,7 +213,7 @@ def shutdownR2():
     url = baseurl + "audio/MOTIVATR"
     try:
         requests.get(url)
-    except:
+    except Exception:
         print("Fail....")
 
     f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
@@ -253,8 +253,8 @@ if not args.dryrun:
     if _config.get('Drive', 'type') == "Sabertooth":
         print("**** Using Sabertooth for main drive ****")
         drive = SabertoothPacketSerial(address=int(_config.get('Drive', 'address')),
-                                   type=_config.get('Drive', 'type'),
-                                   port=_config.get('Drive', 'port'))
+                                       type=_config.get('Drive', 'type'),
+                                       port=_config.get('Drive', 'port'))
     elif _config.get('Drive', 'type') == "ODrive":
         print("***** Using ODRIVE for main drive ***** ")
         print("finding an odrive...")
@@ -323,7 +323,7 @@ list(keys.items())
 url = baseurl + "audio/Happy007"
 try:
     r = requests.get(url)
-except:
+except Exception:
     if __debug__:
         print("Fail....")
 
@@ -363,7 +363,7 @@ while (joystick):
         last_command = time.time()
     try:
         events = pygame.event.get()
-    except:
+    except Exception:
         if __debug__:
             print("Something went wrong!")
         shutdownR2()
@@ -398,7 +398,7 @@ while (joystick):
                 url = baseurl + "audio/Happy006"
                 try:
                     r = requests.get(url)
-                except:
+                except Exception:
                     if __debug__:
                         print("Fail....")
             # Special key press (All 4 plus X) to decrease speed of drive
@@ -419,7 +419,7 @@ while (joystick):
                 url = baseurl + "audio/Sad__019"
                 try:
                     r = requests.get(url)
-                except:
+                except Exception:
                     if __debug__:
                         print("Fail....")
             try:
@@ -432,10 +432,10 @@ while (joystick):
                     print("URL: %s" % newurl)
                 try:
                     r = requests.get(newurl)
-                except:
+                except Exception:
                     if __debug__:
                         print("No connection")
-            except:
+            except Exception:
                 if __debug__:
                     print("No combo (pressed)")
             previous = combo
@@ -452,10 +452,10 @@ while (joystick):
                     print("URL: %s" % newurl)
                 try:
                     r = requests.get(newurl)
-                except:
+                except Exception:
                     if __debug__:
                         print("No connection")
-            except:
+            except Exception:
                 if __debug__:
                     print("No combo (released)")
             previous = ""

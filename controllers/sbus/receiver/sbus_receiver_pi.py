@@ -84,18 +84,22 @@ class SBUSReceiver():
 
         self.sbusChannels[0] = ((toInt(self.sbusFrame[1]) | toInt(self.sbusFrame[2]) << 8) & 0x07FF)
         self.sbusChannels[1] = ((toInt(self.sbusFrame[2]) >> 3 | toInt(self.sbusFrame[3]) << 5) & 0x07FF)
-        self.sbusChannels[2] = ((toInt(self.sbusFrame[3]) >> 6 | toInt(self.sbusFrame[4]) << 2 | toInt(self.sbusFrame[5]) << 10) & 0x07FF)
+        self.sbusChannels[2] = ((toInt(self.sbusFrame[3]) >> 6 |
+                                toInt(self.sbusFrame[4]) << 2 | toInt(self.sbusFrame[5]) << 10) & 0x07FF)
         self.sbusChannels[3] = ((toInt(self.sbusFrame[5]) >> 1 | toInt(self.sbusFrame[6]) << 7) & 0x07FF)
         self.sbusChannels[4] = ((toInt(self.sbusFrame[6]) >> 4 | toInt(self.sbusFrame[7]) << 4) & 0x07FF)
-        self.sbusChannels[5] = ((toInt(self.sbusFrame[7]) >> 7 | toInt(self.sbusFrame[8]) << 1 | toInt(self.sbusFrame[9]) << 9) & 0x07FF)
+        self.sbusChannels[5] = ((toInt(self.sbusFrame[7]) >> 7 | toInt(self.sbusFrame[8]) << 1 |
+                                toInt(self.sbusFrame[9]) << 9) & 0x07FF)
         self.sbusChannels[6] = ((toInt(self.sbusFrame[9]) >> 2 | toInt(self.sbusFrame[10]) << 6) & 0x07FF)
         self.sbusChannels[7] = ((toInt(self.sbusFrame[10]) >> 5 | toInt(self.sbusFrame[11]) << 3) & 0x07FF)
         self.sbusChannels[8] = ((toInt(self.sbusFrame[12]) | toInt(self.sbusFrame[13]) << 8) & 0x07FF)
         self.sbusChannels[9] = ((toInt(self.sbusFrame[13]) >> 3 | toInt(self.sbusFrame[14]) << 5) & 0x07FF)
-        self.sbusChannels[10] = ((toInt(self.sbusFrame[14]) >> 6 | toInt(self.sbusFrame[15]) << 2 | toInt(self.sbusFrame[16]) << 10) & 0x07FF)
+        self.sbusChannels[10] = ((toInt(self.sbusFrame[14]) >> 6 | toInt(self.sbusFrame[15]) << 2 |
+                                 toInt(self.sbusFrame[16]) << 10) & 0x07FF)
         self.sbusChannels[11] = ((toInt(self.sbusFrame[16]) >> 1 | toInt(self.sbusFrame[17]) << 7) & 0x07FF)
         self.sbusChannels[12] = ((toInt(self.sbusFrame[17]) >> 4 | toInt(self.sbusFrame[18]) << 4) & 0x07FF)
-        self.sbusChannels[13] = ((toInt(self.sbusFrame[18]) >> 7 | toInt(self.sbusFrame[19]) << 1 | toInt(self.sbusFrame[20]) << 9) & 0x07FF)
+        self.sbusChannels[13] = ((toInt(self.sbusFrame[18]) >> 7 | toInt(self.sbusFrame[19]) << 1 |
+                                 toInt(self.sbusFrame[20]) << 9) & 0x07FF)
         self.sbusChannels[14] = ((toInt(self.sbusFrame[20]) >> 2 | toInt(self.sbusFrame[21]) << 6) & 0x07FF)
         self.sbusChannels[15] = ((toInt(self.sbusFrame[21]) >> 5 | toInt(self.sbusFrame[22]) << 3) & 0x07FF)
 

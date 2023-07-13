@@ -98,7 +98,7 @@ class _Vocalizer(object):
             print("Initiating vocalizer")
         try:
             self._conn = serial.Serial(port, baudrate=baudrate)
-        except:
+        except Exception:
             print("Failed to open serial port %s" % port)
 
     def TriggerSound(self, data):
@@ -129,7 +129,7 @@ class _Vocalizer(object):
 
         try:
             self._conn.write(code)
-        except:
+        except Exception:
             print("Failed to send command to vocalizer")
 
         if __debug__:

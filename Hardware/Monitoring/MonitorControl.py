@@ -63,7 +63,7 @@ class _Monitoring(object):
         while True:
             try:
                 data = self.bus.read_i2c_block_data(0x04, 0)
-            except:
+            except Exception:
                 if __debug__:
                     print("Failed to read i2c data")
                 sleep(1)
@@ -97,7 +97,7 @@ class _Monitoring(object):
         self.extracted = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         try:
             self.bus = smbus.SMBus(int(mainconfig.mainconfig['busid']))
-        except:
+        except Exception:
             print("Failed to connect to device on bus")
         if __debug__:
             print("Initialising Monitoring")

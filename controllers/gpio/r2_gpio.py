@@ -19,7 +19,7 @@ def cb(button):
     url = baseurl + outputs[str(button)]
     try:
         requests.get(url)
-    except:
+    except Exception:
         if __debug__:
             print("Fail....")
 

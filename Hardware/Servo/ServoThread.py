@@ -39,7 +39,7 @@ class ServoThread(threading.Thread):
         try:
             self.i2c = Adafruit_PCA9685.PCA9685(address=int(self.Address, 16), busnum=int(1))
             self.i2c.set_pwm_freq(60)
-        except:
+        except Exception:
             print("Failed to initialise servo at %s/%s" % (self.Address, self.Channel))
         return
 
@@ -52,8 +52,8 @@ class ServoThread(threading.Thread):
                 position = self.destination_position
             else:
                 if __debug__:
-                    print("Current time: %s | destination_start: %s | destination_time: %s | destination_position: %s | original_position: %s" %
-                          (current_time, self.destination_start, self.destination_time, self.destination_position, self.original_position))
+                    print("Current time: %s | destination_start: %s | destination_time: %s | destination_position: %s | original_position: %s" %  # noqa: E501
+                          (current_time, self.destination_start, self.destination_time, self.destination_position, self.original_position))  # noqa: E501
                     print("(current_time - self.destination_start): %s " % (current_time - self.destination_start))
                     print("(self.destination_time - self.destination_start): %s " %
                           (self.destination_time - self.destination_start))
@@ -75,7 +75,7 @@ class ServoThread(threading.Thread):
             try:
                 self.i2c.set_pwm(self.Channel, 0, position)
                 self.current_position = position
-            except:
+            except Exception:
                 print("Failed to send command %s/%s -> %s " % (self.Address, self.Channel, position))
 #            if self.destination_position == self.current_position:
 #               if __debug__:
@@ -88,7 +88,7 @@ class ServoThread(threading.Thread):
             try:
                 self.i2c.set_pwm(self.Channel, 4096, 0)
                 self.processing = False
-            except:
+            except Exception:
                 if __debug__:
                     print("Failed to send command (reset) %s/%s" % (self.Address, self.Channel))
         return

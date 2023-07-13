@@ -7,6 +7,6 @@ def check():
         host = socket.gethostbyname("www.google.com")
         socket.create_connection((host, 80), 2)
         internet_connection = True
-    except Exception as e:
+    except Exception:
         internet_connection = False
     return internet_connection

@@ -71,7 +71,7 @@ class ServoControl(object):
                 queue = Queue()
                 self.servo_list.append(self.Servo(name=servo_name, queue=queue,
                                                   thread=ServoThread(self.address, servo_Max, servo_Min, servo_home,
-                                                                                             servo_channel, queue)))
+                                                                     servo_channel, queue)))
                 for servo in self.servo_list:
                     if servo.name == servo_name:
                         servo.thread.daemon = True
@@ -115,7 +115,7 @@ class ServoControl(object):
     def close_all_servos(self, duration):
         try:
             duration = int(duration)
-        except:
+        except Exception:
             print("Duration is not an int")
             duration = 0
         if __debug__:
@@ -127,7 +127,7 @@ class ServoControl(object):
     def open_all_servos(self, duration):
         try:
             duration = int(duration)
-        except:
+        except Exception:
             print("Duration is not an int")
             duration = 0
         if __debug__:
@@ -144,11 +144,11 @@ class ServoControl(object):
         current_servo = []
         try:
             position = float(position)
-        except:
+        except Exception:
             print("Position not a float")
         try:
             duration = int(duration)
-        except:
+        except Exception:
             print("Duration is not an int")
         for servo in self.servo_list:
             if servo.name == servo_name:

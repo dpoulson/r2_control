@@ -38,7 +38,7 @@ _config = configparser.SafeConfigParser({'log_file': '/home/pi/r2_control/logs/p
                                          'accel_rate': 0.025,
                                          'curve': 0.6,
                                          'deadband': 0.2
-                                            })
+                                         })
 
 _config.add_section('Dome')
 _config.set('Dome', 'address', '129')
@@ -157,7 +157,7 @@ def shutdownR2():
     url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
     try:
         requests.get(url)
-    except:
+    except Exception:
         print("Fail....")
 
     if __debug__:
@@ -165,7 +165,7 @@ def shutdownR2():
     url = baseurl + "servo/body/ENABLE_DOME/0/0"
     try:
         requests.get(url)
-    except:
+    except Exception:
         print("Fail....")
 
     if __debug__:
@@ -174,7 +174,7 @@ def shutdownR2():
         url = baseurl + "audio/MOTIVATR"
     try:
         requests.get(url)
-    except:
+    except Exception:
         print("Fail....")
 
     f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " ****** PSMove Shutdown ******\n")
@@ -184,9 +184,9 @@ def shutdownR2():
 
 parser = argparse.ArgumentParser(description='PSMove controller for r2_control.')
 parser.add_argument('--curses', '-c', action="store_true", dest="curses", required=False, default=False,
-        help='Output in a nice readable format')
+                    help='Output in a nice readable format')
 parser.add_argument('--dryrun', '-d', action="store_true", dest="dryrun", required=False, default=False,
-        help='Output in a nice readable format')
+                    help='Output in a nice readable format')
 args = parser.parse_args()
 
 # Open a log file
@@ -197,8 +197,10 @@ f.flush()
 if not args.dryrun:
     if __debug__:
         print("Not a drytest")
-    drive = SabertoothPacketSerial(address=int(_config.get('Drive', 'address')), type=_config.get('Drive', 'type'), port=_config.get('Drive', 'port'))
-    dome = SabertoothPacketSerial(address=int(_config.get('Dome', 'address')), type=_config.get('Dome', 'type'), port=_config.get('Dome', 'port'))
+    drive = SabertoothPacketSerial(address=int(_config.get('Drive', 'address')),
+                                   type=_config.get('Drive', 'type'), port=_config.get('Drive', 'port'))
+    dome = SabertoothPacketSerial(address=int(_config.get('Dome', 'address')),
+                                  type=_config.get('Dome', 'type'), port=_config.get('Dome', 'port'))
     drive.driveCommand(0)
     drive.turnCommand(0)
 
@@ -238,7 +240,7 @@ while True:
 url = baseurl + "audio/Happy007"
 try:
     r = requests.get(url)
-except:
+except Exception:
     if __debug__:
         print("Fail....")
 
@@ -320,7 +322,7 @@ while (joystick):
         last_command = time.time()
     try:
         events = pygame.event.get()
-    except:
+    except Exception:
         if __debug__:
             print("Something went wrong!")
         shutdownR2()
@@ -353,11 +355,12 @@ while (joystick):
                 if args.curses:
                     locate('%4f' % speed_fac, 28, 7)
                 drive_mod = speed_fac * invert
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Speed Increase : " + str(speed_fac) + " \n")
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                        " : Speed Increase : " + str(speed_fac) + " \n")
                 url = baseurl + "audio/Happy006"
                 try:
                     r = requests.get(url)
-                except:
+                except Exception:
                     if __debug__:
                         print("Fail....")
             # Special key press (Both shoulder plus left) to decrease speed of drive
@@ -369,26 +372,28 @@ while (joystick):
                 if speed_fac < 0.2:
                     speed_fac = 0.2
                 drive_mod = speed_fac * invert
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Speed Decrease : " + str(speed_fac) + " \n")
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                        " : Speed Decrease : " + str(speed_fac) + " \n")
                 url = baseurl + "audio/Sad__019"
                 try:
                     r = requests.get(url)
-                except:
+                except Exception:
                     if __debug__:
                         print("Fail....")
             try:
                 newurl = baseurl + keys[combo][0]
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Button Down event : " + combo + "," + keys[combo][0] + " \n")
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                        " : Button Down event : " + combo + "," + keys[combo][0] + " \n")
                 f.flush()
                 if __debug__:
                     print("Would run: %s" % keys[combo])
                     print("URL: %s" % newurl)
                 try:
                     r = requests.get(newurl)
-                except:
+                except Exception:
                     if __debug__:
                         print("No connection")
-            except:
+            except Exception:
                 if __debug__:
                     print("No combo (pressed)")
             previous = combo
@@ -397,17 +402,18 @@ while (joystick):
                 print("Buttons released: %s" % previous)
             try:
                 newurl = baseurl + keys[previous][1]
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Button Up event : " + previous + "," + keys[previous][1] + "\n")
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                        " : Button Up event : " + previous + "," + keys[previous][1] + "\n")
                 f.flush()
                 if __debug__:
                     print("Would run: %s" % keys[previous][1])
                     print("URL: %s" % newurl)
                 try:
                     r = requests.get(newurl)
-                except:
+                except Exception:
                     if __debug__:
                         print("No connection")
-            except:
+            except Exception:
                 if __debug__:
                     print("No combo (released)")
             previous = ""
@@ -418,7 +424,8 @@ while (joystick):
                 if args.curses:
                     locate("                   ", 10, 4)
                     locate('%10f' % (event.value), 10, 4)
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Forward/Back : " + str(event.value*drive_mod) + "\n")
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                        " : Forward/Back : " + str(event.value*drive_mod) + "\n")
                 f.flush
                 if not args.dryrun:
                     if __debug__:
@@ -434,7 +441,8 @@ while (joystick):
                 if args.curses:
                     locate("                   ", 10, 5)
                     locate('%10f' % (event.value), 10, 5)
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + " : Left/Right : " + str(event.value*drive_mod) + "\n")
+                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                        " : Left/Right : " + str(event.value*drive_mod) + "\n")
                 f.flush
                 if not args.dryrun:
                     if __debug__:

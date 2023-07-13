@@ -16,6 +16,9 @@ from fcntl import ioctl
 from glob import glob
 from threading import Thread, Event
 
+# Too many lint/flake8 errors, so ignoring file for now.
+# flake8: noqa
+
 from xbox360controller.linux.input import *
 from xbox360controller.linux.input_event_codes import *
 from xbox360controller.linux.joystick import *

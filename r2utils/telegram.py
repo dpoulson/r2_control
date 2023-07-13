@@ -32,7 +32,7 @@ class Telegram(object):
                 requests.get(send_message)
                 if __debug__:
                     print(send_message)
-            except:
+            except Exception:
                 if __debug__:
                     print("Thought we had an internet connection, but sending Telegram failed")
         else:

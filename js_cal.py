@@ -17,7 +17,7 @@ def driveServo(channel, pulse):
         print("Channel %s : pulse %5.5f : Duration: %s" % (channel, pulse, pulse_duration))
     try:
         i2c.set_pwm(channel, 0, int(pulse))
-    except:
+    except Exception:
         print("Failed to send command")
 
 

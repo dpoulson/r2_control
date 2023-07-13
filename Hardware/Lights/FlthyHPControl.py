@@ -201,7 +201,7 @@ class _FlthyHPControl(object):
             print(hexCommand)
         try:
             self.bus.write_i2c_block_data(int(self.address, 16), hexCommand[0], hexCommand[1:])
-        except:
+        except Exception:
             print("Failed to send bytes")
         return "Ok"
 

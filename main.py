@@ -83,7 +83,7 @@ def system_status():
                 remote_battery += str(int(b.readline().split()[0])) + " "
                 if __debug__:
                     print("Remote battery: %s" % remote_battery)
-    except:
+    except Exception:
         remote_battery = ""
 
     status = "Current Status\n"
@@ -112,7 +112,7 @@ def system_status_csv():
         with open('/sys/class/power_supply/sony_controller_battery_00:19:c1:5f:78:b9/capacity',
                   'r') as b:
             remote_battery = int(b.readline().split()[0])
-    except:
+    except Exception:
         remote_battery = 0
 
     battery = 0

@@ -28,7 +28,7 @@ def volmute(bot, update):
     try:
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
-    except:
+    except Exception:
         print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed to Mute")
 
@@ -38,7 +38,7 @@ def volmax(bot, update):
     try:
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
-    except:
+    except Exception:
         print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed to deafen")
 
@@ -52,7 +52,7 @@ def sounds(bot, update, args):
     try:
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
-    except:
+    except Exception:
         print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed...")
 
@@ -66,7 +66,7 @@ def joystick(bot, update, args):
     try:
         r = requests.get(url)
         bot.send_message(chat_id=update.message.chat_id, text=r.content)
-    except:
+    except Exception:
         print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed...")
 
@@ -77,7 +77,7 @@ def status(bot, update):
         r = requests.get(url)
         chat_id = update.message.chat_id
         bot.send_message(chat_id=chat_id, text=r.content)
-    except:
+    except Exception:
         print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed to get status")
 
@@ -86,7 +86,7 @@ def chatid(bot, update):
     try:
         chat_id = update.message.chat_id
         bot.send_message(chat_id=chat_id, text=chat_id)
-    except:
+    except Exception:
         print("Fail....")
         bot.send_message(chat_id=update.message.chat_id, text="Failed to get chat_id")
 

@@ -70,7 +70,7 @@ class _SmokeControl(object):
             print("Command: %s | hexDuration: %s " % (command, hexDuration))
         try:
             self.bus.write_i2c_block_data(int(self.address, 16), command, hexDuration)
-        except:
+        except Exception:
             print("Failed to send bytes")
         return "Ok"
 

@@ -58,7 +58,7 @@ class _GPIOControl(object):
                 GPIO.output(int(row[0]), int(row[2]))  # Third value in csv file is default, set pin to that
             if __debug__:
                 print("Initialising GPIO Control")
-        except:
+        except Exception:
             print("No pin config file: " + gpio_configfile)
 
     def setState(self, gpio, state):
