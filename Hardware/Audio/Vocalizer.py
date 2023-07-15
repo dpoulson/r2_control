@@ -64,6 +64,29 @@ def _play_scared():
         vocalizer.TriggerSound('scared')
     return message
 
+@api.route('/muse', methods=['GET'])
+def _play_muse():
+    """GET to play SCARED sound"""
+    message = ""
+    if request.method == 'GET':
+        vocalizer.TriggerSound('muse')
+    return message
+
+@api.route('/muse/<any(enable, disable):command', methods=['GET'])
+def _play_muse(command):
+    """GET to play SCARED sound"""
+    message = ""
+    if request.method == 'GET':
+        vocalizer.ControlMuse(command)
+    return message
+
+@api.route('/muse/<any(mingap, maxgap):command>/<int:value>', methods=['GET'])
+def _play_muse(command, value=0):
+    """GET to play SCARED sound"""
+    message = ""
+    if request.method == 'GET':
+        vocalizer.ControlMuse(command, value)
+    return message
 
 @api.route('/overload', methods=['GET'])
 def _play_overload():
@@ -124,6 +147,42 @@ class _Vocalizer(object):
             code = "SC0"
         elif data == "overload":
             code = "SE"
+        elif data == "muse":
+            code = "MM"
+        else:
+            code = "PSV"
+
+        try:
+            self._conn.write(code)
+        except Exception:
+            print("Failed to send command to vocalizer")
+
+        if __debug__:
+            print("Command sent to vocalizer")
+        
+    def ControlMuse(self, command, value=0):
+        """
+        Control muse efects
+
+        Parameters
+        ----------
+        data : str
+             type of sound to generate (happy, sad, angry, scared, or overload)
+        """
+        code = None
+        if __debug__:
+            print("Muse:  %s" % command)
+
+        if command == "enable":
+            code = "M1"
+        elif data == "disable":
+            code = "M0"
+        elif data == "toggle":
+            code = "MT"
+        elif data == "mingap":
+            code = "MN" + value
+        elif data == "maxgap":
+            code = "MX" + value
         else:
             code = "PSV"
 
