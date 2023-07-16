@@ -1,6 +1,5 @@
 #!/usr/bin/python
-from __future__ import print_function
-from future import standard_library
+
 import threading
 import time
 import random
@@ -8,6 +7,7 @@ import csv
 import urllib.request
 import urllib.error
 import urllib.parse
+from future import standard_library
 standard_library.install_aliases()
 
 script = ""
@@ -19,7 +19,7 @@ keywords = ['dome', 'body', 'lights', 'sound', 'sleep', 'flthy', 'rseries', 'psi
 
 class ScriptThread(threading.Thread):
     def __init__(self, script, loop):
-        print("Initialising script thread with looping set to: %s" % loop)
+        print(f"Initialising script thread with looping set to: {loop}")
         self.script = script
         self.loop = int(loop)
         self._stopevent = threading.Event()
@@ -27,7 +27,7 @@ class ScriptThread(threading.Thread):
         return
 
     def run(self):
-        print("Starting script thread %s" % self.script)
+        print(f"Starting script thread {self.script}")
         while not self._stopevent.isSet():
             ifile = open('scripts/%s.scr' % self.script, "rt")
             reader = csv.reader(ifile)
@@ -44,12 +44,12 @@ class ScriptThread(threading.Thread):
                     print("Looping...")
             else:
                 self._stopevent.set()
-        print("Stopping script %s" % self.script)
+        print(f"Stopping script {self.script}")
         return
 
     def stop(self, timeout=None):
         if __debug__:
-            print("Stop called on %s" % self.script)
+            print(f"Stop called on {self.script}")
         self._stopevent.set()
         # threading.Thread.join(self, timeout)
 
@@ -61,7 +61,7 @@ class ScriptThread(threading.Thread):
                     if row[1] == "random":
                         stime = random.randint(int(row[2]), int(row[3]))
                         if __debug__:
-                            print("Random sleep time: %s" % stime)
+                            print(f"Random sleep time: {stime}")
                         time.sleep(float(stime))
                     else:
                         time.sleep(float(row[1]))

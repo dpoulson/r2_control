@@ -1,12 +1,11 @@
-from __future__ import print_function
-from __future__ import absolute_import
-from future import standard_library
+"""Module for talking to the Vocalizer board"""
+from builtins import object
 import configparser
 import os
 import serial
-from r2utils import mainconfig
 from flask import Blueprint, request
-from builtins import object
+from future import standard_library
+from r2utils import mainconfig
 standard_library.install_aliases()
 
 
@@ -17,7 +16,7 @@ _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
     print("Config file does not exist (Vocalizer)")
-    with open(_configfile, 'wt') as configfile:
+    with open(_configfile, 'wt', encoding="utf-8") as configfile:
         _config.write(configfile)
 
 _defaults = _config.defaults()
@@ -125,7 +124,7 @@ class _Vocalizer(object):
         try:
             self._conn = serial.Serial(port, baudrate=baudrate)
         except Exception:
-            print("Failed to open serial port %s" % port)
+            print(f"Failed to open serial port {port}")
 
     def TriggerSound(self, data):
         """
@@ -138,7 +137,7 @@ class _Vocalizer(object):
         """
         code = None
         if __debug__:
-            print("Playing %s" % data)
+            print(f"Playing {data}")
 
         if data == "happy":
             code = "SH0"
@@ -174,7 +173,7 @@ class _Vocalizer(object):
         """
         code = None
         if __debug__:
-            print("Muse:  %s" % command)
+            print(f"Muse: {command}")
 
         if command == "enable":
             code = "M1"

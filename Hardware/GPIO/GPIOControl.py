@@ -1,24 +1,24 @@
-from __future__ import print_function
-from __future__ import absolute_import
-from future import standard_library
+""" Module for controlling GPIO """
+from builtins import object
 import configparser
 import os
 import csv
 import collections
-import RPi.GPIO as GPIO
-from r2utils import mainconfig
+import RPi as GPIO
+from future import standard_library
 from flask import Blueprint, request
-from builtins import object
+from r2utils import mainconfig
 standard_library.install_aliases()
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'gpio.cfg'
 
-_config = configparser.SafeConfigParser({'logfile': 'gpio.log', 'gpio_configfile': 'gpio_pins.cfg'})
+_config = configparser.SafeConfigParser({'logfile': 'gpio.log',
+                                         'gpio_configfile': 'gpio_pins.cfg'})
 
 if not os.path.isfile(_configfile):
     print("Config file does not exist  (GPIO)")
-    with open(_configfile, 'wt') as configfile:
+    with open(_configfile, 'wt', encoding="utf-8") as configfile:
         _config.write(configfile)
 
 _config.read(_configfile)
@@ -35,7 +35,7 @@ def _gpio_on(gpio, state):
     """ GET to set the state of a GPIO pin """
     message = ""
     if request.method == 'GET':
-        message += _gpio.setState(gpio, state)
+        message += _gpio.SetState(gpio, state)
     return message
 
 
@@ -61,13 +61,13 @@ class _GPIOControl(object):
         except Exception:
             print("No pin config file: " + gpio_configfile)
 
-    def setState(self, gpio, state):
+    def SetState(self, gpio, state):
         print(self._gpio_list)
         for gpios in self._gpio_list:
             print(gpios)
             if gpios.name == gpio:
                 if __debug__:
-                    print("Setting %s (pin %s) to %s" % (gpio, gpios.pin, state))
+                    print(f"Setting {gpio} (pin {gpios.pin}) to {state}")
                 GPIO.output(int(gpios.pin), int(state))
         return "Ok"
 

@@ -18,15 +18,13 @@
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
 
-from __future__ import print_function
-from __future__ import absolute_import
 from future import standard_library
 import configparser
 import glob
 import os
 import collections
-from r2utils import mainconfig
 from flask import Blueprint, request
+from r2utils import mainconfig
 from builtins import object
 standard_library.install_aliases()
 
@@ -98,7 +96,7 @@ class ScriptControl(object):
         self.script_id = 1
         self.script_dir = script_dir
         if __debug__:
-            print("Starting script object with path: %s" % script_dir)
+            print(f"Starting script object with path: {script_dir}")
 
     def list(self):
         files = ', '.join(glob.glob("./scripts/*.scr"))
@@ -115,7 +113,7 @@ class ScriptControl(object):
     def stop_script(self, kill_id):
         idx = 0
         if __debug__:
-            print("Trying to stop script ID %s" % kill_id)
+            print(f"Trying to stop script ID {kill_id}")
         for script in self.running_scripts:
             if (int(script.script_id) == int(kill_id)) or (script.name == kill_id):
                 script.thread.stop()
@@ -145,7 +143,7 @@ class ScriptControl(object):
                 scripts.thread.daemon = True
                 scripts.thread.start()
         if __debug__:
-            print("Starting script %s" % script)
+            print(f"Starting script {script}")
         if loop == "1":
             print("Looping")
         else:

@@ -1,7 +1,8 @@
-import RPi.GPIO as GPIO
+""" Module to use GPIO as inputs """
+import RPi as GPIO
 import requests
 
-baseurl = 'http://localhost:5000/'
+BASEURL = 'http://localhost:5000/'
 
 outputs = {
         "16": "scripts/r2kt/0",
@@ -16,7 +17,7 @@ GPIO.setmode(GPIO.BOARD)
 def cb(button):
     print(f"Button {button} pressed. URL is {outputs[str(button)]}")
 
-    url = baseurl + outputs[str(button)]
+    url = BASEURL + outputs[str(button)]
     try:
         requests.get(url)
     except Exception:

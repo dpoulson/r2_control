@@ -1,13 +1,12 @@
-from __future__ import print_function
-from __future__ import absolute_import
-from future import standard_library
-import smbus
-import os
-from r2utils import mainconfig
-from flask import Blueprint, request
-import configparser
+""" Module to control FlthyMcNasty HP Lights """
 from builtins import hex
 from builtins import object
+import smbus
+import os
+import configparser
+from flask import Blueprint, request
+from r2utils import mainconfig
+from future import standard_library
 standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'flthy.cfg'
@@ -17,7 +16,7 @@ _config = configparser.SafeConfigParser({'address': '0x19',
                                          'reeltwo': 'false'})
 if not os.path.isfile(_configfile):
     print("Config file does not exist")
-    with open(_configfile, 'wt') as configfile:
+    with open(_configfile, 'wt', encoding="utf-8") as configfile:
         _config.write(configfile)
 
 _config.read(_configfile)
@@ -41,7 +40,7 @@ def _flthy_raw(cmd):
     """ GET to send a raw command to the flthy HP system"""
     message = ""
     if request.method == 'GET':
-        message += _flthy.sendRaw(cmd)
+        message += _flthy.SendRaw(cmd)
     return message
 
 
@@ -50,7 +49,7 @@ def _flthy_seq(seq):
     """ GET to send a sequence command to the flthy HP system"""
     message = ""
     if request.method == 'GET':
-        message += _flthy.sendSequence(seq)
+        message += _flthy.SendSequence(seq)
     return message
 
 
@@ -59,11 +58,12 @@ def _flthy_cmd(hp, type, seq, value):
     """ GET to send a command to the flthy HP system"""
     message = ""
     if request.method == 'GET':
-        message += _flthy.sendCommand(hp, type, seq, value)
+        message += _flthy.SendCommand(hp, type, seq, value)
     return message
 
 
 class _FlthyHPControl(object):
+    """ FlthyMcNasty HP Control """
 
     def __init__(self, address, logdir, reeltwo):
         self.address = address
@@ -72,33 +72,34 @@ class _FlthyHPControl(object):
         self.logdir = logdir
         if __debug__:
             print("Initialising FlthyHP Control")
-            print("Address: %s | Bus: %s | logdir: %s | reeltwo: %s" % (self.address, self.bus, self.logdir, self.reeltwo))
+            print(f"Address: {self.address} | Bus: {self.bus} | logdir: {self.logdir} | reeltwo: {self.reeltwo}" % (self.address, self.bus, self.logdir, self.reeltwo))
 
-    def sendSequence(self, seq):
+    def SendSequence(self, seq):
+        """ Send sequence command """
         if seq.isdigit():
             if __debug__:
                 print("Integer sent, sending command")
             cmd = 'S' + seq
-            self.sendRaw(cmd)
+            self.SendRaw(cmd)
         else:
             if __debug__:
                 print("Not an integer, decode and send command")
             if seq == "leia":
                 if __debug__:
                     print("Leia mode")
-                self.sendRaw('S1')
+                self.SendRaw('S1')
             elif seq == "disable":
                 if __debug__:
                     print("Clear and Disable")
-                self.sendRaw('S8')
+                self.SendRaw('S8')
             elif seq == "enable":
                 if __debug__:
                     print("Clear and Enable")
-                self.sendRaw('S9')
+                self.SendRaw('S9')
         return "Ok"
 
-    def sendCommand(self, hp, type, seq, value):
-        # Decoding HP command
+    def SendCommand(self, hp, type, seq, value):
+        """ Decoding HP command """
         if __debug__:
             print("HP: %s" % hp)
         if (hp.lower() in _hp_list) or (hp in ['T', 'F', 'R', 'A']):
@@ -109,17 +110,17 @@ class _FlthyHPControl(object):
                 if __debug__:
                     print("HP word used")
                 if hp == "front":
-                    hpCmd = "F"
+                    hp_cmd = "F"
                 elif hp == "top":
-                    hpCmd = "T"
+                    hp_cmd = "T"
                 elif (hp == "rear") or (hp == "back"):
-                    hpCmd = "R"
+                    hp_cmd = "R"
                 elif hp == "all":
-                    hpCmd = "A"
+                    hp_cmd = "A"
             else:
                 if __debug__:
                     print("HP code used")
-                hpCmd = hp
+                hp_cmd = hp
         else:
             print("Illegal HP code")
 
@@ -131,13 +132,13 @@ class _FlthyHPControl(object):
                 if __debug__:
                     print("Type word used")
                 if type == "servo":
-                    typeCmd = "1"
+                    type_cmd = "1"
                 elif type == "light":
-                    typeCmd = "0"
+                    type_cmd = "0"
             else:
                 if __debug__:
                     print("Type code used")
-                typeCmd = type
+                type_cmd = type
         else:
             print("Illegal type code")
 
@@ -149,44 +150,45 @@ class _FlthyHPControl(object):
                 if __debug__:
                     print("Sequence word used")
                 if seq == "leia":
-                    seqCmd = "01"
+                    seq_cmd = "01"
                 elif seq == "projector":
-                    seqCmd = "02"
+                    seq_cmd = "02"
                 elif seq == "shortcircuit":
-                    seqCmd = "05"
+                    seq_cmd = "05"
             else:
                 if __debug__:
                     print("Sequence code used")
-                seqCmd = seq
+                seq_cmd = seq
         else:
             print("Illegal type code")
 
-        if typeCmd == "1":
+        if type_cmd == "1":
             if (value.lower() in _position_list) or (value in ['1', '2', '3', '4', '5', '6', '7', '8']):
                 if __debug__:
-                    print("Servo command: %s " % value)
+                    print(f"Servo command: {value}")
                 if value.lower() in _position_list:
                     value = value.lower()
                 else:
                     if __debug__:
                         print("Value code used")
-                    valueCmd = value
+                    value_cmd = value
         else:
             if (value.lower() in _colour_list) or (value in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']):
                 if __debug__:
-                    print("Light command: %s " % value)
+                    print(f"Light command: {value}")
                 if value.lower() in _colour_list:
                     value = value.lower()
                 else:
                     if __debug__:
                         print("Value code used")
-                    valueCmd = value
+                    value_cmd = value
 
-        cmd = hpCmd + typeCmd + seqCmd + valueCmd
-        self.sendRaw(cmd)
+        cmd = hp_cmd + type_cmd + seq_cmd + value_cmd
+        self.SendRaw(cmd)
         return "OK"
 
-    def sendRaw(self, cmd):
+    def SendRaw(self, cmd):
+        """ Send a raw command """
         command = list(cmd)
         hexCommand = list()
         if self.reeltwo is True:

@@ -67,28 +67,28 @@ def list_joysticks():
 
 def system_status():
     """ Collects the system status and returns a formatted message """
-    with open('/proc/uptime', 'r') as f:
+    with open('/proc/uptime', 'r', encoding="utf-8") as f:
         uptime_seconds = float(f.readline().split()[0])
         uptime_string = str(datetime.timedelta(seconds=uptime_seconds))
     remote_battery = ""
     try:
         controllers = glob.glob('/sys/class/power_supply/*')
         if __debug__:
-            print("Controllers: %s" % controllers)
+            print(f"Controllers: {controllers}")
         for controller in controllers:
             path = controller + "/capacity"
             if __debug__:
                 print("Controller path: %s" % path)
-            with open(path, 'r') as b:
+            with open(path, 'r', encoding="utf-8") as b:
                 remote_battery += str(int(b.readline().split()[0])) + " "
                 if __debug__:
-                    print("Remote battery: %s" % remote_battery)
+                    print(f"Remote battery: {remote_battery}")
     except Exception:
         remote_battery = ""
 
     status = "Current Status\n"
     status += "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
-    status += "Uptime: \t%s\n" % uptime_string
+    status += f"Uptime: \t{uptime_string}\n"
     if "Monitoring" in plugins:
         status += "Main Battery: \t%5.3f (balance: %5.3f)\n" % (p['Monitoring'].monitoring.queryBattery(),
                                                                 p['Monitoring'].monitoring.queryBatteryBalance())
@@ -201,7 +201,7 @@ def joystick_current():
     """GET to display current joystick"""
     logging.info("Retrieving current joystick")
     if request.method == 'GET':
-        with open("controllers/.current", "r") as current_joy:
+        with open("controllers/.current", "r", encoding="utf-8") as current_joy:
             current = current_joy.read()
         return current
     return "Fail"
@@ -217,7 +217,7 @@ def joystick_change(stick):
             logging.info("Checking controller type is valid: " + valid)
             if valid == stick:
                 message = "Valid stick. Changed to " + stick
-                with open("controllers/.current", "w") as current_joy:
+                with open("controllers/.current", "w", encoding="utf-8") as current_joy:
                     current_joy.write(stick)
     return message
 
@@ -230,7 +230,7 @@ def shutdown():
         tg.send("Night night...")
     if request.method == 'GET':
         os.system('shutdown now -h')
-        s = open("/home/pi/.r2_config/.shutdown", "w+")
+        s = open("/home/pi/.r2_config/.shutdown", "w+", encoding="utf-8")
         s.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
         s.flush()
         s.close()
@@ -274,7 +274,7 @@ def sendstatusinternet():
     """GET to display internet status"""
     message = ""
     if request.method == 'GET':
-        if (internet.check()):
+        if internet.check():
             message = "True"
         else:
             message = "False"

@@ -18,8 +18,6 @@
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
 
-from __future__ import print_function
-from __future__ import absolute_import
 from future import standard_library
 from .ServoThread import ServoThread
 from queue import Queue
@@ -80,7 +78,7 @@ class ServoControl(object):
                 except Exception:
                     print("Oops")
                 if __debug__:
-                    print("Added servo: %s %s %s %s %s" % (servo_channel, servo_name, servo_Min, servo_Max, servo_home))
+                    print(f"Added servo: {servo_channel} {servo_name} {servo_Min} {servo_Max} {servo_home}")
         ifile.close()
         self.close_all_servos(0)
 
@@ -93,7 +91,7 @@ class ServoControl(object):
         _config.read(_configfile)
 
         if not os.path.isfile(_configfile):
-            print("Config file does not exist (Servo: " + name + ")")
+            print(f"Config file does not exist (Servo: {name})")
             with open(_configfile, 'wt') as configfile:
                 _config.write(configfile)
 
@@ -105,12 +103,12 @@ class ServoControl(object):
         self.address = _defaults['address']
         self.init_config(name)
         if __debug__:
-            print("Initialised servo module " + name + " at address " + self.address)
+            print(f"Initialised servo module {name} at address {self.address}")
 
     def list_servos(self):
         message = ""
         if __debug__:
-            print("Listing servos for address:" + self.address)
+            print(f"Listing servos for address: {self.address}")
         for servo in self.servo_list:
             message += "%s\n" % servo.name
         return message
@@ -143,7 +141,7 @@ class ServoControl(object):
     # def servo_command(self, servo_name, position, duration):
     def servo_command(self, servo_name, position, duration):
         if __debug__:
-            print("Moving %s to %s over duration %s" % (servo_name, position, duration))
+            print(f"Moving {servo_name} to {position} over duration {duration}")
         current_servo = []
         try:
             position = float(position)

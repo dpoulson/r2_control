@@ -11,12 +11,12 @@ standard_library.install_aliases()
 
 q = Queue
 
-Address = 0x40
-Max = 0
-Min = 0
-Current = 0
-Home = 0
-Channel = 0
+ADDRESS = 0x40
+MAX = 0
+MIN = 0
+CURRENT = 0
+HOME = 0
+CHANNEL = 0
 
 
 class ServoThread(threading.Thread):
@@ -24,14 +24,14 @@ class ServoThread(threading.Thread):
         if __debug__:
             print("Initialising thread")
         self.q = q
-        self.Address = Address
-        self.Max = Max
-        self.Min = Min
-        self.Home = Home
-        self.current_position = Home
-        self.original_position = Home
-        self.Channel = Channel
-        self.destination_position = Home
+        self.Address = ADDRESS
+        self.Max = MAX
+        self.Min = MIN
+        self.Home = HOME
+        self.current_position = HOME
+        self.original_position = HOME
+        self.Channel = CHANNEL
+        self.destination_position = HOME
         self.destination_start = 0
         self.destination_time = 0
         self.processing = False
@@ -103,7 +103,7 @@ class ServoThread(threading.Thread):
                 position = command[0]
                 duration = command[1]
                 if position > 1 or position < 0:
-                    print("Invalid position (%s)" % position)
+                    print(f"Invalid position ({position})")
                 else:
                     self.destination_position = int(((self.Max - self.Min) * position) + self.Min)
                     self.processing = True
@@ -111,11 +111,11 @@ class ServoThread(threading.Thread):
                 self.destination_time = self.destination_start + (duration * 1000)
                 self.original_position = self.current_position
                 if __debug__:
-                    print("Duration:    %s " % duration)
-                    print("Destination: %s " % self.destination_position)
-                    print("Original:    %s " % self.original_position)
-                    print("Start time:  %s " % self.destination_start)
-                    print("End time:    %s " % self.destination_time)
+                    print(f"Duration:    {duration} ")
+                    print(f"Destination: {self.destination_position} ")
+                    print(f"Original:    {self.original_position} ")
+                    print(f"Start time:  {self.destination_start} ")
+                    print(f"End time:    {self.destination_time} ")
                 self.sendCommand()                            # Main Command Loop
             except Empty:
                 if self.processing is not False:

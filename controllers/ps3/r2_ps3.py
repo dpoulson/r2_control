@@ -62,7 +62,7 @@ _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
     print("Config file does not exist")
-    with open(_configfile, 'wb') as configfile:
+    with open(_configfile, 'wb', encoding="utf-8") as configfile:
         _config.write(configfile)
 
 ps3config = _config.defaults()
@@ -174,7 +174,7 @@ def clamp(n, minn, maxn):
         return minn
     elif n > maxn:
         if __debug__:
-            print("Clamping max " + str(n))
+            print(f"Clamping max {str(n)}")
         return maxn
     else:
         return n
@@ -238,7 +238,7 @@ while True:
     pygame.joystick.init()
     num_joysticks = pygame.joystick.get_count()
     if __debug__:
-        print("Waiting for joystick... (count %s)" % num_joysticks)
+        print(f"Waiting for joystick... (count {num_joysticks})")
     if num_joysticks != 0:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
                 " : Joystick found \n")
@@ -249,7 +249,7 @@ while True:
 if not args.dryrun:
     if __debug__:
         print("Not a drytest")
-        print("Drive type: %s" % _config.get('Drive', 'type'))
+        print(f"Drive type: {_config.get('Drive', 'type')}")
     if _config.get('Drive', 'type') == "Sabertooth":
         print("**** Using Sabertooth for main drive ****")
         drive = SabertoothPacketSerial(address=int(_config.get('Drive', 'address')),
@@ -298,7 +298,7 @@ if args.curses:
 pygame.init()
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
 if __debug__:
-    print("Framebuffer size: %d x %d" % (size[0], size[1]))
+    print(f"Framebuffer size: {size[0]} x {size[1]}")
 
 j = pygame.joystick.Joystick(0)
 j.init()
@@ -310,11 +310,11 @@ if not os.path.isfile(_keysfile):
 
 # Read in key combos from csv file
 keys = defaultdict(list)
-with open(_keysfile, mode='r') as infile:
+with open(_keysfile, mode='r', encoding="utf-8") as infile:
     reader = csv.reader(infile)
     for row in reader:
         if __debug__:
-            print("Row: %s | %s | %s" % (row[0], row[1], row[2]))
+            print(f"Row: {row[0]} | {row[1]} | {row[2]}")
         keys[row[0]].append(row[1])
         keys[row[0]].append(row[2])
 
@@ -339,7 +339,7 @@ _throttle = 0
 _turning = 0
 
 # Main loop
-while (joystick):
+while joystick:
     time.sleep(0.005)
     # global previous, _throttle, _turning
     steering(_turning, _throttle, drive_mod)
@@ -376,7 +376,7 @@ while (joystick):
                 buf.write(str(button))
             combo = buf.getvalue()
             if __debug__:
-                print("Buttons pressed: %s" % combo)
+                print(f"Buttons pressed: {combo}")
             if args.curses:
                 locate("                   ", 1, 14)
                 locate(combo, 3, 14)
@@ -389,7 +389,7 @@ while (joystick):
                 if speed_fac > 1:
                     speed_fac = 1
                 if __debug__:
-                    print("*** NEW SPEED %s" % speed_fac)
+                    print(f"*** NEW SPEED {speed_fac}")
                 if args.curses:
                     locate('%4f' % speed_fac, 28, 7)
                 drive_mod = speed_fac * invert
@@ -410,7 +410,7 @@ while (joystick):
                 if speed_fac < 0.2:
                     speed_fac = 0.2
                 if __debug__:
-                    print("*** NEW SPEED %s" % speed_fac)
+                    print(f"*** NEW SPEED {speed_fac}")
                 if args.curses:
                     locate('%4f' % speed_fac, 28, 7)
                 drive_mod = speed_fac * invert
@@ -428,8 +428,8 @@ while (joystick):
                         " : Button Down event : " + combo + "," + keys[combo][0] + " \n")
                 f.flush()
                 if __debug__:
-                    print("Would run: %s" % keys[combo])
-                    print("URL: %s" % newurl)
+                    print(f"Would run: {keys[combo]}")
+                    print(f"URL: {newurl}")
                 try:
                     r = requests.get(newurl)
                 except Exception:
@@ -441,15 +441,15 @@ while (joystick):
             previous = combo
         if event.type == pygame.JOYBUTTONUP:
             if __debug__:
-                print("Buttons released: %s" % previous)
+                print(f"Buttons released: {previous}")
             try:
                 newurl = baseurl + keys[previous][1]
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
                         " : Button Up event : " + previous + "," + keys[previous][1] + "\n")
                 f.flush()
                 if __debug__:
-                    print("Would run: %s" % keys[previous][1])
-                    print("URL: %s" % newurl)
+                    print(f"Would run: {keys[previous][1]}" )
+                    print(f"URL: {newurl}")
                 try:
                     r = requests.get(newurl)
                 except Exception:
@@ -462,7 +462,7 @@ while (joystick):
         if event.type == pygame.JOYAXISMOTION:
             if event.axis == PS3_AXIS_LEFT_VERTICAL:
                 if __debug__:
-                    print("Value (Drive): %s : Speed Factor : %s" % (event.value, speed_fac))
+                    print(f"Value (Drive): {event.value} : Speed Factor : {speed_fac}")
                 if args.curses:
                     locate("                   ", 10, 4)
                     locate('%10f' % (event.value), 10, 4)
@@ -470,7 +470,7 @@ while (joystick):
                 last_command = time.time()
             elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
                 if __debug__:
-                    print("Value (Steer): %s" % event.value)
+                    print(f"Value (Steer): {event.value}")
                 if args.curses:
                     locate("                   ", 10, 5)
                     locate('%10f' % (event.value), 10, 5)
@@ -478,7 +478,7 @@ while (joystick):
                 last_command = time.time()
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
                 if __debug__:
-                    print("Value (Dome): %s" % event.value)
+                    print(f"Value (Dome): {event.value}")
                 if args.curses:
                     locate("                   ", 35, 4)
                     locate('%10f' % (event.value), 35, 4)
