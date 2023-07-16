@@ -238,7 +238,7 @@ while True:
     pygame.joystick.init()
     num_joysticks = pygame.joystick.get_count()
     if __debug__:
-        print("Waiting for joystick... (ccount %s)" % num_joysticks)
+        print("Waiting for joystick... (count %s)" % num_joysticks)
     if num_joysticks != 0:
         f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
                 " : Joystick found \n")

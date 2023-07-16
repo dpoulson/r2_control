@@ -41,6 +41,7 @@ class ServoThread(threading.Thread):
             self.i2c.set_pwm_freq(60)
         except Exception:
             print("Failed to initialise servo at %s/%s" % (self.Address, self.Channel))
+            raise Exception("Failed to initialise server")
         return
 
     def sendCommand(self):
