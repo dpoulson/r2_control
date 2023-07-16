@@ -28,7 +28,6 @@ _logfile = _defaults['logfile']
 api = Blueprint('vocalizer', __name__, url_prefix='/voc')
 
 
-@api.route('/', methods=['GET'])
 @api.route('/happy', methods=['GET'])
 def _play_happy():
     """GET to play HAPPY sound"""
@@ -66,23 +65,23 @@ def _play_scared():
 
 @api.route('/muse', methods=['GET'])
 def _play_muse():
-    """GET to play SCARED sound"""
+    """GET to play MUSE sound"""
     message = ""
     if request.method == 'GET':
         vocalizer.TriggerSound('muse')
     return message
 
-@api.route('/muse/<any(enable, disable):command', methods=['GET'])
-def _play_muse(command):
-    """GET to play SCARED sound"""
+@api.route('/muse/<any(enable, disable):command>', methods=['GET'])
+def _play_muse_toggle(command):
+    """GET to toggle MUSE effects"""
     message = ""
     if request.method == 'GET':
         vocalizer.ControlMuse(command)
     return message
 
 @api.route('/muse/<any(mingap, maxgap):command>/<int:value>', methods=['GET'])
-def _play_muse(command, value=0):
-    """GET to play SCARED sound"""
+def _play_muse_timing(command, value=0):
+    """GET to set min and max MUSE times"""
     message = ""
     if request.method == 'GET':
         vocalizer.ControlMuse(command, value)
