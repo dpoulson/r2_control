@@ -63,6 +63,7 @@ def _play_scared():
         vocalizer.TriggerSound('scared')
     return message
 
+
 @api.route('/muse', methods=['GET'])
 def _play_muse():
     """GET to play MUSE sound"""
@@ -70,6 +71,7 @@ def _play_muse():
     if request.method == 'GET':
         vocalizer.TriggerSound('muse')
     return message
+
 
 @api.route('/muse/<any(enable, disable):command>', methods=['GET'])
 def _play_muse_toggle(command):
@@ -79,6 +81,7 @@ def _play_muse_toggle(command):
         vocalizer.ControlMuse(command)
     return message
 
+
 @api.route('/muse/<any(mingap, maxgap):command>/<int:value>', methods=['GET'])
 def _play_muse_timing(command, value=0):
     """GET to set min and max MUSE times"""
@@ -86,6 +89,7 @@ def _play_muse_timing(command, value=0):
     if request.method == 'GET':
         vocalizer.ControlMuse(command, value)
     return message
+
 
 @api.route('/overload', methods=['GET'])
 def _play_overload():
@@ -158,7 +162,7 @@ class _Vocalizer(object):
 
         if __debug__:
             print("Command sent to vocalizer")
-        
+
     def ControlMuse(self, command, value=0):
         """
         Control muse efects
@@ -174,13 +178,13 @@ class _Vocalizer(object):
 
         if command == "enable":
             code = "M1"
-        elif data == "disable":
+        elif command == "disable":
             code = "M0"
-        elif data == "toggle":
+        elif command == "toggle":
             code = "MT"
-        elif data == "mingap":
+        elif command == "mingap":
             code = "MN" + value
-        elif data == "maxgap":
+        elif command == "maxgap":
             code = "MX" + value
         else:
             code = "PSV"
