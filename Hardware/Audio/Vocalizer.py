@@ -120,9 +120,9 @@ class _Vocalizer(object):
         """
 
         if __debug__:
-            print("Initiating vocalizer")
+            print(f"Initiating vocalizer: {port} / {baudrate}")
         try:
-            self._conn = serial.Serial(port, baudrate=baudrate)
+            self._conn = serial.Serial(str(port), baudrate=int(baudrate))
         except Exception:
             print(f"Failed to open serial port {port}")
 
@@ -140,24 +140,26 @@ class _Vocalizer(object):
             print(f"Playing {data}")
 
         if data == "happy":
-            code = "SH0"
+            code = "<SH0>"
         elif data == "sad":
-            code = "SS0"
+            code = "<SS0>"
         elif data == "angry":
-            code = "SM0"
+            code = "<SM0>"
         elif data == "scared":
-            code = "SC0"
+            code = "<SC0>"
         elif data == "overload":
-            code = "SE"
+            code = "<SE>"
         elif data == "muse":
-            code = "MM"
+            code = "<MM>"
         else:
-            code = "PSV"
+            code = "<PSV>"
 
         try:
-            self._conn.write(code)
-        except Exception:
-            print("Failed to send command to vocalizer")
+            if __debug__:
+                print(f"Sending: {code}")
+            self._conn.write(code.encode())
+        except Exception as e:
+            print(f"Failed to send command to vocalizer: {e}")
 
         if __debug__:
             print("Command sent to vocalizer")
@@ -176,17 +178,17 @@ class _Vocalizer(object):
             print(f"Muse: {command}")
 
         if command == "enable":
-            code = "M1"
+            code = "<M1>"
         elif command == "disable":
-            code = "M0"
+            code = "<M0>"
         elif command == "toggle":
-            code = "MT"
+            code = "<MT>"
         elif command == "mingap":
-            code = "MN" + value
+            code = "<MN" + value + ">"
         elif command == "maxgap":
-            code = "MX" + value
+            code = "<MX" + value +">"
         else:
-            code = "PSV"
+            code = "<PSV>"
 
         try:
             self._conn.write(code)

@@ -174,7 +174,7 @@ class _AudioLibrary(object):
         """
 
         if __debug__:
-            print("Initiating audio")
+            print(f"Initiating audioi: sounds_dir = {sounds_dir}")
         mixer.init()
         mixer.music.set_volume(float(volume))
         self.sounds_dir = sounds_dir
@@ -214,7 +214,7 @@ class _AudioLibrary(object):
 
         idx = _Random_Sounds.index(data)
         prefix = _Random_Files[idx]
-        print(f"Random index: {idx}, prefix={prefix}")
+        print(f"Random index: {idx}, prefix={prefix}, sounds_dir={self.sounds_dir}")
         file_list = glob.glob(self.sounds_dir + prefix + "*.mp3")
         file_idx = len(file_list) - 1
         audio_file = file_list[random.randint(0, file_idx)]
