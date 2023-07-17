@@ -1,13 +1,12 @@
-#!/usr/bin/python
+""" Bot to talk to telegram and receive commands """
 
-from __future__ import print_function
-from future import standard_library
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 import configparser
 import requests
 import logging
 import time
+from future import standard_library
 standard_library.install_aliases()
 
 time.sleep(20)
@@ -24,6 +23,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 
 def volmute(bot, update):
+    """ Mute volume """
     url = baseurl + "audio/volume/0"
     try:
         r = requests.get(url)
@@ -34,6 +34,7 @@ def volmute(bot, update):
 
 
 def volmax(bot, update):
+    """ Set volume to max """
     url = baseurl + "audio/volume/1"
     try:
         r = requests.get(url)
@@ -44,6 +45,7 @@ def volmax(bot, update):
 
 
 def sounds(bot, update, args):
+    """ Get a list of sounds """
     url = baseurl + "audio/"
     if len(args) == 0:
         url += "list"
@@ -58,6 +60,7 @@ def sounds(bot, update, args):
 
 
 def joystick(bot, update, args):
+    """ List all joysticks """
     url = baseurl + "joystick/"
     if len(args) == 0:
         url += "list"
@@ -72,6 +75,7 @@ def joystick(bot, update, args):
 
 
 def status(bot, update):
+    """ Get status of droid """
     url = baseurl + "status"
     try:
         r = requests.get(url)
@@ -83,6 +87,7 @@ def status(bot, update):
 
 
 def chatid(bot, update):
+    """ Get chat ID """
     try:
         chat_id = update.message.chat_id
         bot.send_message(chat_id=chat_id, text=chat_id)

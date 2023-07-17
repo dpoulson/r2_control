@@ -47,19 +47,21 @@ class _GPIOControl(object):
         self._logdir = logdir
         self._gpio_list = []
         try:
-            ifile = open(mainconfig.mainconfig['config_dir'] + '%s' % gpio_configfile, "rt")
+            ifile = open(mainconfig.mainconfig['config_dir'] + '%s' % gpio_configfile, 
+                         "rt", 
+                         encoding="utf-8")
             reader = csv.reader(ifile)
             GPIO.setmode(GPIO.BCM)
             for row in reader:
                 pin = row[0]
                 name = row[1]
-                self._gpio_list.append(self._GPIO_def(pin=pin, name=name))     # Add gpio pin number and name to dictionary,
+                self._gpio_list.append(self._GPIO_def(pin=pin, name=name))  # Add gpio pin number and name to dictionary,
                 GPIO.setup(int(row[0]), GPIO.OUT)  # Set pin as an output
                 GPIO.output(int(row[0]), int(row[2]))  # Third value in csv file is default, set pin to that
             if __debug__:
                 print("Initialising GPIO Control")
         except Exception:
-            print("No pin config file: " + gpio_configfile)
+            print(f"No pin config file: {gpio_configfile}")
 
     def SetState(self, gpio, state):
         print(self._gpio_list)

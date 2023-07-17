@@ -17,15 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
-
-from future import standard_library
+from builtins import object
 import configparser
 import glob
 import os
 import collections
 from flask import Blueprint, request
 from r2utils import mainconfig
-from builtins import object
+from future import standard_library
 standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'scripts.cfg'
@@ -52,7 +51,9 @@ def _script_list():
     """GET gives a comma separated list of available scripts"""
     message = ""
     if request.method == 'GET':
-        message += scripts.list()
+        message = ', '.join(glob.glob("./scripts/*.scr"))
+        message = files.replace("./scripts/", "", -1)
+        message = files.replace(".scr", "", -1)
     return message
 
 
@@ -98,11 +99,6 @@ class ScriptControl(object):
         if __debug__:
             print(f"Starting script object with path: {script_dir}")
 
-    def list(self):
-        files = ', '.join(glob.glob("./scripts/*.scr"))
-        files = files.replace("./scripts/", "", -1)
-        files = files.replace(".scr", "", -1)
-        return files
 
     def list_running(self):
         message = ""

@@ -1,9 +1,9 @@
 """Module for doing some dome automation and position sensing"""
 from builtins import str
 from builtins import object
-from future import standard_library
 import configparser
 import os
+from future import standard_library
 from flask import Blueprint, request
 from r2utils import mainconfig
 from .DomeThread import DomeThread
@@ -112,17 +112,21 @@ class _DomeControl(object):
         return "Ok"
 
     def Position(self, position):
+        """ Set position of dome """
         self.dome.SetPosition(position)
         return "Ok"
 
     def Random(self, value):
+        """ Set random position """
         self.dome.SetRandom(value)
         return "Ok"
 
     def GetRandom(self):
+        """ Get random position """
         return self.dome.GetRandom()
 
     def GetPosition(self):
+        """ Set current position """
         return self.dome.GetPosition()
 
     def Turn(self, stick):

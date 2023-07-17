@@ -448,7 +448,7 @@ while joystick:
                         " : Button Up event : " + previous + "," + keys[previous][1] + "\n")
                 f.flush()
                 if __debug__:
-                    print(f"Would run: {keys[previous][1]}" )
+                    print(f"Would run: {keys[previous][1]}")
                     print(f"URL: {newurl}")
                 try:
                     r = requests.get(newurl)

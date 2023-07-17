@@ -1,12 +1,12 @@
 """ Module to control FlthyMcNasty HP Lights """
 from builtins import hex
 from builtins import object
-import smbus
 import os
 import configparser
+import smbus
 from flask import Blueprint, request
-from r2utils import mainconfig
 from future import standard_library
+from r2utils import mainconfig
 standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'flthy.cfg'
@@ -53,12 +53,12 @@ def _flthy_seq(seq):
     return message
 
 
-@api.route('/<hp>/<type>/<seq>/<value>', methods=['GET'])
-def _flthy_cmd(hp, type, seq, value):
+@api.route('/<hp>/<hptype>/<seq>/<value>', methods=['GET'])
+def _flthy_cmd(hp, hptype, seq, value):
     """ GET to send a command to the flthy HP system"""
     message = ""
     if request.method == 'GET':
-        message += _flthy.SendCommand(hp, type, seq, value)
+        message += _flthy.SendCommand(hp, hptype, seq, value)
     return message
 
 
@@ -72,7 +72,7 @@ class _FlthyHPControl(object):
         self.logdir = logdir
         if __debug__:
             print("Initialising FlthyHP Control")
-            print(f"Address: {self.address} | Bus: {self.bus} | logdir: {self.logdir} | reeltwo: {self.reeltwo}" % (self.address, self.bus, self.logdir, self.reeltwo))
+            print(f"Address: {self.address} | Bus: {self.bus} | logdir: {self.logdir} | reeltwo: {self.reeltwo}")
 
     def SendSequence(self, seq):
         """ Send sequence command """
@@ -98,7 +98,7 @@ class _FlthyHPControl(object):
                 self.SendRaw('S9')
         return "Ok"
 
-    def SendCommand(self, hp, type, seq, value):
+    def SendCommand(self, hp, hptype, seq, value):
         """ Decoding HP command """
         if __debug__:
             print("HP: %s" % hp)
@@ -124,21 +124,21 @@ class _FlthyHPControl(object):
         else:
             print("Illegal HP code")
 
-        if (type.lower() in _type_list) or (type in ['0', '1']):
+        if (hptype.lower() in _type_list) or (type in ['0', '1']):
             if __debug__:
                 print("Type selection OK")
-            if type.lower() in _type_list:
-                type = type.lower()
+            if hptype.lower() in _type_list:
+                hptype = hptype.lower()
                 if __debug__:
                     print("Type word used")
-                if type == "servo":
+                if hptype == "servo":
                     type_cmd = "1"
-                elif type == "light":
+                elif hptype == "light":
                     type_cmd = "0"
             else:
                 if __debug__:
                     print("Type code used")
-                type_cmd = type
+                type_cmd = hptype
         else:
             print("Illegal type code")
 
@@ -190,7 +190,7 @@ class _FlthyHPControl(object):
     def SendRaw(self, cmd):
         """ Send a raw command """
         command = list(cmd)
-        hexCommand = list()
+        hexCommand = []
         if self.reeltwo is True:
             if __debug__:
                 print("ReelTwo Mode")

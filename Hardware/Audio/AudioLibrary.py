@@ -79,10 +79,10 @@ def _audio(name):
 @api.route('/random/list', methods=['GET'])
 def _random_audio_list():
     """GET returns types of sounds available at random"""
-    message = ""
+    types = ""
     if request.method == 'GET':
-        message += audio.ListRandomSounds()
-    return message
+        types = ', '.join(_Random_Sounds)
+    return types
 
 
 @api.route('/random/<name>', methods=['GET'])
@@ -98,19 +98,45 @@ def _get_volume():
     """GET returns current volume level"""
     message = ""
     if request.method == 'GET':
-        message += str(audio.ShowVolume())
+        cur_vol = mixer.music.get_volume()
         if __debug__:
-            print(f"Sending: ${message}")
+            print(f"Current volume: {cur_vol}")
+        message += str(cur_vol)
+        if __debug__:
+            print(f"Sending: {message}")
     return message
 
 
 @api.route('/volume/<level>', methods=['GET'])
 def _set_volume(level):
-    """GET to set a specific volume level"""
-    message = ""
+    """
+    Changes the volume level
+
+    Parameters
+    ----------
+    level : str
+            Either a string of up/down to increment/decrement the volume, or
+            an explicitly set volume between 0 and 1
+    """
     if request.method == 'GET':
-        message += audio.SetVolume(level)
-    return message
+        if level == "up":
+            if __debug__:
+                print("Increasing volume")
+            new_level = mixer.music.get_volume() + 0.025
+        elif level == "down":
+            if __debug__:
+                print("Decreasing volume")
+            new_level = mixer.music.get_volume() - 0.025
+        else:
+            if __debug__:
+                print("Volume level explicitly states")
+            new_level = float(level)
+        if new_level < 0:
+            new_level = 0
+        if __debug__:
+            print(f"Setting volume to: {new_level}")
+        mixer.music.set_volume(float(new_level))
+    return "Ok"
 
 
 class _AudioLibrary(object):
@@ -188,7 +214,7 @@ class _AudioLibrary(object):
 
         idx = _Random_Sounds.index(data)
         prefix = _Random_Files[idx]
-        print(f"Random index: {idx}, prefix=${prefix}")
+        print(f"Random index: {idx}, prefix={prefix}")
         file_list = glob.glob(self.sounds_dir + prefix + "*.mp3")
         file_idx = len(file_list) - 1
         audio_file = file_list[random.randint(0, file_idx)]
@@ -210,48 +236,6 @@ class _AudioLibrary(object):
         files = files.replace(self.sounds_dir, "", -1)
         files = files.replace(".mp3", "", -1)
         return files
-
-    def ListRandomSounds(self):
-        """ Returns the list of sound groups """
-        types = ', '.join(_Random_Sounds)
-        return types
-
-    def ShowVolume(self):
-        """ Returns the current volume """
-        cur_vol = mixer.music.get_volume()
-        if __debug__:
-            print(f"Current volume: {cur_vol}")
-        return cur_vol
-
-    def SetVolume(self, level):
-        """
-        Changes the volume level
-
-        Parameters
-        ----------
-        level : str
-             Either a string of up/down to increment/decrement the volume, or
-             an explicitly set volume between 0 and 1
-        """
-
-        if level == "up":
-            if __debug__:
-                print("Increasing volume")
-            new_level = mixer.music.get_volume() + 0.025
-        elif level == "down":
-            if __debug__:
-                print("Decreasing volume")
-            new_level = mixer.music.get_volume() - 0.025
-        else:
-            if __debug__:
-                print("Volume level explicitly states")
-            new_level = float(level)
-        if new_level < 0:
-            new_level = 0
-        if __debug__:
-            print(f"Setting volume to: {new_level}")
-        mixer.music.set_volume(float(new_level))
-        return "Ok"
 
 
 audio = _AudioLibrary(_defaults['sounds_dir'], _defaults['volume'])

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+""" Handle servo threads """
 # ===============================================================================
 # Copyright (C) 2013 Darren Poulson
 #
@@ -18,7 +18,6 @@
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
 
-from future import standard_library
 from .ServoThread import ServoThread
 from queue import Queue
 import csv
@@ -28,9 +27,9 @@ from pathlib import Path
 import configparser
 from builtins import object
 from r2utils import mainconfig
+from future import standard_library
 standard_library.install_aliases()
 
-tick_duration = 100
 _configdir = mainconfig.mainconfig['config_dir']
 
 
@@ -106,6 +105,7 @@ class ServoControl(object):
             print(f"Initialised servo module {name} at address {self.address}")
 
     def list_servos(self):
+        """ List all servos """
         message = ""
         if __debug__:
             print(f"Listing servos for address: {self.address}")
@@ -114,6 +114,7 @@ class ServoControl(object):
         return message
 
     def close_all_servos(self, duration):
+        """ Close all servos """
         try:
             duration = int(duration)
         except Exception:
@@ -126,6 +127,7 @@ class ServoControl(object):
         return
 
     def open_all_servos(self, duration):
+        """ Open all servos """
         try:
             duration = int(duration)
         except Exception:
@@ -140,6 +142,7 @@ class ServoControl(object):
     # Send a command over i2c to turn a servo to a given position (percentage) over a set duration (seconds)
     # def servo_command(self, servo_name, position, duration):
     def servo_command(self, servo_name, position, duration):
+        """ Send command to a servo """
         if __debug__:
             print(f"Moving {servo_name} to {position} over duration {duration}")
         current_servo = []

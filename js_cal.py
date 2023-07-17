@@ -1,16 +1,17 @@
-#!/usr/bin/python
+""" Script to help calibrate a servo """
 import sys
 import Adafruit_PCA9685
 
 
 channel = sys.argv[2]
 bus = int(sys.argv[1], 16)
-freq = 60
-print("Channel %s : Frequency %s" % (channel, freq))
+FREQ = 60
+print(f"Channel {channel} : Frequency {FREQ}")
 
 
-def driveServo(channel, pulse):
-    period = 1/float(freq)
+def drive_servo(channel, pulse):
+    """ Set a servo """
+    period = 1/float(FREQ)
     bit_duration = period/4096
     pulse_duration = bit_duration*pulse*1000000
     if __debug__:
@@ -22,10 +23,10 @@ def driveServo(channel, pulse):
 
 
 i2c = Adafruit_PCA9685.PCA9685(address=bus, busnum=1)
-i2c.set_pwm_freq(60)
+i2c.set_pwm_freq(FREQ)
 
 
 while True:
     global pulse
     pulse = input("Enter value > ")
-    driveServo(int(channel), float(pulse))
+    drive_servo(int(channel), float(pulse))

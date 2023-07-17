@@ -6,8 +6,9 @@ standard_library.install_aliases()
 
 
 class DomeThread(threading.Thread):
+    """ Class to control dome threads """
 
-    def __init__(self, address, type, port):
+    def __init__(self, address, drivetype, port):
         self.position_setpoint = 0
         self.current_position = 0
         self.random = False
