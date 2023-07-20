@@ -36,7 +36,7 @@ pexpect==4.7.0
 pickleshare==0.7.5
 ptyprocess==0.6.0
 pycparser==2.19
-Pygments==2.7.4
+Pygments==2.15.0
 pyinotify==0.9.6
 pyOpenSSL==21.0.0
 pyparsing==3.0.6
