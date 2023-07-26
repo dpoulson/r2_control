@@ -14,7 +14,8 @@ _config = configparser.SafeConfigParser({'logtofile': True,
                                          'busid': '1',
                                          'plugins': 'GPIO,Audio,Scripts',
                                          'config_dir': _configdir,
-                                         'servos': 'body,dome'
+                                         'servos': 'body,dome',
+                                         'telegram': False
                                          })
 
 _config.read(_configfile)
