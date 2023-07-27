@@ -8,6 +8,6 @@ pyserial==3.5
 Requests==2.31.0
 RPi.GPIO==0.7.1
 SabertoothPacketSerial==0.2.2
-setuptools==59.6.0
+setuptools==65.5.1
 smbus==1.1.post2
 xbox360controller==1.1.2
