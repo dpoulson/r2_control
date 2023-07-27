@@ -1,6 +1,6 @@
 Adafruit_PCA9685==1.0.1
 Adafruit_PCA9685==1.0.1
-Flask==2.0.1
+Flask==2.2.5
 future==0.18.2
 odrive==0.6.7
 pygame==2.1.2
