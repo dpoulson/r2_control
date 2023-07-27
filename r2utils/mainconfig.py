@@ -18,6 +18,15 @@ _config = configparser.SafeConfigParser({'logtofile': True,
                                          'telegram': False
                                          })
 
+_config.add_section('Dome')
+_config.set('Dome', 'address', '129')
+_config.set('Dome', 'type', 'Syren')
+_config.set('Dome', 'port', '/dev/ttyUSB0')
+_config.add_section('Drive')
+_config.set('Drive', 'address', '128')
+_config.set('Drive', 'type', 'Sabertooth')
+_config.set('Drive', 'port', '/dev/ttyACM0')
+
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):

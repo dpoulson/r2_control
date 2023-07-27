@@ -37,8 +37,8 @@ class ServoThread(threading.Thread):
         try:
             self.i2c = Adafruit_PCA9685.PCA9685(address=int(self.Address, 16), busnum=int(1))
             self.i2c.set_pwm_freq(60)
-        except Exception:
-            print(f"Failed to initialise servo at {self.Address}/{self.Channel}")
+        except Exception as e:
+            print(f"Failed to initialise servo at {self.Address}/{self.Channel}. Exception: {e}")
             raise Exception("Failed to initialise server")
         return
 

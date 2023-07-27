@@ -341,9 +341,9 @@ _turning = 0
 # Main loop
 while joystick:
     time.sleep(0.005)
-    # global previous, _throttle, _turning
     steering(_turning, _throttle, drive_mod)
     difference = float(time.time() - last_command)
+    # Send watchdog
     if _config.get("Drive", "type") == "ODrive":
         drive.axis0.watchdog_feed()
         drive.axis1.watchdog_feed()
