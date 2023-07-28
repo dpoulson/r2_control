@@ -22,14 +22,14 @@ class ServoThread(threading.Thread):
         if __debug__:
             print("Initialising thread")
         self.q = q
-        self.Address = ADDRESS
-        self.Max = MAX
-        self.Min = MIN
-        self.Home = HOME
-        self.current_position = HOME
-        self.original_position = HOME
-        self.Channel = CHANNEL
-        self.destination_position = HOME
+        self.Address = Address
+        self.Max = Max
+        self.Min = Min
+        self.Home = Home
+        self.current_position = Home
+        self.original_position = Home
+        self.Channel = Channel
+        self.destination_position = Home
         self.destination_start = 0
         self.destination_time = 0
         self.processing = False
