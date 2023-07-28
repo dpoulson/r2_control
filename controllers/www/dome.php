@@ -24,7 +24,7 @@ $panels = ["PP1" => "Pie Panel 1",
             "SP" => "Small Panel",
             "VSP" => "Very Small Panel"];
 
-$servo_list = file_get_contents("http://localhost:5000/servo/dome/list");
+$servo_list = file_get_contents("http://localhost:5000/dome/list");
 $convert = explode("\n", $servo_list);
 
 for ($i = 0; $i < count($convert); $i++) {
@@ -36,7 +36,7 @@ $servo_name = $_GET["servo_name"];
 $value = $_GET["value"];
 
 if (isset($servo_name)) {
-	$url = "http://localhost:5000/servo/dome/" . $servo_name . "/" . $value . "/0";
+	$url = "http://localhost:5000/dome/" . $servo_name . "/" . $value . "/0";
 	$handle = fopen($url, "r");
 }
 ?>
@@ -58,11 +58,11 @@ if (isset($servo_name)) {
 $i = 0;
 foreach ($panels as $key => $panel) {
     $i++;
-    if (in_array($panel, $list)) {
+    if (in_array($key, $list)) {
         echo "<tr>
                 <td class='panel'>$i $panel</td>
-                <td><a href=\"?page=body&servo_name=$key&value=0.9\" class='open'>Open</a></td>
-                <td><a href=\"?page=body&servo_name=$key&value=0\" class='close'>Close</a></td>
+                <td><a href=\"?page=dome&servo_name=$key&value=0.9\" class='open'>Open</a></td>
+                <td><a href=\"?page=dome&servo_name=$key&value=0\" class='close'>Close</a></td>
             </tr>\n";
                 } else {
                     echo "<tr>

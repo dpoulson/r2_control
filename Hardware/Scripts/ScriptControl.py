@@ -52,8 +52,8 @@ def _script_list():
     message = ""
     if request.method == 'GET':
         message = ', '.join(glob.glob("./scripts/*.scr"))
-        message = files.replace("./scripts/", "", -1)
-        message = files.replace(".scr", "", -1)
+        message = message.replace("./scripts/", "", -1)
+        message = message.replace(".scr", "", -1)
     return message
 
 

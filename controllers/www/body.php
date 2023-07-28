@@ -20,7 +20,7 @@ $panels = ["LLD" => "Left Bread Pan Door",
             "SArm" => "SCOMP Computer Interface Arm",
             "ENABLE_DRIVE"];
 
-$servo_list = file_get_contents("http://localhost:5000/servo/body/list");
+$servo_list = file_get_contents("http://localhost:5000/body/list");
 $convert = explode("\n", $servo_list);
 
 for ($i = 0; $i < count($convert); $i++) {
@@ -54,7 +54,7 @@ if (isset($servo_name)) {
 $i = 0;
 foreach ($panels as $key => $panel) {
         $i++;
-    if (in_array($panel, $list)) {
+    if (in_array($key, $list)) {
         echo "<tr>
                 <td class='panel'>$i $panel</td>
                 <td><a href=\"?page=body&servo_name=$key&value=0.9\" class='open'>Open</a></td>
