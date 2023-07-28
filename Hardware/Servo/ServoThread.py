@@ -20,7 +20,7 @@ CHANNEL = 0
 class ServoThread(threading.Thread):
     def __init__(self, Address, Max, Min, Home, Channel, q):
         if __debug__:
-            print("Initialising thread")
+            print(f"Initialising thread - {Address}/{Max}/{Min}/{Home}/{Channel}")
         self.q = q
         self.Address = Address
         self.Max = Max
@@ -35,6 +35,10 @@ class ServoThread(threading.Thread):
         self.processing = False
         threading.Thread.__init__(self)
         try:
+            if __debug__:
+                print(f"Address is of type: {type(self.Address)}")
+                print(f"Address as hex: {self.Address}")
+                print(f"Address as dec: {int(self.Address, 16)}")
             self.i2c = Adafruit_PCA9685.PCA9685(address=int(self.Address, 16), busnum=int(1))
             self.i2c.set_pwm_freq(60)
         except Exception as e:

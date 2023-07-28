@@ -74,8 +74,8 @@ class ServoControl(object):
                         if servo.name == servo_name:
                             servo.thread.daemon = True
                             servo.thread.start()
-                except Exception:
-                    print("Oops")
+                except Exception as e:
+                    print(f"Oops: {e}")
                 if __debug__:
                     print(f"Added servo: {servo_channel} {servo_name} {servo_Min} {servo_Max} {servo_home}")
         ifile.close()
