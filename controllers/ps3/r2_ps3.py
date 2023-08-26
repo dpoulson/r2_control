@@ -155,8 +155,8 @@ def steering(x, y, drive_mod):
             drive.motor(0, left)
             drive.motor(1, right)
         elif _config.get('Drive', 'type') == "ODrive":
-            drive.axis0.controller.input_vel = left*10
-            drive.axis1.controller.input_vel = right*10
+            drive.axis0.controller.input_vel = left*30
+            drive.axis1.controller.input_vel = right*30
     if args.curses:
         # locate("                   ", 13, 11)
         # locate("                   ", 13, 12)

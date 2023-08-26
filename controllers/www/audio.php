@@ -150,6 +150,7 @@ $sound_groups = array("alarm", "happy", "hum", "misc", "quote", "razz", "sad", "
 
         const request = new XMLHttpRequest();
 
+	console.log("Setting volume to: " + this.value);
         request.open('GET', 'http://<?php echo $_SERVER['SERVER_NAME']; ?>/?page=audio&vol=' + this.value / 100, true);
         request.send();
     });
