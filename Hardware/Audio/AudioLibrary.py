@@ -174,7 +174,7 @@ class _AudioLibrary(object):
         """
 
         if __debug__:
-            print(f"Initiating audioi: sounds_dir = {sounds_dir}")
+            print(f"Initiating audio: sounds_dir = {sounds_dir}")
         mixer.init()
         mixer.music.set_volume(float(volume))
         self.sounds_dir = sounds_dir
