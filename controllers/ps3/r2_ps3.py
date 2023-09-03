@@ -181,6 +181,12 @@ def clamp(n, minn, maxn):
 
 
 def shutdownR2():
+    if _config.get('Drive', 'type'):
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                f"Axis0: {drive.axis0.error} {drive.axis0.motor.error} {drive.axis0.controller.error}\n")
+        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                f"Axis1: {drive.axis1.error} {drive.axis1.motor.error} {drive.axis1.controller.error}\n")
+
     """ shutdownR2 - Put R2 into a safe state """
     if __debug__:
         print("Running shutdown procedure")
