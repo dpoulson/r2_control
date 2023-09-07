@@ -19,6 +19,7 @@ from collections import defaultdict
 from SabertoothPacketSerial import SabertoothPacketSerial
 from shutil import copyfile
 import odrive
+from odrive.enums import *
 import signal
 sys.path.insert(0, '/home/pi/r2_control')
 from r2utils import mainconfig
@@ -150,13 +151,15 @@ def steering(x, y, drive_mod):
     left = (max(-1, min(left, 1)))*drive_mod
     right = (max(-1, min(right, 1)))*drive_mod
 
+    # Send command to drives. ODrive has a max speed setting, which defines max rev/s of the motor
+    # Q85s have a gear box, so this is not the speed of the actual wheel.
     if not args.dryrun:
         if _config.get('Drive', 'type') == "Sabertooth":
             drive.motor(0, left)
             drive.motor(1, right)
         elif _config.get('Drive', 'type') == "ODrive":
-            drive.axis0.controller.input_vel = left*30
-            drive.axis1.controller.input_vel = right*30
+            drive.axis0.controller.input_vel = left*int(_config.get('Drive', 'max_vel'))
+            drive.axis1.controller.input_vel = right*int(_config.get('Drive', 'max_vel'))
     if args.curses:
         # locate("                   ", 13, 11)
         # locate("                   ", 13, 12)
