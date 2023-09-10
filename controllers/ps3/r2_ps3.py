@@ -280,8 +280,6 @@ if not args.dryrun:
         drive.axis1.config.enable_watchdog = True
         drive.axis0.requested_state = 8
         drive.axis1.requested_state = 8
-        # drive.axis1.controller.vel_ramp_enable = True
-        # drive.axis0.controller.vel_ramp_enable = True
     else:
         print("No drive configured....")
 
@@ -431,6 +429,24 @@ while joystick:
                 except Exception:
                     if __debug__:
                         print("Fail....")
+            # Disable Drives for odrive
+            if _config.get("Drive", "type") == "ODrive":
+                if combo == "00000000000100000":
+                    if __debug__:
+                        print("Disable ODrive")
+                    drive.axis0.requested_state = 1
+                    drive.axis1.requested_state = 1
+                    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                        " : Drives Disables \n")
+                if combo == "00000000010000000":
+                    if __debug__:
+                        print("Enable ODrive")
+                    drive.axis0.requested_state = 8
+                    drive.axis1.requested_state = 8
+                    drive.clear_errors()
+                    drive.clear_errors()
+                    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                        " : Drives Enabled \n")
             try:
                 newurl = baseurl + keys[combo][0]
                 f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
