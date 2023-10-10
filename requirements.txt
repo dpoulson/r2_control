@@ -1,9 +1,8 @@
 Adafruit_PCA9685==1.0.1
-Adafruit_PCA9685==1.0.1
-Flask~=2.0.0
-future>=0.18.3
-odrive>=0.6.7
-pygame~=2.1.0
+Flask~=2.0
+future>=0.18
+odrive>=0.6
+pygame~=2.0
 pyserial~=3.5
 Requests~=2.31.0
 RPi.GPIO~=0.7.0
