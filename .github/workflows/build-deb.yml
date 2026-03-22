@@ -21,10 +21,10 @@ jobs:
             arch: armv7
             deb_arch: armhf
           - os_version: bookworm
-            arch: arm64
+            arch: aarch64
             deb_arch: arm64
           - os_version: trixie # Trixie carries Python 3.13
-            arch: arm64
+            arch: aarch64
             deb_arch: arm64
             distro: bookworm
             base_image: debian:trixie
