@@ -5,15 +5,13 @@ import os
 import csv
 import collections
 import RPi as GPIO
-from future import standard_library
 from flask import Blueprint, request
 from r2utils import mainconfig
-standard_library.install_aliases()
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'gpio.cfg'
 
-_config = configparser.SafeConfigParser({'logfile': 'gpio.log',
+_config = configparser.ConfigParser({'logfile': 'gpio.log',
                                          'gpio_configfile': 'gpio_pins.cfg'})
 
 if not os.path.isfile(_configfile):

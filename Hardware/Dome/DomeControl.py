@@ -3,16 +3,14 @@ from builtins import str
 from builtins import object
 import configparser
 import os
-from future import standard_library
 from flask import Blueprint, request
 from r2utils import mainconfig
 from .DomeThread import DomeThread
-standard_library.install_aliases()
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'dome.cfg'
 
-_config = configparser.SafeConfigParser({'address': '0x1c',
+_config = configparser.ConfigParser({'address': '0x1c',
                                          'logfile': 'dome.log',
                                          'dome_address': '129',
                                          'port': '/dev/ttyUSB0',

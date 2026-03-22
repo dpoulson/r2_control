@@ -6,13 +6,11 @@ import smbus
 import os
 from flask import Blueprint, request
 from r2utils import mainconfig
-from future import standard_library
-standard_library.install_aliases()
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'vader.cfg'
 
-_config = configparser.SafeConfigParser({'address': '0x1c', 'logfile': 'vader.log'})
+_config = configparser.ConfigParser({'address': '0x1c', 'logfile': 'vader.log'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):

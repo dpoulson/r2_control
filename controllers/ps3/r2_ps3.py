@@ -1,7 +1,5 @@
 #!/usr/bin/python
 """ PS3 Joystick controller """
-from __future__ import print_function
-from future import standard_library
 from builtins import str
 from builtins import range
 import pygame
@@ -10,10 +8,12 @@ import csv
 import configparser
 import os
 import sys
-import time
+from time import time, sleep
 import datetime
 import argparse
 import math
+import logging
+import logging.handlers
 from io import StringIO
 from collections import defaultdict
 from SabertoothPacketSerial import SabertoothPacketSerial
@@ -23,7 +23,6 @@ from odrive.enums import *
 import signal
 sys.path.insert(0, '/home/pi/r2_control')
 from r2utils import mainconfig
-standard_library.install_aliases()
 
 
 def sig_handler(signal, frame):
@@ -172,12 +171,11 @@ def steering(x, y, drive_mod):
 def clamp(n, minn, maxn):
     """ Clamp a number between two values """
     if n < minn:
-        if __debug__:
-            print("Clamping min")
+        logging.debug("Clamping min")
         return minn
     elif n > maxn:
-        if __debug__:
-            print(f"Clamping max {str(n)}")
+
+        logging.debug(f"Clamping max {str(n)}")
         return maxn
     else:
         return n
@@ -185,47 +183,42 @@ def clamp(n, minn, maxn):
 
 def shutdownR2():
     if _config.get('Drive', 'type'):
-        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+        f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
                 f"Axis0: {drive.axis0.error} {drive.axis0.motor.error} {drive.axis0.controller.error}\n")
-        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+        f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
                 f"Axis1: {drive.axis1.error} {drive.axis1.motor.error} {drive.axis1.controller.error}\n")
 
     """ shutdownR2 - Put R2 into a safe state """
-    if __debug__:
-        print("Running shutdown procedure")
-    if __debug__:
-        print("Stopping all motion...")
-        print("...Setting drive to 0")
+    logging.info("Running shutdown procedure")
+    logging.debug("Stopping all motion...")
+    logging.debug("...Setting drive to 0")
     steering(0, 0, drive_mod)
-    print("...Setting dome to 0")
+    logging.debug("...Setting dome to 0")
     dome.driveCommand(0)
 
-    if __debug__:
-        print("Disable drives")
+    logging.info("Disable drives")
     url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
     try:
         requests.get(url)
     except Exception:
-        print("Fail....")
+        logging.debug("Fail....")
 
-    if __debug__:
-        print("Disable dome")
+    logging.debug("Disable dome")
     url = baseurl + "servo/body/ENABLE_DOME/0/0"
     try:
         requests.get(url)
     except Exception:
-        print("Fail....")
+        logging.debug("Fail....")
 
-    if __debug__:
-        print("Bad motivator")
+    logging.debug("Bad motivator")
     # Play a sound to alert about a problem
     url = baseurl + "audio/MOTIVATR"
     try:
         requests.get(url)
     except Exception:
-        print("Fail....")
+        logging.debug("Fail....")
 
-    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+    f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
             " ****** PS3 Shutdown ******\n")
 
 
@@ -238,7 +231,7 @@ args = parser.parse_args()
 
 # Open a log file
 f = open(log_file, 'at')
-f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
         " : ****** ps3 started ******\n")
 f.flush()
 
@@ -246,27 +239,25 @@ while True:
     pygame.joystick.quit()
     pygame.joystick.init()
     num_joysticks = pygame.joystick.get_count()
-    if __debug__:
-        print(f"Waiting for joystick... (count {num_joysticks})")
+    logging.debug(f"Waiting for joystick... (count {num_joysticks})")
     if num_joysticks != 0:
-        f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+        f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
                 " : Joystick found \n")
         f.flush()
         break
-    time.sleep(5)
+    sleep(5)
 
 if not args.dryrun:
-    if __debug__:
-        print("Not a drytest")
-        print(f"Drive type: {_config.get('Drive', 'type')}")
+    logging.debug("Not a drytest")
+    logging.debug(f"Drive type: {_config.get('Drive', 'type')}")
     if _config.get('Drive', 'type') == "Sabertooth":
-        print("**** Using Sabertooth for main drive ****")
+        logging.debug("**** Using Sabertooth for main drive ****")
         drive = SabertoothPacketSerial(address=int(_config.get('Drive', 'address')),
                                        type=_config.get('Drive', 'type'),
                                        port=_config.get('Drive', 'port'))
     elif _config.get('Drive', 'type') == "ODrive":
-        print("***** Using ODRIVE for main drive ***** ")
-        print("finding an odrive...")
+        logging.debug("***** Using ODRIVE for main drive ***** ")
+        logging.debug("finding an odrive...")
         drive = odrive.find_any()  # "serial:" + _config.get('Drive', 'port'))
         drive.axis0.config.watchdog_timeout = 0.5
         drive.axis1.config.watchdog_timeout = 0.5
@@ -304,8 +295,7 @@ if args.curses:
 
 pygame.init()
 size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-if __debug__:
-    print(f"Framebuffer size: {size[0]} x {size[1]}")
+logging.debug(f"Framebuffer size: {size[0]} x {size[1]}")
 
 j = pygame.joystick.Joystick(0)
 j.init()
@@ -320,8 +310,7 @@ keys = defaultdict(list)
 with open(_keysfile, mode='r', encoding="utf-8") as infile:
     reader = csv.reader(infile)
     for row in reader:
-        if __debug__:
-            print(f"Row: {row[0]} | {row[1]} | {row[2]}")
+        logging.debug(f"Row: {row[0]} | {row[1]} | {row[2]}")
         keys[row[0]].append(row[1])
         keys[row[0]].append(row[2])
 
@@ -331,14 +320,13 @@ url = baseurl + "audio/Happy007"
 try:
     r = requests.get(url)
 except Exception:
-    if __debug__:
-        print("Fail....")
+    logging.debug("Fail....")
 
-f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
         " : System Initialised \n")
 f.flush()
 
-last_command = time.time()
+last_command = time()
 joystick = True
 
 previous = ""
@@ -347,19 +335,18 @@ _turning = 0
 
 # Main loop
 while joystick:
-    time.sleep(0.005)
+    sleep(0.005)
     steering(_turning, _throttle, drive_mod)
-    difference = float(time.time() - last_command)
+    difference = float(time() - last_command)
     # Send watchdog
     if _config.get("Drive", "type") == "ODrive":
         drive.axis0.watchdog_feed()
         drive.axis1.watchdog_feed()
     if difference > keepalive:
         if os.path.exists('/dev/input/js0'):
-            if __debug__:
-                print("Joystick still there....")
+            logging.debug("Joystick still there....")
         else:
-            print("No joystick")
+            logging.debug("No joystick")
             joystick = False
             shutdownR2()
         # Check for no shutdown file
@@ -367,12 +354,11 @@ while joystick:
             print("Shutdown file is there")
             joystick = False
             shutdownR2()
-        last_command = time.time()
+        last_command = time()
     try:
         events = pygame.event.get()
     except Exception:
-        if __debug__:
-            print("Something went wrong!")
+        logging.debug("Something went wrong!")
         shutdownR2()
         sys.exit(0)
     for event in events:
@@ -382,145 +368,124 @@ while joystick:
                 button = j.get_button(i)
                 buf.write(str(button))
             combo = buf.getvalue()
-            if __debug__:
-                print(f"Buttons pressed: {combo}")
+            logging.debug(f"Buttons pressed: {combo}")
             if args.curses:
                 locate("                   ", 1, 14)
                 locate(combo, 3, 14)
             # Special key press (All 4 plus triangle) to increase speed of drive
             if combo == "00001111000000001":
-                if __debug__:
-                    print("Incrementing drive speed")
+                logging.debug("Incrementing drive speed")
                 # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
                 speed_fac += 0.05
                 if speed_fac > 1:
                     speed_fac = 1
-                if __debug__:
-                    print(f"*** NEW SPEED {speed_fac}")
+                logging.debug(f"*** NEW SPEED {speed_fac}")
                 if args.curses:
                     locate('%4f' % speed_fac, 28, 7)
                 drive_mod = speed_fac * invert
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
                         " : Speed Increase : " + str(speed_fac) + " \n")
                 url = baseurl + "audio/Happy006"
                 try:
                     r = requests.get(url)
                 except Exception:
-                    if __debug__:
-                        print("Fail....")
+                    logging.debug("Fail....")
             # Special key press (All 4 plus X) to decrease speed of drive
             if combo == "00001111000000010":
-                if __debug__:
-                    print("Decrementing drive speed")
+                logging.debug("Decrementing drive speed")
                 # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
                 speed_fac -= 0.05
                 if speed_fac < 0.2:
                     speed_fac = 0.2
-                if __debug__:
-                    print(f"*** NEW SPEED {speed_fac}")
+                logging.debug(f"*** NEW SPEED {speed_fac}")
                 if args.curses:
                     locate('%4f' % speed_fac, 28, 7)
                 drive_mod = speed_fac * invert
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
                         " : Speed Decrease : " + str(speed_fac) + " \n")
                 url = baseurl + "audio/Sad__019"
                 try:
                     r = requests.get(url)
                 except Exception:
-                    if __debug__:
-                        print("Fail....")
+                    logging.debug("Fail....")
             # Disable Drives for odrive
             if _config.get("Drive", "type") == "ODrive":
                 if combo == "00000000000100000":
-                    if __debug__:
-                        print("Disable ODrive")
+                    logging.debug("Disable ODrive")
                     drive.axis0.requested_state = 1
                     drive.axis1.requested_state = 1
-                    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                    f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
                         " : Drives Disables \n")
                 if combo == "00000000010000000":
-                    if __debug__:
-                        print("Enable ODrive")
+                    logging.debug("Enable ODrive")
                     drive.axis0.requested_state = 8
                     drive.axis1.requested_state = 8
                     drive.clear_errors()
                     drive.clear_errors()
-                    f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                    f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
                         " : Drives Enabled \n")
             try:
                 newurl = baseurl + keys[combo][0]
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
                         " : Button Down event : " + combo + "," + keys[combo][0] + " \n")
                 f.flush()
-                if __debug__:
-                    print(f"Would run: {keys[combo]}")
-                    print(f"URL: {newurl}")
+                logging.debug(f"Would run: {keys[combo]}")
+                logging.debug(f"URL: {newurl}")
                 try:
                     r = requests.get(newurl)
                 except Exception:
-                    if __debug__:
-                        print("No connection")
+                    logging.debug("No connection")
             except Exception:
-                if __debug__:
-                    print("No combo (pressed)")
+                logging.debug("No combo (pressed)")
             previous = combo
         if event.type == pygame.JOYBUTTONUP:
-            if __debug__:
-                print(f"Buttons released: {previous}")
+            logging.debug(f"Buttons released: {previous}")
             try:
                 newurl = baseurl + keys[previous][1]
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
                         " : Button Up event : " + previous + "," + keys[previous][1] + "\n")
                 f.flush()
-                if __debug__:
-                    print(f"Would run: {keys[previous][1]}")
-                    print(f"URL: {newurl}")
+                logging.debug(f"Would run: {keys[previous][1]}")
+                logging.debug(f"URL: {newurl}")
                 try:
                     r = requests.get(newurl)
                 except Exception:
-                    if __debug__:
-                        print("No connection")
+                    logging.debug("No connection")
             except Exception:
-                if __debug__:
-                    print("No combo (released)")
+                logging.debug("No combo (released)")
             previous = ""
         if event.type == pygame.JOYAXISMOTION:
             if event.axis == PS3_AXIS_LEFT_VERTICAL:
-                if __debug__:
-                    print(f"Value (Drive): {event.value} : Speed Factor : {speed_fac}")
+                logging.debug(f"Value (Drive): {event.value} : Speed Factor : {speed_fac}")
                 if args.curses:
                     locate("                   ", 10, 4)
                     locate('%10f' % (event.value), 10, 4)
                 _throttle = event.value
-                last_command = time.time()
+                last_command = time()
             elif event.axis == PS3_AXIS_LEFT_HORIZONTAL:
-                if __debug__:
-                    print(f"Value (Steer): {event.value}")
+                logging.debug(f"Value (Steer): {event.value}")
                 if args.curses:
                     locate("                   ", 10, 5)
                     locate('%10f' % (event.value), 10, 5)
                 _turning = event.value
-                last_command = time.time()
+                last_command = time()
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
-                if __debug__:
-                    print(f"Value (Dome): {event.value}")
+                logging.debug(f"Value (Dome): {event.value}")
                 if args.curses:
                     locate("                   ", 35, 4)
                     locate('%10f' % (event.value), 35, 4)
-                f.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +
+                f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
                         " : Dome : " + str(event.value) + "\n")
                 f.flush
                 if not args.dryrun:
-                    if __debug__:
-                        print("Not a drytest")
+                    logging.debug("Not a drytest")
                     dome.driveCommand(clamp(event.value, -0.99, 0.99))
                 if args.curses:
                     locate("                   ", 35, 8)
                     locate('%10f' % (event.value), 35, 8)
-                last_command = time.time()
+                last_command = time()
 #                dome_stick = event.value
 
 # If the while loop quits, make sure that the motors are reset.
-if __debug__:
-    print("Exited main loop")
+logging.debug("Exited main loop")
 shutdownR2()

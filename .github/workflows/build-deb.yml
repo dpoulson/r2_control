@@ -1,0 +1,96 @@
+name: Build and Release Raspberry Pi DEB
+
+on:
+  push:
+    tags:
+      - "v*" # Triggers when you push a tag like v1.0.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os_version: bullseye
+            arch: armv7
+            deb_arch: armhf
+          - os_version: bookworm
+            arch: arm64
+            deb_arch: arm64
+          - os_version: trixie # Trixie carries Python 3.13
+            arch: arm64
+            deb_arch: arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Package inside ARM Container
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.os_version }}
+
+          # Pass the tag name as an environment variable
+          env: |
+            PKG_VERSION: ${{ github.ref_name }}
+
+          # This section runs inside the emulated Raspberry Pi environment
+          run: |
+            # 1. Install necessary build tools inside the container
+            apt-get update
+            apt-get install -y python3 python3-venv rsync binutils build-essential \
+                               libusb-dev libbluetooth-dev libsdl1.2-dev libffi-dev pkg-config
+
+            # 2. Create the Staging Directory Structure
+            STAGING="build_staging"
+            mkdir -p $STAGING/DEBIAN
+            mkdir -p $STAGING/opt/r2_control
+            mkdir -p $STAGING/var/www/html/r2_control
+            mkdir -p $STAGING/etc/systemd/system
+
+            # 3. Copy Python logic to /opt (Excluding build artifacts)
+            rsync -av --exclude="$STAGING" --exclude=".git" --exclude=".github" . $STAGING/opt/r2_control/
+
+            cp controllers/www/apache.conf build/etc/apache2/sites-available/000-r2.conf
+
+            # 5. Copy Systemd and Maintainer Scripts
+            cp r2_control.service $STAGING/etc/systemd/system/
+            cp packaging/postinst $STAGING/DEBIAN/
+            cp packaging/prerm $STAGING/DEBIAN/
+            chmod 755 $STAGING/DEBIAN/postinst $STAGING/DEBIAN/prerm
+
+            # 6. Create the Control file dynamically
+            # Strip the 'v' from the tag for the Debian version
+            CLEAN_VER=$(echo ${{ github.ref_name }} | sed 's/v//')
+            sed "s/{{VERSION}}/$CLEAN_VER/g; s/{{ARCHITECTURE}}/$DEB_ARCH/g" packaging/control.template > $STAGING/DEBIAN/control
+
+            # 7. Build the Virtual Environment
+            # This ensures pip dependencies are compiled for ARM
+            python3 -m venv $STAGING/opt/r2_control/venv
+            $STAGING/opt/r2_control/venv/bin/pip install --upgrade pip
+            $STAGING/opt/r2_control/venv/bin/pip install -r requirements.txt
+
+            # 8. Set ownership to root and build the DEB
+            chown -R root:root $STAGING
+            dpkg-deb --build $STAGING "r2-control_${CLEAN_VER}_${{ matrix.os_version }}_${{ matrix.arch }}.deb"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.os_version }}-${{ matrix.arch }}
+          path: "*.deb"
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "**/*.deb"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

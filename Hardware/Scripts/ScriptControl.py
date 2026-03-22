@@ -24,12 +24,10 @@ import os
 import collections
 from flask import Blueprint, request
 from r2utils import mainconfig
-from future import standard_library
-standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'scripts.cfg'
 
-_config = configparser.SafeConfigParser({'script_dir': './scripts', 'logfile': 'scripts.log'})
+_config = configparser.ConfigParser({'script_dir': './scripts', 'logfile': 'scripts.log'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):

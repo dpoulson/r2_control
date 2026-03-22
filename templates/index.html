@@ -1,9 +1,114 @@
 <!doctype html>
-<h1>Welcome to R2D2 REST API.</h1>
-<dl>
-  {% for path, docstr in urls|dictsort(false, 'key') %}
-  <dt><a href="{{ path }}">{{ path }}</a></dt>
-  <dd><pre>{{ docstr }}</pre></dd>
-  {% endfor %}
-</dl>
-
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R2D2 REST API</title>
+    <style>
+        :root {
+            --sw-yellow: #FFE81F;
+            --holo-blue: #3498db;
+            --bg-dark: #0d0d0d;
+            --panel-bg: #1a1a1a;
+            --text-main: #ececec;
+            --text-success: #2ecc71;
+            --border-color: #333;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+            background: rgba(26, 26, 26, 0.4);
+            padding: 30px;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: var(--sw-yellow);
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 0;
+        }
+        h1::before, h1::after {
+            content: ' - ';
+            color: var(--border-color);
+        }
+        dl {
+            margin: 0;
+        }
+        dt {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid var(--holo-blue);
+            padding: 12px 15px;
+            margin-top: 25px;
+            font-weight: bold;
+            font-size: 1.1em;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: center;
+        }
+        dt::before {
+            content: '[>] ';
+            color: var(--holo-blue);
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+        dt a {
+            color: var(--holo-blue);
+            text-decoration: none;
+            word-break: break-all;
+            transition: color 0.2s;
+        }
+        dt a:hover {
+            color: #5dade2;
+            text-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        dd {
+            background-color: var(--panel-bg);
+            padding: 15px;
+            margin-left: 0;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+        pre {
+            color: var(--text-success);
+            white-space: pre-wrap;
+            margin: 0;
+            font-size: 0.95em;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to R2D2 REST API</h1>
+        <dl>
+          {% for path, docstr in urls|dictsort(false, 'key') %}
+          <dt><a href="{{ path }}">{{ path }}</a></dt>
+          <dd><pre>{{ docstr }}</pre></dd>
+          {% endfor %}
+        </dl>
+        <div class="footer">ASTROMECH DIAGNOSTIC INTERFACE v1.0</div>
+    </div>
+</body>
+</html>

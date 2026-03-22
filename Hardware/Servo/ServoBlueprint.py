@@ -17,13 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with R2_Control.  If not, see <http://www.gnu.org/licenses/>.
 # ===============================================================================
-
-from __future__ import print_function
-from __future__ import absolute_import
-from future import standard_library
 from flask import Blueprint, request
 from .ServoControl import ServoControl
-standard_library.install_aliases()
 
 
 def construct_blueprint(name):

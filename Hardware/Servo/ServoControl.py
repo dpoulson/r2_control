@@ -27,8 +27,6 @@ from pathlib import Path
 import configparser
 from builtins import object
 from r2utils import mainconfig
-from future import standard_library
-standard_library.install_aliases()
 
 _configdir = mainconfig.mainconfig['config_dir']
 
@@ -85,7 +83,7 @@ class ServoControl(object):
         self.servo_list = []
 
         _configfile = mainconfig.mainconfig['config_dir'] + 'servo_' + name + '.cfg'
-        _config = configparser.SafeConfigParser({'address': '0x40',
+        _config = configparser.ConfigParser({'address': '0x40',
                                                 'logfile': 'servo_' + name + '.log'})
         _config.read(_configfile)
 

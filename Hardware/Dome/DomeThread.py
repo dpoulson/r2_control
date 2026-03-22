@@ -1,8 +1,6 @@
 """ Module for firing off Dome Thread """
-from future import standard_library
 import threading
 import time
-standard_library.install_aliases()
 
 
 class DomeThread(threading.Thread):

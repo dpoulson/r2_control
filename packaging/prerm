@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+# Stop the service so hardware pins/sockets are released
+systemctl stop r2_control.service || true
+systemctl disable r2_control.service || true
+
+# "purge" removes config files too, "remove" is a standard uninstall
+if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
+    echo "Cleaning up Python bytecode and virtual environment..."
+    
+    # Remove the entire app directory including the venv and __pycache__
+    rm -rf /opt/r2_control
+    
+fi
+
+
+exit 0

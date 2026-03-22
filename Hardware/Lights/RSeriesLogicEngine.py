@@ -6,12 +6,10 @@ import configparser
 import smbus
 from flask import Blueprint, request
 from r2utils import mainconfig
-from future import standard_library
-standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'rseries.cfg'
 
-_config = configparser.SafeConfigParser({'address': '0x20',
+_config = configparser.ConfigParser({'address': '0x20',
                                          'logfile': 'rseries.log',
                                          'reeltwo': 'false'})
 _config.read(_configfile)
