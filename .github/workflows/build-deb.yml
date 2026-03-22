@@ -17,9 +17,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - os_version: bullseye
-            arch: armv7
-            deb_arch: armhf
           - os_version: bookworm
             arch: aarch64
             deb_arch: arm64
