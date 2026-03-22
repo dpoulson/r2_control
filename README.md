@@ -42,3 +42,13 @@ Read the wiki.
 
 To see some parts of this in action, follow my instagram: https://www.instagram.com/r2djp/
 
+Experimental
+============
+
+Install everything using a simple debian package. This will install the systemd services and everything needed to run r2_control. 
+
+echo "deb [trusted=yes] https://dpoulson.github.io/r2_control/ ./" | sudo tee /etc/apt/sources.list.d/r2-control.list
+sudo apt update
+sudo apt install r2-control-lite
+
+
