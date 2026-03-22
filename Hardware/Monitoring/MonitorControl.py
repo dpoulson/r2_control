@@ -11,12 +11,10 @@ from flask import Blueprint, request
 from r2utils import mainconfig
 from r2utils import telegram
 from builtins import range
-from future import standard_library
-standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'monitoring.cfg'
 
-_config = configparser.SafeConfigParser({'address': '0x04',
+_config = configparser.ConfigParser({'address': '0x04',
                                          'logfile': 'monitoring.log',
                                          'interval': 0.5})
 _config.read(_configfile)

@@ -6,15 +6,13 @@ import random
 from builtins import str
 from builtins import object
 from flask import Blueprint, request
-from future import standard_library
 from pygame import mixer
 from r2utils import mainconfig
-standard_library.install_aliases()
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'audio.cfg'
 
-_config = configparser.SafeConfigParser({'sounds_dir': './sounds/',
+_config = configparser.ConfigParser({'sounds_dir': './sounds/',
                                          'logfile': 'audio.log',
                                          'volume': '0.3'})
 _config.read(_configfile)

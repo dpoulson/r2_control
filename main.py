@@ -25,12 +25,10 @@ import time
 import datetime
 import logging
 import logging.handlers
+import importlib
 from flask import Flask, request, render_template
 from r2utils import telegram, internet, mainconfig
 from Hardware.Servo import ServoBlueprint
-from future import standard_library
-standard_library.install_aliases()
-
 
 plugins = mainconfig.mainconfig['plugins'].split(",")
 servos = mainconfig.mainconfig['servos'].split(",")
@@ -38,6 +36,7 @@ i2c_bus = mainconfig.mainconfig['busid']
 logtofile = mainconfig.mainconfig['logtofile']
 logdir = mainconfig.mainconfig['logdir']
 logfile = mainconfig.mainconfig['logfile']
+configdir = mainconfig.mainconfig['config_dir']
 
 
 plugin_names = {
@@ -72,17 +71,15 @@ def system_status():
     remote_battery = ""
     try:
         controllers = glob.glob('/sys/class/power_supply/*')
-        if __debug__:
-            print(f"Controllers: {controllers}")
+        logging.debug(f"Controllers: {controllers}")
         for controller in controllers:
             path = controller + "/capacity"
-            if __debug__:
-                print(f"Controller path: {path}")
+            logging.debug(f"Controller path: {path}")
             with open(path, 'r', encoding="utf-8") as b:
                 remote_battery += str(int(b.readline().split()[0])) + " "
-                if __debug__:
-                    print(f"Remote battery: {remote_battery}")
-    except Exception:
+                logging.debug(f"Remote battery: {remote_battery}")
+    except Exception as e:
+        logging.error(f"Error getting remote battery: {e}")
         remote_battery = ""
 
     status = "Current Status\n"
@@ -95,10 +92,12 @@ def system_status():
     status += "Wifi: \t\t\n"
     status += f"Internet: \t{internet.check()} \n"
     status += "Location: \t\n"
-    status += f"Volume: \t{p['Audio'].audio.ShowVolume()}\n"
+    if "Audio" in plugins:
+        status += f"Volume: \t{p['Audio'].audio.ShowVolume()}\n"
     status += "--------------\n"
     status += "Scripts Running:\n"
-    status += p['Scripts'].scripts.list_running()
+    if "Scripts" in plugins:
+        status += p['Scripts'].scripts.list_running()
     return status
 
 
@@ -111,7 +110,8 @@ def system_status_csv():
         with open('/sys/class/power_supply/sony_controller_battery_00:19:c1:5f:78:b9/capacity',
                   'r', encoding="utf-8") as b:
             remote_battery = int(b.readline().split()[0])
-    except Exception:
+    except Exception as e:
+        logging.error(f"Error getting remote battery: {e}")
         remote_battery = 0
 
     battery = 0
@@ -129,11 +129,11 @@ log_filename = logdir + '/' + logfile
 # Create target Directory if don't exist
 if not os.path.exists(logdir):
     os.mkdir(logdir)
-    print("Creating logdir " + logdir)
+    print(f"Creating logdir: {logdir}")
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename=log_filename,
-                    filemode='w')
+                    filemode=mainconfig.mainconfig.get('logmode', 'w'))
 logging.info("**** Starting r2_control")
 
 
@@ -141,11 +141,9 @@ logging.info("**** Starting r2_control")
 # initialise modules
 if mainconfig.mainconfig['telegram'] == "True":
     # Enable telegram
-    if __debug__:
-        print("Enabled Telegram")
+    logging.info("Enabled Telegram")
     tg = telegram.Telegram()
-    if __debug__:
-        print(tg)
+    logging.info(tg)
     tg.send("R2 Starting up....")
 
 app = Flask(__name__, template_folder='templates')
@@ -161,8 +159,7 @@ def index():
 
 
 # Initialise server controllers
-if __debug__:
-    print("Servos loading.... %s" % servos)
+logging.info(f"Servos loading.... {servos}")
 for x in servos:
     if x != '':
         logging.info(f"Loading Servo Control Board: {x}")
@@ -170,15 +167,14 @@ for x in servos:
 
 p = {}
 for x in plugins:
-    logging.info("Loading %s" % x)
+    logging.info(f"Loading {x}")
     p[x] = __import__("Hardware." + plugin_names[x], fromlist=[str(x), 'api'])
     app.register_blueprint(p[x].api)
 
-if __debug__:
-    print("Modules loaded:")
-    print("============================================")
-    print(p)
-    print("============================================")
+logging.info("Modules loaded:")
+logging.info("============================================")
+logging.info(p)
+logging.info("============================================")
 
 
 #######################
@@ -188,34 +184,31 @@ if __debug__:
 def joystick_list():
     """GET to display list of possible joysticks"""
     logging.info("Retrieving list of joysticks")
-    if request.method == 'GET':
-        return '\n'.join(list_joysticks())
-    return "Fail"
+    return '\n'.join(list_joysticks())
 
 
 @app.route('/joystick/current', methods=['GET'])
 def joystick_current():
     """GET to display current joystick"""
     logging.info("Retrieving current joystick")
-    if request.method == 'GET':
-        with open("controllers/.current", "r", encoding="utf-8") as current_joy:
-            current = current_joy.read()
-        return current
-    return "Fail"
+    with open("controllers/.current", "r", encoding="utf-8") as current_joy:
+        current = current_joy.read()
+    return current
+
 
 
 @app.route('/joystick/<stick>', methods=['GET'])
 def joystick_change(stick):
     """GET to change joystick to <stick> """
     logging.info("Changing joystick to " + stick)
-    if request.method == 'GET':
-        message = "Invalid stick"
-        for valid in list_joysticks():
-            logging.info("Checking controller type is valid: " + valid)
-            if valid == stick:
-                message = "Valid stick. Changed to " + stick
-                with open("controllers/.current", "w", encoding="utf-8") as current_joy:
-                    current_joy.write(stick)
+
+    message = "Invalid stick"
+    for valid in list_joysticks():
+        logging.info("Checking controller type is valid: " + valid)
+        if valid == stick:
+            message = "Valid stick. Changed to " + stick
+            with open("controllers/.current", "w", encoding="utf-8") as current_joy:
+                current_joy.write(stick)
     return message
 
 
@@ -225,9 +218,8 @@ def shutdown():
     logging.info("****** Shutting down ******")
     if mainconfig.mainconfig['telegram']:
         tg.send("Night night...")
-    if request.method == 'GET':
-        os.system('shutdown now -h')
-        s = open("/home/pi/.r2_config/.shutdown", "w+", encoding="utf-8")
+    os.system('shutdown now -h')
+    with open(configdir + ".shutdown", "w", encoding="utf-8") as s:
         s.write(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
         s.flush()
         s.close()
@@ -239,8 +231,7 @@ def shutdown():
 def sysstatus():
     """GET to display system status"""
     message = ""
-    if request.method == 'GET':
-        message = system_status()
+    message = system_status()
     return message
 
 
@@ -248,12 +239,11 @@ def sysstatus():
 def sendstatus():
     """GET to send system status via telegram"""
     message = ""
-    if request.method == 'GET':
-        if mainconfig.mainconfig['telegram']:
-            tg.send(system_status())
-            message = "Sent"
-        else:
-            message = "Telegram module not configured"
+    if mainconfig.mainconfig['telegram']:
+        tg.send(system_status())
+        message = "Sent"
+    else:
+        message = "Telegram module not configured"
     return message
 
 
@@ -261,8 +251,7 @@ def sendstatus():
 def sendstatuscsv():
     """GET to display a CSV of current stats"""
     message = ""
-    if request.method == 'GET':
-        message = system_status_csv()
+    message = system_status_csv()
     return message
 
 
@@ -270,13 +259,12 @@ def sendstatuscsv():
 def sendstatusinternet():
     """GET to display internet status"""
     message = ""
-    if request.method == 'GET':
-        if internet.check():
-            message = "True"
-        else:
-            message = "False"
+    if internet.check():
+        message = "True"
+    else:
+        message = "False"
     return message
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=__debug__, use_reloader=False, threaded=True)
+    app.run(host='0.0.0.0', use_reloader=False, threaded=True)

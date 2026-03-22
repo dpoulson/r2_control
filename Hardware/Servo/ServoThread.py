@@ -3,9 +3,6 @@ import threading
 from queue import Queue, Empty
 import time
 import Adafruit_PCA9685
-from future import standard_library
-standard_library.install_aliases()
-
 
 q = Queue
 

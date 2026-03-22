@@ -6,14 +6,12 @@ import csv
 import urllib.request
 import urllib.error
 import urllib.parse
-from future import standard_library
-standard_library.install_aliases()
 
 script = ""
 loop = False
 lock = threading.Lock()
 
-keywords = ['dome', 'body', 'lights', 'sound', 'sleep', 'flthy', 'rseries', 'psi_matrix']
+keywords = ['dome', 'body', 'sound', 'sleep', 'flthy', 'rseries', 'psi_matrix', 'smoke']
 
 
 class ScriptThread(threading.Thread):
@@ -22,6 +20,7 @@ class ScriptThread(threading.Thread):
         self.script = script
         self.loop = int(loop)
         self._stopevent = threading.Event()
+        self.contents = ""
         threading.Thread.__init__(self)
         return
 

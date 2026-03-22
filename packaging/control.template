@@ -1,0 +1,27 @@
+Package: r2-control
+Version: {{VERSION}}
+Section: custom
+Priority: optional
+Architecture: {{ARCHITECTURE}}
+Essential: no
+Maintainer: Darren Poulson <darren.poulson@gmail.com>
+Description: R2 Control system for running an astromech using a Pi
+Depends: python3, 
+         python3-venv, 
+         apache2, 
+         i2c-tools,
+         php, 
+         libapache2-mod-php, 
+         python3-pip,
+         git,
+         bluetooth,
+         blueman,
+         bluez-hcidump,
+         checkinstall,
+         libusb-dev,
+         libbluetooth-dev,
+         joystick,
+         pkg-config,
+         libsdl1.2-dev,
+         libffi-dev,
+         python3-monotonic

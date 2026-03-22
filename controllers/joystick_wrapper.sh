@@ -1,13 +1,19 @@
 #!/bin/bash
 
-CONT_DIR=/home/pi/.r2_config
+# Configuration directories
+BASE_DIR="/opt/r2_control"
+CONT_DIR="$BASE_DIR/controllers"
 
-CURRENT=`cat $CONT_DIR/current_joy`
-rm $CONT_DIR/.shutdown
+# Read the currently active joystick
+CURRENT=$(cat $CONT_DIR/.current 2>/dev/null || echo "ps3")
+
+# Clean up any lingering shutdown flags
+rm ~/.r2_config/.shutdown 2>/dev/null || true
 
 echo "Joystick selected: $CURRENT"
 
-cd /home/pi/r2_control/controllers/$CURRENT
+# Switch into the joystick directory
+cd "$CONT_DIR/$CURRENT" || exit 1
 
-/usr/bin/python ./r2_"$CURRENT".py
-
+# Execute the controller script using the strict package virtual environment
+$BASE_DIR/venv/bin/python3 "./r2_${CURRENT}.py"

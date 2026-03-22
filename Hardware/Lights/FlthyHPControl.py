@@ -5,13 +5,11 @@ import os
 import configparser
 import smbus
 from flask import Blueprint, request
-from future import standard_library
 from r2utils import mainconfig
-standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'flthy.cfg'
 
-_config = configparser.SafeConfigParser({'address': '0x19',
+_config = configparser.ConfigParser({'address': '0x19',
                                          'logfile': 'flthy.log',
                                          'reeltwo': 'false'})
 if not os.path.isfile(_configfile):

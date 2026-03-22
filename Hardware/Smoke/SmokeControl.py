@@ -1,6 +1,3 @@
-from __future__ import print_function
-from __future__ import absolute_import
-from future import standard_library
 import configparser
 import smbus
 import os
@@ -8,11 +5,10 @@ from r2utils import mainconfig
 from flask import Blueprint, request
 from builtins import hex
 from builtins import object
-standard_library.install_aliases()
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'smoke.cfg'
 
-_config = configparser.SafeConfigParser({'address': '0x05', 'logfile': 'smoke.log'})
+_config = configparser.ConfigParser({'address': '0x05', 'logfile': 'smoke.log'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):

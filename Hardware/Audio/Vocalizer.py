@@ -4,14 +4,12 @@ import configparser
 import os
 import serial
 from flask import Blueprint, request
-from future import standard_library
 from r2utils import mainconfig
-standard_library.install_aliases()
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'vocalizer.cfg'
 
-_config = configparser.SafeConfigParser({'logfile': 'vocalizer.log', 'port': '/dev/ttyUSB1', 'baudrate': '9600'})
+_config = configparser.ConfigParser({'logfile': 'vocalizer.log', 'port': '/dev/ttyUSB1', 'baudrate': '9600'})
 _config.read(_configfile)
 
 if not os.path.isfile(_configfile):

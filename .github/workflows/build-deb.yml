@@ -1,0 +1,158 @@
+name: Build and Release Raspberry Pi DEB
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "v*" # Triggers when you push a tag like v1.0.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os_version: bullseye
+            arch: armv7
+            deb_arch: armhf
+          - os_version: bookworm
+            arch: arm64
+            deb_arch: arm64
+          - os_version: trixie # Trixie carries Python 3.13
+            arch: arm64
+            deb_arch: arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Package inside ARM Container
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.os_version }}
+
+          # Pass the tag name as an environment variable
+          env: |
+            PKG_VERSION: ${{ github.ref_name }}
+
+          # This section runs inside the emulated Raspberry Pi environment
+          run: |
+            # 1. Install necessary build tools inside the container
+            apt-get update
+            apt-get install -y python3 python3-venv python3-pip rsync binutils build-essential \
+                               libusb-dev libbluetooth-dev libsdl1.2-dev libffi-dev pkg-config
+
+            # 2. Create the Staging Directory Structure
+            STAGING="build_staging"
+            mkdir -p $STAGING/DEBIAN
+            mkdir -p $STAGING/opt/r2_control
+            mkdir -p $STAGING/etc/systemd/system
+            mkdir -p $STAGING/etc/apache2/sites-available
+
+            # ==========================================
+            # BUILD 1: LITE PACKAGE (INTERNET REQUIRED)
+            # ==========================================
+            cp packaging/postinst.lite $STAGING/DEBIAN/postinst
+            cp packaging/prerm $STAGING/DEBIAN/
+            chmod +x $STAGING/DEBIAN/postinst $STAGING/DEBIAN/prerm
+
+            # Create the Control file dynamically
+            if [[ "${{ github.ref_type }}" == "tag" ]]; then
+              CLEAN_VER=$(echo ${{ github.ref_name }} | sed 's/v//')
+            else
+              CLEAN_VER="0.0.0+experimental${{ github.run_number }}"
+            fi
+            sed "s/{{VERSION}}/$CLEAN_VER/g; s/{{ARCHITECTURE}}/${{ matrix.deb_arch }}/g" packaging/control.template > $STAGING/DEBIAN/control
+
+            # Copy code natively (Excluding build artifacts and massive folders)
+            rsync -av --exclude="$STAGING" --exclude="build" --exclude=".git" --exclude=".github" --exclude=".venv" --exclude="venv" --exclude="*.deb" --exclude="wheels" . $STAGING/opt/r2_control/
+
+            cp r2_control.service $STAGING/etc/systemd/system/
+            cp controllers/r2_joy.service $STAGING/etc/systemd/system/
+            cp controllers/www/apache.conf $STAGING/etc/apache2/sites-available/000-r2.conf
+
+            # Ensure proper ownership before dpkg-deb to avoid warnings
+            chown -R root:root $STAGING
+            dpkg-deb --build $STAGING "r2_control_lite_${CLEAN_VER}_${{ matrix.deb_arch }}.deb"
+
+            # ==========================================
+            # BUILD 2: OFFLINE PACKAGE (WHEELS BUNDLED)
+            # ==========================================
+            cp packaging/postinst.offline $STAGING/DEBIAN/postinst
+            chmod +x $STAGING/DEBIAN/postinst
+
+            # Generate Pre-Compiled Offline Wheels inside the ARM container!
+            mkdir -p $STAGING/opt/r2_control/wheels
+            python3 -m pip wheel -w $STAGING/opt/r2_control/wheels --pre pygame
+            python3 -m pip wheel -w $STAGING/opt/r2_control/wheels -r requirements.txt
+
+            chown -R root:root $STAGING
+            dpkg-deb --build $STAGING "r2_control_offline_${CLEAN_VER}_${{ matrix.deb_arch }}.deb"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.os_version }}-${{ matrix.arch }}
+          path: "*.deb"
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "**/*.deb"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  apt-repo:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Generate APT Repository and Push
+        run: |
+          mkdir new_debs
+          find . -name "*.deb" -exec mv {} new_debs/ \;
+          
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git clone --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-repo || {
+            echo "Initializing gh-pages branch"
+            git init gh-pages-repo
+            cd gh-pages-repo
+            git checkout --orphan gh-pages
+            git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            cd ..
+          }
+          
+          cd gh-pages-repo
+          cp ../new_debs/*.deb ./
+          
+          sudo apt-get update && sudo apt-get install -y dpkg-dev
+          dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+          
+          echo "Origin: R2-Control" > Release
+          echo "Label: R2-Control" >> Release
+          echo "Suite: stable" >> Release
+          echo "Codename: stable" >> Release
+          echo "Architectures: arm64 armhf" >> Release
+          echo "Components: main" >> Release
+          echo "Description: GitHub Actions Auto-Generated APT Repository" >> Release
+          
+          git add -A
+          git commit -m "Auto-publish debian packages to apt-repo for release ${{ github.ref_name }}" || echo "Nothing to deploy"
+          git push -u origin gh-pages
