@@ -21,7 +21,7 @@ from shutil import copyfile
 import odrive
 from odrive.enums import *
 import signal
-sys.path.insert(0, '/home/pi/r2_control')
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from r2utils import mainconfig
 
 
@@ -37,14 +37,14 @@ signal.signal(signal.SIGINT, sig_handler)
 # Load config
 _configfile = mainconfig.mainconfig['config_dir'] + 'ps3.cfg'
 _keysfile = mainconfig.mainconfig['config_dir'] + 'ps3_keys.csv'
-_config = configparser.SafeConfigParser({'log_file': '/home/pi/r2_control/logs/ps3.log',
+_config = configparser.ConfigParser({'logfile': 'ps3.log',
                                          'baseurl': 'http://localhost:5000/',
-                                         'keepalive': 0.25,
-                                         'speed_fac': 0.35,
-                                         'invert': 1,
-                                         'accel_rate': 0.025,
-                                         'curve': 0.6,
-                                         'deadband': 0.2})
+                                         'keepalive': '0.25',
+                                         'speed_fac': '0.35',
+                                         'invert': '1',
+                                         'accel_rate': '0.025',
+                                         'curve': '0.6',
+                                         'deadband': '0.2'})
 
 _config.add_section('Dome')
 _config.set('Dome', 'address', '129')
@@ -62,15 +62,17 @@ _config.read(_configfile)
 
 if not os.path.isfile(_configfile):
     print("Config file does not exist")
-    with open(_configfile, 'wb', encoding="utf-8") as configfile:
+    with open(_configfile, 'w', encoding="utf-8") as configfile:
         _config.write(configfile)
 
 ps3config = _config.defaults()
+logdir = mainconfig.mainconfig['logdir']
+configdir = mainconfig.mainconfig['config_dir']
 
 ##########################################################
 # Set variables
 # Log file location
-log_file = ps3config['log_file']
+logfile = ps3config['logfile']
 
 # How often should the script send a keepalive (s)
 keepalive = float(ps3config['keepalive'])
@@ -182,11 +184,11 @@ def clamp(n, minn, maxn):
 
 
 def shutdownR2():
-    if _config.get('Drive', 'type'):
-        f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-                f"Axis0: {drive.axis0.error} {drive.axis0.motor.error} {drive.axis0.controller.error}\n")
-        f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-                f"Axis1: {drive.axis1.error} {drive.axis1.motor.error} {drive.axis1.controller.error}\n")
+#    if _config.get('Drive', 'type'):
+#        f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
+#                f"Axis0: {drive.axis0.error} {drive.axis0.motor.error} {drive.axis0.controller.error}\n")
+#        f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
+#                f"Axis1: {drive.axis1.error} {drive.axis1.motor.error} {drive.axis1.controller.error}\n")
 
     """ shutdownR2 - Put R2 into a safe state """
     logging.info("Running shutdown procedure")
@@ -194,7 +196,8 @@ def shutdownR2():
     logging.debug("...Setting drive to 0")
     steering(0, 0, drive_mod)
     logging.debug("...Setting dome to 0")
-    dome.driveCommand(0)
+    if not args.dryrun:
+        dome.driveCommand(0)
 
     logging.info("Disable drives")
     url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
@@ -230,10 +233,17 @@ parser.add_argument('--dryrun', '-d', action="store_true", dest="dryrun", requir
 args = parser.parse_args()
 
 # Open a log file
-f = open(log_file, 'at')
-f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-        " : ****** ps3 started ******\n")
-f.flush()
+# Setup logging
+log_filename = logdir + '/' + logfile
+# Create target Directory if don't exist
+if not os.path.exists(logdir):
+    os.mkdir(logdir)
+    print(f"Creating logdir: {logdir}")
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename=log_filename,
+                    filemode=ps3config.get('logmode', 'w'))
+logging.info("**** Starting ps3 controller")
 
 while True:
     pygame.joystick.quit()
@@ -241,9 +251,7 @@ while True:
     num_joysticks = pygame.joystick.get_count()
     logging.debug(f"Waiting for joystick... (count {num_joysticks})")
     if num_joysticks != 0:
-        f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-                " : Joystick found \n")
-        f.flush()
+        logging.info("Joystick found")
         break
     sleep(5)
 
@@ -322,14 +330,34 @@ try:
 except Exception:
     logging.debug("Fail....")
 
-f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-        " : System Initialised \n")
-f.flush()
+logging.info("System Initialised")
 
 last_command = time()
 joystick = True
 
-previous = ""
+
+def get_digital_state(j, num_buttons):
+    expected_length = max(17, num_buttons)
+    state = ['0'] * expected_length
+    for i in range(min(num_buttons, expected_length)):
+        state[i] = str(j.get_button(i))
+    if j.get_numhats() > 0:
+        hat = j.get_hat(0)
+        if hat[1] > 0: state[4] = '1'
+        if hat[0] > 0: state[5] = '1'
+        if hat[1] < 0: state[6] = '1'
+        if hat[0] < 0: state[7] = '1'
+    if j.get_numaxes() > 6:
+        val = j.get_axis(6)
+        if val > 0.5: state[5] = '1'
+        elif val < -0.5: state[7] = '1'
+    if j.get_numaxes() > 7:
+        val = j.get_axis(7)
+        if val > 0.5: state[6] = '1'
+        elif val < -0.5: state[4] = '1'
+    return "".join(state)
+
+previous = get_digital_state(j, buttons)
 _throttle = 0
 _turning = 0
 
@@ -350,7 +378,7 @@ while joystick:
             joystick = False
             shutdownR2()
         # Check for no shutdown file
-        if os.path.exists('/home/pi/.r2_config/.shutdown'):
+        if os.path.exists(f'{configdir}/.shutdown'):
             print("Shutdown file is there")
             joystick = False
             shutdownR2()
@@ -362,98 +390,87 @@ while joystick:
         shutdownR2()
         sys.exit(0)
     for event in events:
-        if event.type == pygame.JOYBUTTONDOWN:
-            buf = StringIO()
-            for i in range(buttons):
-                button = j.get_button(i)
-                buf.write(str(button))
-            combo = buf.getvalue()
-            logging.debug(f"Buttons pressed: {combo}")
-            if args.curses:
-                locate("                   ", 1, 14)
-                locate(combo, 3, 14)
-            # Special key press (All 4 plus triangle) to increase speed of drive
-            if combo == "00001111000000001":
-                logging.debug("Incrementing drive speed")
-                # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
-                speed_fac += 0.05
-                if speed_fac > 1:
-                    speed_fac = 1
-                logging.debug(f"*** NEW SPEED {speed_fac}")
-                if args.curses:
-                    locate('%4f' % speed_fac, 28, 7)
-                drive_mod = speed_fac * invert
-                f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-                        " : Speed Increase : " + str(speed_fac) + " \n")
-                url = baseurl + "audio/Happy006"
-                try:
-                    r = requests.get(url)
-                except Exception:
-                    logging.debug("Fail....")
-            # Special key press (All 4 plus X) to decrease speed of drive
-            if combo == "00001111000000010":
-                logging.debug("Decrementing drive speed")
-                # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
-                speed_fac -= 0.05
-                if speed_fac < 0.2:
-                    speed_fac = 0.2
-                logging.debug(f"*** NEW SPEED {speed_fac}")
-                if args.curses:
-                    locate('%4f' % speed_fac, 28, 7)
-                drive_mod = speed_fac * invert
-                f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-                        " : Speed Decrease : " + str(speed_fac) + " \n")
-                url = baseurl + "audio/Sad__019"
-                try:
-                    r = requests.get(url)
-                except Exception:
-                    logging.debug("Fail....")
-            # Disable Drives for odrive
-            if _config.get("Drive", "type") == "ODrive":
-                if combo == "00000000000100000":
-                    logging.debug("Disable ODrive")
-                    drive.axis0.requested_state = 1
-                    drive.axis1.requested_state = 1
-                    f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-                        " : Drives Disables \n")
-                if combo == "00000000010000000":
-                    logging.debug("Enable ODrive")
-                    drive.axis0.requested_state = 8
-                    drive.axis1.requested_state = 8
-                    drive.clear_errors()
-                    drive.clear_errors()
-                    f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-                        " : Drives Enabled \n")
-            try:
-                newurl = baseurl + keys[combo][0]
-                f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-                        " : Button Down event : " + combo + "," + keys[combo][0] + " \n")
-                f.flush()
-                logging.debug(f"Would run: {keys[combo]}")
-                logging.debug(f"URL: {newurl}")
-                try:
-                    r = requests.get(newurl)
-                except Exception:
-                    logging.debug("No connection")
-            except Exception:
-                logging.debug("No combo (pressed)")
-            previous = combo
-        if event.type == pygame.JOYBUTTONUP:
-            logging.debug(f"Buttons released: {previous}")
-            try:
-                newurl = baseurl + keys[previous][1]
-                f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-                        " : Button Up event : " + previous + "," + keys[previous][1] + "\n")
-                f.flush()
-                logging.debug(f"Would run: {keys[previous][1]}")
-                logging.debug(f"URL: {newurl}")
-                try:
-                    r = requests.get(newurl)
-                except Exception:
-                    logging.debug("No connection")
-            except Exception:
-                logging.debug("No combo (released)")
-            previous = ""
+        if event.type in (pygame.JOYBUTTONDOWN, pygame.JOYBUTTONUP, pygame.JOYHATMOTION, pygame.JOYAXISMOTION):
+            combo = get_digital_state(j, buttons)
+            if combo != previous:
+                if combo.count('1') > previous.count('1'):
+                    logging.debug(f"Buttons pressed: {combo}")
+                    if args.curses:
+                        locate("                   ", 1, 14)
+                        locate(combo, 3, 14)
+                    # Special key press (All 4 plus triangle) to increase speed of drive
+                    if combo == "00001111000000001":
+                        logging.debug("Incrementing drive speed")
+                        # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
+                        speed_fac += 0.05
+                        if speed_fac > 1:
+                            speed_fac = 1
+                        logging.debug(f"*** NEW SPEED {speed_fac}")
+                        if args.curses:
+                            locate('%4f' % speed_fac, 28, 7)
+                        drive_mod = speed_fac * invert
+                        logging.info(f"Speed Increase : {speed_fac}")
+                        url = baseurl + "audio/Happy006"
+                        try:
+                            r = requests.get(url)
+                        except Exception:
+                            logging.debug("Fail....")
+                    # Special key press (All 4 plus X) to decrease speed of drive
+                    if combo == "00001111000000010":
+                        logging.debug("Decrementing drive speed")
+                        # When detected, will increment the speed_fac by 0.5 and give some audio feedback.
+                        speed_fac -= 0.05
+                        if speed_fac < 0.2:
+                            speed_fac = 0.2
+                        logging.debug(f"*** NEW SPEED {speed_fac}")
+                        if args.curses:
+                            locate('%4f' % speed_fac, 28, 7)
+                        drive_mod = speed_fac * invert
+                        logging.info(f"Speed Decrease : {speed_fac}")
+                        url = baseurl + "audio/Sad__019"
+                        try:
+                            r = requests.get(url)
+                        except Exception:
+                            logging.debug("Fail....")
+                    # Disable Drives for odrive
+                    if _config.get("Drive", "type") == "ODrive":
+                        if combo == "00000000000100000":
+                            logging.debug("Disable ODrive")
+                            drive.axis0.requested_state = 1
+                            drive.axis1.requested_state = 1
+                            logging.info("Drives Disables")
+                        if combo == "00000000010000000":
+                            logging.debug("Enable ODrive")
+                            drive.axis0.requested_state = 8
+                            drive.axis1.requested_state = 8
+                            drive.clear_errors()
+                            drive.clear_errors()
+                            logging.info("Drives Enabled")
+                    try:
+                        newurl = baseurl + keys[combo][0]
+                        logging.info(f"Button Down event : {combo},{keys[combo][0]}")
+                        logging.debug(f"Would run: {keys[combo]}")
+                        logging.debug(f"URL: {newurl}")
+                        try:
+                            r = requests.get(newurl)
+                        except Exception:
+                            logging.debug("No connection")
+                    except Exception:
+                        logging.debug("No combo (pressed)")
+                else:
+                    logging.debug(f"Buttons released: {previous}")
+                    try:
+                        newurl = baseurl + keys[previous][1]
+                        logging.info(f"Button Up event : {previous},{keys[previous][1]}")
+                        logging.debug(f"Would run: {keys[previous][1]}")
+                        logging.debug(f"URL: {newurl}")
+                        try:
+                            r = requests.get(newurl)
+                        except Exception:
+                            logging.debug("No connection")
+                    except Exception:
+                        logging.debug("No combo (released)")
+                previous = combo
         if event.type == pygame.JOYAXISMOTION:
             if event.axis == PS3_AXIS_LEFT_VERTICAL:
                 logging.debug(f"Value (Drive): {event.value} : Speed Factor : {speed_fac}")
@@ -474,9 +491,7 @@ while joystick:
                 if args.curses:
                     locate("                   ", 35, 4)
                     locate('%10f' % (event.value), 35, 4)
-                f.write(datetime.datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S') +
-                        " : Dome : " + str(event.value) + "\n")
-                f.flush
+                logging.info(f"Dome : {event.value}")
                 if not args.dryrun:
                     logging.debug("Not a drytest")
                     dome.driveCommand(clamp(event.value, -0.99, 0.99))

@@ -133,7 +133,7 @@ if not os.path.exists(logdir):
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename=log_filename,
-                    filemode='w')
+                    filemode=mainconfig.mainconfig.get('logmode', 'w'))
 logging.info("**** Starting r2_control")
 
 
