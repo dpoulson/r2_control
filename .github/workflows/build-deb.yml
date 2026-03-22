@@ -8,6 +8,9 @@ on:
     tags:
       - "v*" # Triggers when you push a tag like v1.0.0
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,6 +26,8 @@ jobs:
           - os_version: trixie # Trixie carries Python 3.13
             arch: arm64
             deb_arch: arm64
+            distro: bookworm
+            base_image: debian:trixie
 
     steps:
       - name: Checkout code
@@ -32,7 +37,8 @@ jobs:
         uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.arch }}
-          distro: ${{ matrix.os_version }}
+          distro: ${{ matrix.distro || matrix.os_version }}
+          base_image: ${{ matrix.base_image || '' }}
 
           # Pass the tag name as an environment variable
           env: |
