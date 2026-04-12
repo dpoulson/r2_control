@@ -235,5 +235,9 @@ class _AudioLibrary(object):
         files = files.replace(".mp3", "", -1)
         return files
 
+    def ShowVolume(self):
+        """ Returns current volume as a float """
+        return mixer.music.get_volume()
+
 
 audio = _AudioLibrary(_defaults['sounds_dir'], _defaults['volume'])

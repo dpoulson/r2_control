@@ -33,3 +33,27 @@ if not os.path.isfile(_configfile):
 
 
 mainconfig = _config.defaults()
+
+def save_config(updates):
+    # Map dictionary updates into parser
+    if 'plugins' in updates:
+        _config.set('DEFAULT', 'plugins', updates['plugins'])
+    if 'servos' in updates:
+        _config.set('DEFAULT', 'servos', updates['servos'])
+    if 'drive_type' in updates:
+        _config.set('Drive', 'type', updates['drive_type'])
+    if 'drive_port' in updates:
+        _config.set('Drive', 'port', updates['drive_port'])
+    
+    if not _config.has_section('Dome'):
+        _config.add_section('Dome')
+    if 'dome_type' in updates:
+        _config.set('Dome', 'type', updates['dome_type'])
+    if 'dome_port' in updates:
+        _config.set('Dome', 'port', updates['dome_port'])
+    
+    with open(_configfile, 'wt') as configfile:
+        _config.write(configfile)
+    
+    global mainconfig
+    mainconfig = _config.defaults()

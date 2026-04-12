@@ -26,7 +26,7 @@ import datetime
 import logging
 import logging.handlers
 import importlib
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 from r2utils import telegram, internet, mainconfig
 from Hardware.Servo import ServoBlueprint
 
@@ -106,10 +106,16 @@ def system_status_csv():
     with open('/proc/uptime', 'r', encoding="utf-8") as f:
         uptime_seconds = float(f.readline().split()[0])
         uptime_string = str(datetime.timedelta(seconds=uptime_seconds))
+    remote_battery = ""
     try:
-        with open('/sys/class/power_supply/sony_controller_battery_00:19:c1:5f:78:b9/capacity',
-                  'r', encoding="utf-8") as b:
-            remote_battery = int(b.readline().split()[0])
+        controllers = glob.glob('/sys/class/power_supply/*')
+        logging.debug(f"Controllers: {controllers}")
+        for controller in controllers:
+            path = controller + "/capacity"
+            logging.debug(f"Controller path: {path}")
+            with open(path, 'r', encoding="utf-8") as b:
+                remote_battery += str(int(b.readline().split()[0])) + " "
+                logging.debug(f"Remote battery: {remote_battery}")
     except Exception as e:
         logging.error(f"Error getting remote battery: {e}")
         remote_battery = 0
@@ -264,6 +270,105 @@ def sendstatusinternet():
     else:
         message = "False"
     return message
+
+
+@app.route('/config/get', methods=['GET'])
+def get_config():
+    """GET current system configuration"""
+    import configparser
+    def get_servo_addr(name):
+        p = os.path.expanduser(f'~/.r2_config/servo_{name}.cfg')
+        if os.path.exists(p):
+            c = configparser.ConfigParser()
+            c.read(p)
+            return c.get('DEFAULT', 'address', fallback='')
+        return ''
+
+    config_data = {
+        'plugins': mainconfig.mainconfig.get('plugins', ''),
+        'servos': mainconfig.mainconfig.get('servos', ''),
+        'drive_type': mainconfig._config.get('Drive', 'type', fallback=''),
+        'drive_port': mainconfig._config.get('Drive', 'port', fallback=''),
+        'dome_type': mainconfig._config.get('Dome', 'type', fallback=''),
+        'dome_port': mainconfig._config.get('Dome', 'port', fallback=''),
+        'available_ports': list(set(glob.glob('/dev/ttyUSB*') + glob.glob('/dev/ttyACM*') + glob.glob('/dev/ttyAMA*') + glob.glob('/dev/serial*'))),
+        'available_plugins': list(plugin_names.keys()),
+        'servo_addresses': { s.strip(): get_servo_addr(s.strip()) for s in mainconfig.mainconfig.get('servos', '').split(',') if s.strip() }
+    }
+    
+    plugin_configs = {}
+    for p in mainconfig.mainconfig.get('plugins', '').split(','):
+        p = p.strip().lower()
+        if not p: continue
+        cfg_path = os.path.expanduser(f'~/.r2_config/{p}.cfg')
+        if os.path.exists(cfg_path):
+            c = configparser.ConfigParser()
+            c.read(cfg_path)
+            p_dict = {}
+            if c.defaults(): p_dict['DEFAULT'] = dict(c.defaults())
+            for section in c.sections():
+                p_dict[section] = dict(c.items(section))
+            plugin_configs[p] = p_dict
+    config_data['plugin_configs'] = plugin_configs
+
+    return jsonify(config_data)
+
+
+@app.route('/config/set', methods=['POST'])
+def set_config():
+    """POST to update configuration"""
+    import threading
+    import configparser
+    
+    data = request.form
+    mainconfig.save_config(data)
+    
+    def set_servo_addr(name, val):
+        if not val: return
+        p = os.path.expanduser(f'~/.r2_config/servo_{name}.cfg')
+        c = configparser.ConfigParser()
+        if os.path.exists(p):
+            c.read(p)
+        c.set('DEFAULT', 'address', val)
+        with open(p, 'w') as f:
+            c.write(f)
+            
+    for key, val in data.items():
+        if key.startswith('servo_addr_'):
+            set_servo_addr(key[11:], val)
+            
+    plugin_updates = {}
+    for key, val in data.items():
+        if key.startswith('plugin_cfg__'):
+            parts = key.split('__')
+            if len(parts) == 4:
+                _, p_name, section, p_key = parts
+                if p_name not in plugin_updates:
+                    plugin_updates[p_name] = {}
+                if section not in plugin_updates[p_name]:
+                    plugin_updates[p_name][section] = {}
+                plugin_updates[p_name][section][p_key] = val
+                
+    for p_name, sections in plugin_updates.items():
+        cfg_path = os.path.expanduser(f'~/.r2_config/{p_name}.cfg')
+        c = configparser.ConfigParser()
+        if os.path.exists(cfg_path):
+            c.read(cfg_path)
+        for section, keys in sections.items():
+            if section != 'DEFAULT' and not c.has_section(section):
+                c.add_section(section)
+            for k, v in keys.items():
+                c.set(section, k, v)
+        with open(cfg_path, 'w') as f:
+            c.write(f)
+    
+    def restart():
+        import time
+        time.sleep(1)
+        os.system('systemctl restart r2_control.service')
+        
+    threading.Thread(target=restart).start()
+    return "Ok"
 
 
 if __name__ == '__main__':
