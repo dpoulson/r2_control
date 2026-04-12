@@ -24,7 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'drive_type' => $_POST['drive_type'] ?? '',
         'drive_port' => $_POST['drive_port'] ?? '',
         'dome_type' => $_POST['dome_type'] ?? '',
-        'dome_port' => $_POST['dome_port'] ?? ''
+        'dome_port' => $_POST['dome_port'] ?? '',
+        'action' => $_POST['action'] ?? 'save'
     ];
     foreach($_POST as $key => $val) {
         if (strpos($key, 'servo_addr_') === 0 || strpos($key, 'plugin_cfg__') === 0) {
@@ -44,7 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     @file_get_contents('http://localhost:5000/config/set', false, $context);
     
     // Redirect 
-    header("Location: http://$_SERVER[HTTP_HOST]/?page=configuration&msg=saved");
+    $msg = (($_POST['action'] ?? '') === 'restart') ? 'restarting' : 'saved';
+    header("Location: http://$_SERVER[HTTP_HOST]/?page=configuration&msg=" . $msg);
     exit;
 }
 
@@ -75,7 +77,9 @@ sort($available_ports);
 </style>
 
 <?php if(isset($_GET['msg']) && $_GET['msg'] === 'saved'): ?>
-    <div class="msg">Configuration saved! Hard rebooting application...</div>
+    <div class="msg" style="color: #4da6ff;">Configuration saved. (Restart required to apply changes)</div>
+<?php elseif(isset($_GET['msg']) && $_GET['msg'] === 'restarting'): ?>
+    <div class="msg" style="color: #ffc107;">Configuration saved! Restarting system daemon...</div>
 <?php endif; ?>
 
 <h3 class="avail">System Settings</h3>
@@ -88,8 +92,9 @@ sort($available_ports);
             if (!empty($config_data['available_plugins'])) {
                 foreach($config_data['available_plugins'] as $plugin) {
                     $checked = in_array(trim($plugin), $active_plugins) ? 'checked' : '';
+                    $pl_low = strtolower(trim($plugin));
                     echo "<label style=\"display:flex; align-items:center; font-weight:normal; color:#fff; cursor:pointer;\">";
-                    echo "<input type=\"checkbox\" name=\"plugins[]\" value=\"".htmlspecialchars($plugin)."\" $checked style=\"width:auto; margin-right:5px;\"> ";
+                    echo "<input type=\"checkbox\" id=\"chk_plugin_{$pl_low}\" name=\"plugins[]\" value=\"".htmlspecialchars($plugin)."\" $checked style=\"width:auto; margin-right:5px;\" onchange=\"togglePluginConfig('{$pl_low}')\"> ";
                     echo htmlspecialchars($plugin);
                     echo "</label>";
                 }
@@ -149,10 +154,14 @@ sort($available_ports);
 
     <h3 class="avail" style="margin-top:40px;">Plugin Specific Configurations</h3>
     <?php if (empty($config_data['plugin_configs'])): ?>
-        <p style="color:#aaa;">No dynamic configurations were found for currently active plugins.</p>
+        <p style="color:#aaa;">No dynamic configurations were found.</p>
     <?php else: ?>
         <?php foreach (($config_data['plugin_configs'] ?? []) as $plugin_name => $sections): ?>
-            <div class="config-group" style="padding:15px; border:1px solid #444; border-radius:8px; margin-bottom:15px; background: #1a1a1a;">
+            <?php 
+                $is_active = in_array(trim($plugin_name), array_map('strtolower', $active_plugins));
+                $display_style = $is_active ? 'block' : 'none'; 
+            ?>
+            <div id="plugin_config_<?php echo htmlspecialchars($plugin_name); ?>" class="config-group" style="display: <?php echo $display_style; ?>; padding:15px; border:1px solid #444; border-radius:8px; margin-bottom:15px; background: #1a1a1a;">
                 <h4 style="margin-top:0; color:#4da6ff; margin-bottom: 20px;"><?php echo ucfirst($plugin_name); ?> Settings</h4>
                 <?php foreach ($sections as $section_name => $keys): ?>
                     <?php if (count($sections) > 1): ?>
@@ -173,6 +182,14 @@ sort($available_ports);
     <?php endif; ?>
 
 <script>
+function togglePluginConfig(pluginId) {
+    const el = document.getElementById('plugin_config_' + pluginId);
+    const chk = document.getElementById('chk_plugin_' + pluginId);
+    if (el && chk) {
+        el.style.display = chk.checked ? 'block' : 'none';
+    }
+}
+
 const existingServoAddrs = <?php echo json_encode($config_data['servo_addresses'] ?? []); ?>;
 
 function updateServoConfigList() {
@@ -192,7 +209,10 @@ function updateServoConfigList() {
 window.addEventListener('DOMContentLoaded', updateServoConfigList);
 </script>
 
-    <button type="submit" class="save-btn">Save & Restart System</button>
+    <div style="display:flex; gap:15px; margin-top:20px;">
+        <button type="submit" name="action" value="save" class="save-btn">Save Configuration</button>
+        <button type="submit" name="action" value="restart" class="save-btn" style="background:#dc3545;">Save & Restart System</button>
+    </div>
 </form>
 
 <br><hr style="border-color:#444;"/><br>

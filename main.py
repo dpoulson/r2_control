@@ -296,19 +296,42 @@ def get_config():
         'servo_addresses': { s.strip(): get_servo_addr(s.strip()) for s in mainconfig.mainconfig.get('servos', '').split(',') if s.strip() }
     }
     
+    import ast
+    def get_plugin_defaults(plugin_file_path):
+        try:
+            with open(plugin_file_path, 'r', encoding='utf-8') as f:
+                tree = ast.parse(f.read())
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call):
+                    func = node.value.func
+                    if isinstance(func, ast.Attribute) and func.attr == 'ConfigParser':
+                        args = node.value.args
+                        if args and isinstance(args[0], ast.Dict):
+                            return ast.literal_eval(args[0])
+        except Exception: pass
+        return {}
+
     plugin_configs = {}
-    for p in mainconfig.mainconfig.get('plugins', '').split(','):
-        p = p.strip().lower()
+    for p_case in list(plugin_names.keys()):
+        p = p_case.strip().lower()
         if not p: continue
         cfg_path = os.path.expanduser(f'~/.r2_config/{p}.cfg')
+        p_dict = {}
         if os.path.exists(cfg_path):
             c = configparser.ConfigParser()
             c.read(cfg_path)
-            p_dict = {}
             if c.defaults(): p_dict['DEFAULT'] = dict(c.defaults())
             for section in c.sections():
                 p_dict[section] = dict(c.items(section))
+        else:
+            py_path = f"./Hardware/{plugin_names[p_case].replace('.', '/')}.py"
+            defaults = get_plugin_defaults(py_path)
+            if defaults:
+                p_dict['DEFAULT'] = defaults
+                
+        if p_dict:
             plugin_configs[p] = p_dict
+            
     config_data['plugin_configs'] = plugin_configs
 
     return jsonify(config_data)
@@ -361,14 +384,15 @@ def set_config():
                 c.set(section, k, v)
         with open(cfg_path, 'w') as f:
             c.write(f)
-    
-    def restart():
-        import time
-        time.sleep(1)
-        os.system('systemctl restart r2_control.service')
-        
-    threading.Thread(target=restart).start()
-    return "Ok"
+            
+    if data.get('action') == 'restart':
+        def restart():
+            import time
+            time.sleep(1)
+            os.system('sudo systemctl restart r2_control')
+        threading.Thread(target=restart).start()
+
+    return jsonify({"status": "Ok"})
 
 
 if __name__ == '__main__':
