@@ -1,0 +1,17 @@
+[Unit]
+Description=R2 BLE Bridge Service
+After=network.target r2_control.service
+ 
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/r2_control/venv/bin/python3 controllers/ble/ble_bridge.py
+WorkingDirectory=/opt/r2_control
+StandardOutput=syslog
+StandardError=syslog
+Restart=on-failure
+ 
+[Install]
+WantedBy=network.target
+Alias=r2_ble.service

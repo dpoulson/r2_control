@@ -24,6 +24,7 @@ rsync -av --exclude='build' --exclude='.git' --exclude='.venv' --exclude='venv' 
 # Copy the existing service files to the system location
 cp r2_control.service build/etc/systemd/system/
 cp controllers/r2_joy.service build/etc/systemd/system/
+cp controllers/ble/r2_ble.service build/etc/systemd/system/
 
 cp controllers/www/apache.conf build/etc/apache2/sites-available/000-r2.conf
 

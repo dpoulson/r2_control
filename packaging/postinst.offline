@@ -19,6 +19,8 @@ systemctl enable r2_control.service
 systemctl restart r2_control.service
 systemctl enable r2_joy.service
 systemctl restart r2_joy.service
+systemctl enable r2_ble.service
+systemctl restart r2_ble.service
 
 # 3. Configure Apache
 # rm /etc/apache2/sites-enabled/000-default.conf

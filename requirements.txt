@@ -9,3 +9,4 @@ setuptools
 smbus
 xbox360controller
 gunicorn
+bless
