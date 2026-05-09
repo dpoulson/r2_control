@@ -1,0 +1,9 @@
+    L3  R3  ST  UP  RGT DWN LFT L2  R2  L1  R1  TRI CIR X   SQ   
+0   0   0   0   0   0   0   0   1   0   1   0   0   0   0   1   0   0   0
+1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19
+
+Axis: 0 - Left - Left/Right
+      1 - Left - Up/Down
+      2 - Right - Left/Right
+      3 - Right - Up/Down
+

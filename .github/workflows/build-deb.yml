@@ -48,34 +48,60 @@ jobs:
             apt-get install -y python3 python3-venv python3-pip rsync binutils build-essential \
                                libusb-dev libbluetooth-dev libsdl1.2-dev libffi-dev pkg-config
 
-            # 2. Create the Staging Directory Structure
-            STAGING="build_staging"
-            mkdir -p $STAGING/DEBIAN
-            mkdir -p $STAGING/opt/r2_control
-            mkdir -p $STAGING/etc/systemd/system
-            mkdir -p $STAGING/etc/apache2/sites-available
-
-            # ==========================================
-            # BUILD 1: LITE PACKAGE (INTERNET REQUIRED)
-            # ==========================================
-            cp packaging/postinst.lite $STAGING/DEBIAN/postinst
-            cp packaging/prerm $STAGING/DEBIAN/
-            chmod +x $STAGING/DEBIAN/postinst $STAGING/DEBIAN/prerm
-
-            # Create the Control file dynamically
             if [[ "${{ github.ref_type }}" == "tag" ]]; then
               CLEAN_VER=$(echo ${{ github.ref_name }} | sed 's/v//')
             else
               CLEAN_VER="0.0.0+experimental${{ github.run_number }}"
             fi
+
+            # ==========================================
+            # BUILD: SOUNDS PACKAGE
+            # ==========================================
+            mkdir -p build_sounds/DEBIAN
+            mkdir -p build_sounds/opt/r2_control/sounds
+            rsync -a sounds/ build_sounds/opt/r2_control/sounds/
+            sed "s/{{VERSION}}/$CLEAN_VER/g; s/{{ARCHITECTURE}}/all/g" packaging/control_sounds.template > build_sounds/DEBIAN/control
+            chown -R root:root build_sounds
+            dpkg-deb --build build_sounds "r2_control_sounds_${CLEAN_VER}_all.deb"
+
+            # ==========================================
+            # BUILD: CONTROLLERS PACKAGE
+            # ==========================================
+            mkdir -p build_controllers/DEBIAN
+            mkdir -p build_controllers/opt/r2_control/controllers
+            mkdir -p build_controllers/etc/systemd/system
+            mkdir -p build_controllers/etc/apache2/sites-available
+            rsync -a controllers/ build_controllers/opt/r2_control/controllers/
+            cp controllers/r2_joy.service build_controllers/etc/systemd/system/
+            cp controllers/ble/r2_ble.service build_controllers/etc/systemd/system/
+            cp controllers/www/apache.conf build_controllers/etc/apache2/sites-available/000-r2.conf
+            sed "s/{{VERSION}}/$CLEAN_VER/g; s/{{ARCHITECTURE}}/${{ matrix.deb_arch }}/g" packaging/control_controllers.template > build_controllers/DEBIAN/control
+            cp packaging/postinst_controllers build_controllers/DEBIAN/postinst
+            cp packaging/prerm_controllers build_controllers/DEBIAN/prerm
+            chmod +x build_controllers/DEBIAN/postinst build_controllers/DEBIAN/prerm
+            chown -R root:root build_controllers
+            dpkg-deb --build build_controllers "r2_control_controllers_${CLEAN_VER}_${{ matrix.deb_arch }}.deb"
+
+            # ==========================================
+            # BUILD 1: LITE PACKAGE (INTERNET REQUIRED)
+            # ==========================================
+            STAGING="build_staging"
+            mkdir -p $STAGING/DEBIAN
+            mkdir -p $STAGING/opt/r2_control
+            mkdir -p $STAGING/etc/systemd/system
+            mkdir -p $STAGING/etc/udev/rules.d
+
+            cp packaging/postinst.lite $STAGING/DEBIAN/postinst
+            cp packaging/prerm $STAGING/DEBIAN/
+            chmod +x $STAGING/DEBIAN/postinst $STAGING/DEBIAN/prerm
+
             sed "s/{{VERSION}}/$CLEAN_VER/g; s/{{ARCHITECTURE}}/${{ matrix.deb_arch }}/g" packaging/control.template > $STAGING/DEBIAN/control
 
-            # Copy code natively (Excluding build artifacts and massive folders)
-            rsync -av --exclude="$STAGING" --exclude="build" --exclude=".git" --exclude=".github" --exclude=".venv" --exclude="venv" --exclude="*.deb" --exclude="wheels" . $STAGING/opt/r2_control/
+            # Copy code natively (Excluding build artifacts, massive folders, sounds, and controllers)
+            rsync -av --exclude="$STAGING" --exclude="build_*" --exclude="build" --exclude=".git" --exclude=".github" --exclude=".venv" --exclude="venv" --exclude="*.deb" --exclude="wheels" --exclude="sounds" --exclude="controllers" . $STAGING/opt/r2_control/
 
             cp r2_control.service $STAGING/etc/systemd/system/
-            cp controllers/r2_joy.service $STAGING/etc/systemd/system/
-            cp controllers/www/apache.conf $STAGING/etc/apache2/sites-available/000-r2.conf
+            cp 99-r2-usb.rules $STAGING/etc/udev/rules.d/
 
             # Ensure proper ownership before dpkg-deb to avoid warnings
             chown -R root:root $STAGING
@@ -152,7 +178,7 @@ jobs:
           echo "Label: R2-Control" >> Release
           echo "Suite: stable" >> Release
           echo "Codename: stable" >> Release
-          echo "Architectures: arm64 armhf" >> Release
+          echo "Architectures: arm64 armhf all" >> Release
           echo "Components: main" >> Release
           echo "Description: GitHub Actions Auto-Generated APT Repository" >> Release
           

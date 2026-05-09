@@ -1,0 +1,9 @@
+Package: r2-control-controllers
+Version: {{VERSION}}
+Section: custom
+Priority: optional
+Architecture: {{ARCHITECTURE}}
+Essential: no
+Maintainer: Darren Poulson <darren.poulson@gmail.com>
+Depends: r2-control (>= 1.0)
+Description: Controllers package for R2 Control

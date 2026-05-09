@@ -1,0 +1,14 @@
+[Unit]
+Description=R2 PS3 Autodome
+ 
+[Service]
+ExecStart=/usr/bin/python /home/pi/r2_control/controllers/ps3_autodome/r2_ps3.py
+WorkingDirectory=/home/pi/r2_control/controllers/ps3_autodome
+StandardOutput=syslog
+Restart=on-failure
+ 
+[Install]
+WantedBy=multi-user.target
+Alias=r2_ps3_autodome.service
+
+

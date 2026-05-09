@@ -47,7 +47,7 @@ plugin_names = {
     'Vocalizer': 'Audio.Vocalizer',
     'vader': 'Lights.VaderPSIControl',
     'teecees': 'Lights.TeeceesControl',
-    'Dome': 'Dome',
+    'Dome': 'Dome.DomeControl',
     'GPIO': 'GPIO.GPIOControl',
     'Smoke': 'Smoke',
     'Monitoring': 'Monitoring'}
@@ -126,8 +126,43 @@ def system_status_csv():
         battery = p['Monitoring'].monitoring.queryBattery()
         batteryBalance = p['Monitoring'].monitoring.queryBatteryBalance()
 
-    status = f"{uptime_string},{battery},{batteryBalance},{remote_battery},{internet.check()},{p['Audio'].audio.ShowVolume()}"
+    status = f"\"{uptime_string}\",\"{battery}\",\"{batteryBalance}\",\"{remote_battery}\",\"{internet.check()}\",\"{p['Audio'].audio.ShowVolume()}\""
     return status
+
+
+def system_status_json():
+    """ Collects the system status and returns a JSON dictionary """
+    with open('/proc/uptime', 'r', encoding="utf-8") as f:
+        uptime_seconds = float(f.readline().split()[0])
+        uptime_string = str(datetime.timedelta(seconds=uptime_seconds))
+    remote_battery = ""
+    try:
+        controllers = glob.glob('/sys/class/power_supply/*')
+        for controller in controllers:
+            path = controller + "/capacity"
+            with open(path, 'r', encoding="utf-8") as b:
+                remote_battery += str(int(b.readline().split()[0])) + " "
+    except Exception as e:
+        logging.error(f"Error getting remote battery: {e}")
+        remote_battery = "0"
+        
+    telemetry = {
+        "system": {
+            "uptime": uptime_string,
+            "remote_battery": remote_battery.strip(),
+            "internet": internet.check()
+        },
+        "plugins": {}
+    }
+    
+    for plugin_name, plugin_module in p.items():
+        if hasattr(plugin_module, 'get_telemetry'):
+            try:
+                telemetry["plugins"][plugin_name] = plugin_module.get_telemetry()
+            except Exception as e:
+                logging.error(f"Error getting telemetry for {plugin_name}: {e}")
+                
+    return telemetry
 
 
 # Setup logging
@@ -259,6 +294,12 @@ def sendstatuscsv():
     message = ""
     message = system_status_csv()
     return message
+
+
+@app.route('/status/json', methods=['GET'])
+def sendstatusjson():
+    """GET to display an object of current stats"""
+    return jsonify(system_status_json())
 
 
 @app.route('/internet', methods=['GET'])

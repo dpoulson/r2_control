@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+systemctl stop r2_joy.service || true
+systemctl disable r2_joy.service || true
+systemctl stop r2_ble.service || true
+systemctl disable r2_ble.service || true
+a2dissite 000-r2.conf || true
+systemctl restart apache2 || true
+
+exit 0

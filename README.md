@@ -34,13 +34,22 @@ Read the wiki.
 
 To see some parts of this in action, follow my instagram: https://www.instagram.com/r2djp/
 
-## Experimental
-Install everything using a simple Debian package. This will install the systemd services and everything needed to run `r2_control`. 
+## Debian Packages (Experimental)
+Install the system using the pre-built Debian packages. The system is modular so you can install just what you need. 
 
+First, add the APT repository:
 ```bash
 echo "deb [trusted=yes] https://dpoulson.github.io/r2_control/ ./" | sudo tee /etc/apt/sources.list.d/r2-control.list
 sudo apt update
-sudo apt install r2-control-lite
 ```
 
+Then, you can install the components you want:
 
+**Core Package**:
+* `sudo apt install r2-control` (This installs the core system. Note: the APT repository currently serves the lite version. For the offline bundle, download the `.deb` file directly from the GitHub releases page).
+
+**Add-On Packages**:
+* `sudo apt install r2-control-sounds` (Installs all sound libraries)
+* `sudo apt install r2-control-controllers` (Installs controller logic, Joystick services, BLE, and Apache web integration)
+
+*Note: The add-on packages will automatically depend on the main `r2-control` package.*

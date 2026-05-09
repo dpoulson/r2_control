@@ -1,0 +1,9 @@
+Package: r2-control-sounds
+Version: {{VERSION}}
+Section: custom
+Priority: optional
+Architecture: {{ARCHITECTURE}}
+Essential: no
+Maintainer: Darren Poulson <darren.poulson@gmail.com>
+Depends: r2-control
+Description: Sounds package for R2 Control

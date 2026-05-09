@@ -14,16 +14,5 @@ venv/bin/python3 -m pip install -r requirements.txt
 # 3. Enable and start your services
 systemctl enable r2_control.service
 systemctl restart r2_control.service
-systemctl enable r2_joy.service
-systemctl restart r2_joy.service
-systemctl enable r2_ble.service
-systemctl restart r2_ble.service
-
-# 3. Configure Apache
-# rm /etc/apache2/sites-enabled/000-default.conf
-a2ensite 000-r2.conf
-
-# 4. Restart Apache to apply changes
-systemctl restart apache2
 
 exit 0

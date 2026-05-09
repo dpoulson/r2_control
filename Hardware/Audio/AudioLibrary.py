@@ -241,3 +241,9 @@ class _AudioLibrary(object):
 
 
 audio = _AudioLibrary(_defaults['sounds_dir'], _defaults['volume'])
+
+def get_telemetry():
+    """Returns telemetry data for the main /status/json endpoint."""
+    return {
+        "volume": audio.ShowVolume()
+    }

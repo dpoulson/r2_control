@@ -150,3 +150,10 @@ class ScriptControl(object):
 
 
 scripts = ScriptControl(_defaults['script_dir'])
+
+def get_telemetry():
+    """Returns telemetry data for the main /status/json endpoint."""
+    running = [{"id": s.script_id, "name": s.name} for s in scripts.running_scripts]
+    return {
+        "running_scripts": running
+    }

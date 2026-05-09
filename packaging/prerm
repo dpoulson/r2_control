@@ -9,8 +9,9 @@ systemctl disable r2_control.service || true
 if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
     echo "Cleaning up Python bytecode and virtual environment..."
     
-    # Remove the entire app directory including the venv and __pycache__
-    rm -rf /opt/r2_control
+    # Remove the venv and pycache, leaving sounds and controllers intact if installed
+    rm -rf /opt/r2_control/venv
+    find /opt/r2_control -name "__pycache__" -type d -exec rm -rf {} + || true
     
 fi
 

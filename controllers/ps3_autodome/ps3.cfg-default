@@ -1,0 +1,17 @@
+[DEFAULT]
+deadband = 0.2
+invert = -1
+log_file = /home/pi/r2_control/logs/ps3.log
+speed_fac = 0.35
+keepalive = 0.25
+
+[Dome]
+address = 129
+type = Syren
+port = /dev/ttyUSB0
+
+[Drive]
+address = 128
+type = Sabertooth
+port = /dev/ttyACM0
+

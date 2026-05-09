@@ -194,7 +194,13 @@ def shutdownR2():
     steering(0, 0, drive_mod)
     logging.debug("...Setting dome to 0")
     if not args.dryrun:
-        dome.driveCommand(0)
+        if _config.get('Dome', 'type') == "DomeControl":
+            try:
+                session.post(baseurl + "autodome/spin", json={"direction": "left", "speed": 0}, timeout=0.1)
+            except Exception:
+                logging.debug("Fail to stop dome via API")
+        else:
+            dome.driveCommand(0)
 
     logging.info("Disable drives")
     url = baseurl + "servo/body/ENABLE_DRIVE/0/0"
@@ -278,9 +284,12 @@ if not args.dryrun:
     else:
         print("No drive configured....")
 
-    dome = SabertoothPacketSerial(address=int(_config.get('Dome', 'address')),
-                                  type=_config.get('Dome', 'type'),
-                                  port=_config.get('Dome', 'port'))
+    if _config.get('Dome', 'type') == "DomeControl":
+        session = requests.Session()
+    else:
+        dome = SabertoothPacketSerial(address=int(_config.get('Dome', 'address')),
+                                      type=_config.get('Dome', 'type'),
+                                      port=_config.get('Dome', 'port'))
 
 pygame.display.init()
 
@@ -367,7 +376,7 @@ while joystick:
         drive.axis0.watchdog_feed()
         drive.axis1.watchdog_feed()
     if difference > keepalive:
-        if os.path.exists('/dev/input/js1'):
+        if os.path.exists('/dev/input/js0'):
             logging.debug("Joystick still there....")
         else:
             logging.debug("No joystick")
@@ -490,7 +499,15 @@ while joystick:
                 logging.info(f"Dome : {event.value}")
                 if not args.dryrun:
                     logging.debug("Not a drytest")
-                    dome.driveCommand(clamp(event.value, -0.99, 0.99))
+                    if _config.get('Dome', 'type') == "DomeControl":
+                        direction = "right" if event.value >= 0 else "left"
+                        speed = abs(event.value)
+                        try:
+                            session.post(baseurl + "autodome/spin", json={"direction": direction, "speed": speed}, timeout=0.05)
+                        except Exception:
+                            logging.debug("API dome spin failed")
+                    else:
+                        dome.driveCommand(clamp(event.value, -0.99, 0.99))
                 if args.curses:
                     locate("                   ", 35, 8)
                     locate('%10f' % (event.value), 35, 8)

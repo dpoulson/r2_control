@@ -17,9 +17,11 @@ SERVER_NAME = "R2_Tele"
 SERVICE_UUID = "A07498CA-AD5B-474E-940D-16F1FBE7E8CD"
 TELEMETRY_CHAR_UUID = "51FF12BB-3ED8-46E5-B4F9-D64E2FEC021B" # Read-only telemetry (csv format string)
 COMMAND_CHAR_UUID = "51FF12BB-3ED8-46E5-B4F9-D64E2FEC021C" # Write-only commands (string to interpret as rest calls)
+JSON_TELEMETRY_CHAR_UUID = "51FF12BB-3ED8-46E5-B4F9-D64E2FEC021D" # Read-only telemetry (JSON format string)
 
 # Flask endpoints
 STATUS_URL = "http://127.0.0.1:5000/status/csv"
+JSON_STATUS_URL = "http://127.0.0.1:5000/status/json"
 BASE_URL = "http://127.0.0.1:5000"
 
 def get_telemetry():
@@ -34,6 +36,19 @@ def get_telemetry():
     except Exception as e:
         logger.debug(f"Failed to get telemetry: {e}")
     return "error"
+
+def get_json_telemetry():
+    """
+    Fetches the JSON telemetry from the main R2_Control Flask API.
+    Returns the string or '{}' on fail.
+    """
+    try:
+        response = requests.get(JSON_STATUS_URL, timeout=1)
+        if response.status_code == 200:
+            return response.text
+    except Exception as e:
+        logger.debug(f"Failed to get JSON telemetry: {e}")
+    return "{}"
 
 
 def trigger_command(command_str):
@@ -93,6 +108,11 @@ async def run_ble_server(loop):
         cmd_permissions = GATTAttributePermissions.writeable
         await server.add_new_characteristic(SERVICE_UUID, COMMAND_CHAR_UUID, cmd_flags, None, cmd_permissions)
         
+        # Add JSON Telemetry Characteristic
+        json_char_flags = GATTCharacteristicProperties.read | GATTCharacteristicProperties.notify
+        json_permissions = GATTAttributePermissions.readable
+        await server.add_new_characteristic(SERVICE_UUID, JSON_TELEMETRY_CHAR_UUID, json_char_flags, None, json_permissions)
+        
         logger.info("Starting BLE server...")
         await server.start()
         logger.info(f"BLE server started successfully. {SERVER_NAME} is advertising.")
@@ -100,6 +120,8 @@ async def run_ble_server(loop):
         # Polling loop to update telemetry characteristic
         while True:
             await asyncio.sleep(2.0)
+            
+            # --- Update CSV Telemetry ---
             telemetry_data = get_telemetry()
             val = telemetry_data.encode('utf-8')
             
@@ -109,6 +131,15 @@ async def run_ble_server(loop):
                 char.value = val
                 # notify subscribers
                 server.update_value(SERVICE_UUID, TELEMETRY_CHAR_UUID)
+                
+            # --- Update JSON Telemetry ---
+            json_telemetry_data = get_json_telemetry()
+            json_val = json_telemetry_data.encode('utf-8')
+            
+            json_char = server.get_characteristic(JSON_TELEMETRY_CHAR_UUID)
+            if json_char:
+                json_char.value = json_val
+                server.update_value(SERVICE_UUID, JSON_TELEMETRY_CHAR_UUID)
             
     except BaseException as e:
         logger.error(f"Error in BLE Server: {e}")
@@ -118,9 +149,11 @@ async def run_ble_server(loop):
             pass # bless library bug on failed initialization
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(run_ble_server(loop))
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     try:
-        loop.run_forever()
+        loop.run_until_complete(run_ble_server(loop))
     except KeyboardInterrupt:
         logger.info("Shutting down bridging service")
+    finally:
+        loop.close()

@@ -1,0 +1,16 @@
+# udev rules for R2-D2 USB devices
+# Copy this file to /etc/udev/rules.d/99-r2-usb.rules and run:
+# sudo udevadm control --reload-rules && sudo udevadm trigger
+
+# ODrive
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="0d32", SYMLINK+="odrive", MODE="0666"
+
+# JK BMS (USB to RS485 adapter - typical CH340)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", SYMLINK+="bms", MODE="0666"
+
+# Sabertooth 2x32 (Native USB)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="00df", SYMLINK+="sabertooth", MODE="0666"
+
+# Syren (Typical USB-Serial adapter for Dome)
+# Note: If using two identical adapters, you must add ATTRS{serial}=="YOUR_SERIAL" to differentiate them.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="syren", MODE="0666"
