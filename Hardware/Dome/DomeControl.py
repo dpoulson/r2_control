@@ -59,7 +59,7 @@ class DomeState:
     spin_speed: float = 0.0          # -1.0 .. 1.0 for continuous spin
     spin_direction: int = 0          # -1 for left, 1 for right, 0 for stopped
     last_manual_input: float = 0.0   # Timestamp of last manual command
-    lock: threading.Lock = field(default_factory=threading.Lock, init=False)
+    lock: threading.RLock = field(default_factory=threading.RLock, init=False)
 
     def as_dict(self):
         return {
@@ -99,6 +99,11 @@ class DomeController(threading.Thread):
         self._auto_last_move = 0
         self._auto_target = 0.0
         self._auto_phase = 'idle'  # idle, moving, dwell, returning
+        # Timers and parameters for sensorless auto mode
+        self._auto_move_start = 0.0
+        self._auto_move_duration = 0.0
+        self._auto_move_direction = 0
+        self._auto_move_speed = 0.0
         # Lazily import the driver – this keeps the module importable on systems
         # without the hardware attached (useful for unit tests).
         try:
@@ -216,30 +221,59 @@ class DomeController(threading.Thread):
                     self._command_driver(0)
 
             if not manual_active and random_enabled:
-                # Auto‑dome logic using configurable limits and timings.
-                if self._auto_phase == 'idle':
-                    if now - self._auto_last_move >= self.auto_interval:
-                        self._auto_target = random.uniform(-self.auto_left_max, self.auto_right_max)
-                        self._auto_last_move = now
-                        self._auto_phase = 'moving'
-                elif self._auto_phase == 'moving':
-                    error = self._auto_target - current
-                    command = max(-1.0, min(1.0, error / 180.0))
-                    self._command_driver(command)
-                    if abs(error) < 5:
-                        self._auto_phase = 'dwell'
-                        self._dwell_start = now
-                elif self._auto_phase == 'dwell':
-                    if now - self._dwell_start >= self.auto_dwell:
-                        self._auto_target = 0.0  # return to centre
-                        self._auto_phase = 'returning'
-                elif self._auto_phase == 'returning':
-                    error = self._auto_target - current
-                    command = max(-1.0, min(1.0, error / 180.0))
-                    self._command_driver(command)
-                    if abs(error) < 5:
-                        self._auto_phase = 'idle'
-                        self._auto_last_move = now
+                if self.encoder_url:
+                    # Sensor-based proportional auto‑dome logic
+                    if self._auto_phase == 'idle':
+                        if now - self._auto_last_move >= self.auto_interval:
+                            self._auto_target = random.uniform(-self.auto_left_max, self.auto_right_max)
+                            self._auto_last_move = now
+                            self._auto_phase = 'moving'
+                    elif self._auto_phase == 'moving':
+                        error = self._auto_target - current
+                        command = max(-1.0, min(1.0, error / 180.0))
+                        self._command_driver(command)
+                        if abs(error) < 5:
+                            self._auto_phase = 'dwell'
+                            self._dwell_start = now
+                    elif self._auto_phase == 'dwell':
+                        if now - self._dwell_start >= self.auto_dwell:
+                            self._auto_target = 0.0  # return to centre
+                            self._auto_phase = 'returning'
+                    elif self._auto_phase == 'returning':
+                        error = self._auto_target - current
+                        command = max(-1.0, min(1.0, error / 180.0))
+                        self._command_driver(command)
+                        if abs(error) < 5:
+                            self._auto_phase = 'idle'
+                            self._auto_last_move = now
+                else:
+                    # Sensorless time-based auto-dome logic
+                    if self._auto_phase == 'idle':
+                        if now - self._auto_last_move >= self.auto_interval:
+                            # Choose a random direction, speed, and duration for the move
+                            self._auto_move_direction = random.choice([-1, 1])
+                            self._auto_move_speed = random.uniform(0.2, 0.4)
+                            self._auto_move_duration = random.uniform(0.5, 1.5)
+                            self._auto_move_start = now
+                            self._auto_phase = 'moving'
+                    elif self._auto_phase == 'moving':
+                        self._command_driver(self._auto_move_direction * self._auto_move_speed)
+                        if now - self._auto_move_start >= self._auto_move_duration:
+                            self._command_driver(0)
+                            self._auto_phase = 'dwell'
+                            self._dwell_start = now
+                    elif self._auto_phase == 'dwell':
+                        if now - self._dwell_start >= self.auto_dwell:
+                            # Return to "center" by inverting direction for the same duration and speed
+                            self._auto_move_direction = -self._auto_move_direction
+                            self._auto_move_start = now
+                            self._auto_phase = 'returning'
+                    elif self._auto_phase == 'returning':
+                        self._command_driver(self._auto_move_direction * self._auto_move_speed)
+                        if now - self._auto_move_start >= self._auto_move_duration:
+                            self._command_driver(0)
+                            self._auto_last_move = now
+                            self._auto_phase = 'idle'
             elif not manual_active:
                 if mode == "stop":
                     self._command_driver(0)
@@ -317,7 +351,7 @@ def toggle_random():
     """Toggle the random_enabled flag."""
     with _dome_controller.state.lock:
         new_state = not _dome_controller.state.random_enabled
-        _dome_controller.enable_random(new_state)
+    _dome_controller.enable_random(new_state)
     return jsonify({"status": "ok", "random_enabled": new_state})
 
 @api.route('/spin', methods=['POST'])

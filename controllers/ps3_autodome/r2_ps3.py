@@ -97,6 +97,7 @@ curve = float(ps3config['curve'])
 dome_speed = 0
 accel_rate = float(ps3config['accel_rate'])
 dome_stick = 0
+last_dome_val = 0.0
 
 # Set Axis definitions
 PS3_AXIS_LEFT_VERTICAL = int(_config.get('Axis', 'drive'))
@@ -188,6 +189,8 @@ def shutdownR2():
 #        pass
 
     """ shutdownR2 - Put R2 into a safe state """
+    global last_dome_val
+    last_dome_val = 0.0
     logging.info("Running shutdown procedure")
     logging.debug("Stopping all motion...")
     logging.debug("...Setting drive to 0")
@@ -196,6 +199,7 @@ def shutdownR2():
     if not args.dryrun:
         if _config.get('Dome', 'type') == "DomeControl":
             try:
+                session.post(baseurl + "autodome/random", json={"enabled": False}, timeout=0.1)
                 session.post(baseurl + "autodome/spin", json={"direction": "left", "speed": 0}, timeout=0.1)
             except Exception:
                 logging.debug("Fail to stop dome via API")
@@ -492,27 +496,46 @@ while joystick:
                 _turning = event.value
                 last_command = time()
             elif event.axis == PS3_AXIS_RIGHT_HORIZONTAL:
-                logging.debug(f"Value (Dome): {event.value}")
+                val = event.value
+                # Apply deadband: if value is within deadband, treat it as 0.0
+                if abs(val) < deadband:
+                    val = 0.0
+
+                # Check if the value has changed significantly or transitioned to/from 0.0
+                is_significant = False
+                if val == 0.0:
+                    if last_dome_val != 0.0:
+                        is_significant = True
+                else:
+                    if abs(val - last_dome_val) >= 0.02:
+                        is_significant = True
+
+                if not is_significant:
+                    continue
+
+                last_dome_val = val
+
+                logging.debug(f"Value (Dome): {val}")
                 if args.curses:
                     locate("                   ", 35, 4)
-                    locate('%10f' % (event.value), 35, 4)
-                logging.info(f"Dome : {event.value}")
+                    locate('%10f' % (val), 35, 4)
+                logging.info(f"Dome : {val}")
                 if not args.dryrun:
                     logging.debug("Not a drytest")
                     if _config.get('Dome', 'type') == "DomeControl":
-                        direction = "right" if event.value >= 0 else "left"
-                        speed = abs(event.value)
+                        direction = "right" if val >= 0 else "left"
+                        speed = abs(val)
                         try:
-                            session.post(baseurl + "autodome/spin", json={"direction": direction, "speed": speed}, timeout=0.05)
+                            session.post(baseurl + "autodome/spin", json={"direction": direction, "speed": speed}, timeout=0.2)
                         except Exception:
                             logging.debug("API dome spin failed")
                     else:
-                        dome.driveCommand(clamp(event.value, -0.99, 0.99))
+                        dome.driveCommand(clamp(val, -0.99, 0.99))
                 if args.curses:
                     locate("                   ", 35, 8)
-                    locate('%10f' % (event.value), 35, 8)
+                    locate('%10f' % (val), 35, 8)
                 last_command = time()
-#                dome_stick = event.value
+#                dome_stick = val
 
 # If the while loop quits, make sure that the motors are reset.
 logging.debug("Exited main loop")
