@@ -193,9 +193,19 @@ app = Flask(__name__, template_folder='templates')
 @app.route('/')
 def index():
     """GET to generate a list of endpoints and their docstrings"""
-    urls = dict([(r.rule, app.view_functions.get(r.endpoint).__doc__)
-                 for r in app.url_map.iter_rules()
-                 if not r.rule.startswith('/static')])
+    urls = []
+    for r in app.url_map.iter_rules():
+        if r.rule.startswith('/static'):
+            continue
+        func = app.view_functions.get(r.endpoint)
+        docstr = func.__doc__ if func else ""
+        methods = list(r.methods - {'HEAD', 'OPTIONS'})
+        urls.append({
+            'path': r.rule,
+            'doc': docstr.strip() if docstr else "No description available.",
+            'methods': methods
+        })
+    urls.sort(key=lambda x: x['path'])
     return render_template('index.html', urls=urls)
 
 

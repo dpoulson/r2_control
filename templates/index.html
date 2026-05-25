@@ -3,112 +3,934 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R2D2 REST API</title>
+    <title>R2D2 Astromech REST Terminal</title>
     <style>
         :root {
-            --sw-yellow: #FFE81F;
-            --holo-blue: #3498db;
-            --bg-dark: #0d0d0d;
-            --panel-bg: #1a1a1a;
-            --text-main: #ececec;
-            --text-success: #2ecc71;
-            --border-color: #333;
+            --holo-cyan: #00bcff;
+            --holo-blue: #0055ff;
+            --imperial-red: #ff3344;
+            --cyber-green: #00e676;
+            --droid-yellow: #ffd600;
+            --bg-deep: #08090d;
+            --panel-bg: rgba(22, 26, 37, 0.6);
+            --panel-border: rgba(0, 188, 255, 0.15);
+            --panel-border-glow: rgba(0, 188, 255, 0.3);
+            --text-primary: #e3f2fd;
+            --text-secondary: #90caf9;
+            --font-terminal: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
             margin: 0;
             padding: 20px;
-            line-height: 1.6;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 85, 255, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 188, 255, 0.08) 0px, transparent 50%),
+                linear-gradient(rgba(18, 18, 18, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 18, 18, 0.4) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
         }
+
+        /* Scanline Overlay for Cyberpunk Feel */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 99999;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
         .container {
-            max-width: 900px;
+            max-width: 1400px;
             margin: 0 auto;
-            border: 1px solid var(--border-color);
-            background: rgba(26, 26, 26, 0.4);
-            padding: 30px;
-            box-shadow: 0 0 15px rgba(52, 152, 219, 0.1);
-            border-radius: 8px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
         }
-        h1 {
-            color: var(--sw-yellow);
-            text-align: center;
-            border-bottom: 2px solid var(--border-color);
+
+        @media (max-width: 1000px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Immersion Panels */
+        .glass-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-panel:hover {
+            border-color: var(--panel-border-glow);
+            box-shadow: 0 8px 32px 0 rgba(0, 188, 255, 0.1);
+        }
+
+        /* Header / Logo */
+        header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--panel-border);
             padding-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-top: 0;
+            margin-bottom: 10px;
         }
-        h1::before, h1::after {
-            content: ' - ';
-            color: var(--border-color);
-        }
-        dl {
-            margin: 0;
-        }
-        dt {
-            background-color: rgba(52, 152, 219, 0.1);
-            border-left: 4px solid var(--holo-blue);
-            padding: 12px 15px;
-            margin-top: 25px;
-            font-weight: bold;
-            font-size: 1.1em;
-            border-radius: 4px 4px 0 0;
+
+        .logo-area {
             display: flex;
             align-items: center;
+            gap: 15px;
         }
-        dt::before {
-            content: '[>] ';
-            color: var(--holo-blue);
-            margin-right: 10px;
-            font-size: 0.9em;
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--text-primary) 30%, var(--holo-blue) 90%);
+            border: 3px solid var(--holo-cyan);
+            box-shadow: 0 0 15px var(--holo-cyan);
+            position: relative;
+            animation: pulse-glow 3s infinite alternate;
         }
-        dt a {
-            color: var(--holo-blue);
-            text-decoration: none;
-            word-break: break-all;
-            transition: color 0.2s;
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px var(--holo-cyan); }
+            100% { box-shadow: 0 0 20px var(--holo-cyan); }
         }
-        dt a:hover {
-            color: #5dade2;
-            text-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
-        }
-        dd {
-            background-color: var(--panel-bg);
-            padding: 15px;
-            margin-left: 0;
-            border: 1px solid var(--border-color);
-            border-top: none;
-            border-radius: 0 0 4px 4px;
-        }
-        pre {
-            color: var(--text-success);
-            white-space: pre-wrap;
+
+        .logo-title h1 {
             margin: 0;
-            font-size: 0.95em;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 0.8em;
-            color: #666;
+            font-size: 1.6rem;
+            letter-spacing: 2px;
             text-transform: uppercase;
+            font-family: var(--font-terminal);
+            color: var(--holo-cyan);
+            text-shadow: 0 0 8px rgba(0, 188, 255, 0.5);
+        }
+
+        .logo-subtitle {
+            margin: 0;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        /* Telemetry Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .telemetry-title {
+            font-family: var(--font-terminal);
+            color: var(--droid-yellow);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 214, 0, 0.2);
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--cyber-green);
+            box-shadow: 0 0 8px var(--cyber-green);
+            display: inline-block;
+        }
+
+        .status-dot.offline {
+            background-color: var(--imperial-red);
+            box-shadow: 0 0 8px var(--imperial-red);
+        }
+
+        .telemetry-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .telemetry-label {
+            color: var(--text-secondary);
+            font-family: var(--font-terminal);
+        }
+
+        .telemetry-value {
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        /* Telemetry Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            height: 8px;
+            margin-top: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--holo-blue), var(--holo-cyan));
+            box-shadow: 0 0 8px var(--holo-cyan);
+            width: 0%;
+        }
+
+        /* Quick Command Dashboard */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn {
+            background: rgba(0, 188, 255, 0.08);
+            border: 1px solid rgba(0, 188, 255, 0.3);
+            border-radius: 6px;
+            color: var(--holo-cyan);
+            padding: 10px;
+            font-size: 0.8rem;
+            font-family: var(--font-terminal);
+            cursor: pointer;
+            text-transform: uppercase;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: rgba(0, 188, 255, 0.2);
+            border-color: var(--holo-cyan);
+            box-shadow: 0 0 10px rgba(0, 188, 255, 0.3);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: rgba(255, 51, 68, 0.08);
+            border-color: rgba(255, 51, 68, 0.3);
+            color: var(--imperial-red);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 51, 68, 0.2);
+            border-color: var(--imperial-red);
+            box-shadow: 0 0 10px rgba(255, 51, 68, 0.3);
+        }
+
+        .btn-warning {
+            background: rgba(255, 214, 0, 0.08);
+            border-color: rgba(255, 214, 0, 0.3);
+            color: var(--droid-yellow);
+        }
+
+        .btn-warning:hover {
+            background: rgba(255, 214, 0, 0.2);
+            border-color: var(--droid-yellow);
+            box-shadow: 0 0 10px rgba(255, 214, 0, 0.3);
+        }
+
+        /* Search & Catalog Main View */
+        .main-view {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 12px 18px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--holo-cyan);
+            box-shadow: 0 0 10px rgba(0, 188, 255, 0.2);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: var(--font-terminal);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .filter-btn.active {
+            background: rgba(0, 188, 255, 0.15);
+            border-color: var(--holo-cyan);
+            color: var(--holo-cyan);
+        }
+
+        /* Endpoint Catalog Cards */
+        .catalog {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .endpoint-card {
+            border-left: 4px solid var(--holo-blue);
+        }
+
+        .endpoint-card.POST {
+            border-left-color: var(--droid-yellow);
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding-bottom: 8px;
+        }
+
+        .endpoint-route {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-terminal);
+            font-size: 1.05rem;
+            font-weight: bold;
+        }
+
+        .method-badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            background: rgba(0, 188, 255, 0.15);
+            border: 1px solid var(--holo-cyan);
+            color: var(--holo-cyan);
+        }
+
+        .method-badge.POST {
+            background: rgba(255, 214, 0, 0.15);
+            border-color: var(--droid-yellow);
+            color: var(--droid-yellow);
+        }
+
+        .endpoint-doc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 8px 0 15px 0;
+            white-space: pre-wrap;
+            border-left: 2px solid rgba(255,255,255,0.05);
+            padding-left: 10px;
+        }
+
+        /* Form / Request Panel */
+        .request-panel {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .request-subtitle {
+            font-family: var(--font-terminal);
+            color: var(--holo-cyan);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-top: 0;
+            margin-bottom: 12px;
             letter-spacing: 1px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-family: var(--font-terminal);
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #fff;
+            font-family: var(--font-terminal);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--holo-cyan);
+        }
+
+        /* JSON Textarea payload editor */
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+            font-size: 0.85rem;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--cyber-green);
+        }
+
+        /* Console Output View */
+        .console-output {
+            margin-top: 15px;
+            background: #040508;
+            border: 1px solid rgba(0, 188, 255, 0.1);
+            border-radius: 6px;
+            padding: 12px;
+            display: none;
+        }
+
+        .console-meta {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-terminal);
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .status-badge {
+            font-weight: bold;
+        }
+
+        .status-badge.success { color: var(--cyber-green); }
+        .status-badge.error { color: var(--imperial-red); }
+
+        .console-pre {
+            margin: 0;
+            overflow-x: auto;
+            font-family: var(--font-terminal);
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* Collapsible expander indicator */
+        .expander {
+            font-family: var(--font-terminal);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .footer {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            font-family: var(--font-terminal);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 30px;
+            letter-spacing: 2px;
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Welcome to R2D2 REST API</h1>
-        <dl>
-          {% for path, docstr in urls|dictsort(false, 'key') %}
-          <dt><a href="{{ path }}">{{ path }}</a></dt>
-          <dd><pre>{{ docstr }}</pre></dd>
-          {% endfor %}
-        </dl>
-        <div class="footer">ASTROMECH DIAGNOSTIC INTERFACE v1.0</div>
+        
+        <!-- Header -->
+        <header class="glass-panel">
+            <div class="logo-area">
+                <div class="logo-icon"></div>
+                <div class="logo-title">
+                    <h1>R2D2 REST Console</h1>
+                    <div class="logo-subtitle">Astromech Interface System</div>
+                </div>
+            </div>
+            <div>
+                <span class="status-dot" id="global-status-dot"></span>
+                <span style="font-family: var(--font-terminal); font-size: 0.85rem; margin-left: 8px;" id="global-status-text">CONNECTED</span>
+            </div>
+        </header>
+
+        <!-- Sidebar / Telemetry -->
+        <div class="sidebar">
+            
+            <div class="glass-panel">
+                <h3 class="telemetry-title">
+                    Telemetry HUD
+                    <span class="status-dot" id="hud-status-dot"></span>
+                </h3>
+                
+                <div class="telemetry-row">
+                    <span class="telemetry-label">SYSTEM UPTIME:</span>
+                    <span class="telemetry-value" id="val-uptime">--:--:--</span>
+                </div>
+                
+                <div class="telemetry-row">
+                    <span class="telemetry-label">INTERNET CONNECT:</span>
+                    <span class="telemetry-value" id="val-internet">--</span>
+                </div>
+
+                <div class="telemetry-row" style="flex-direction: column; align-items: flex-start; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <span class="telemetry-label">REMOTE BATT:</span>
+                        <span class="telemetry-value" id="val-battery">--%</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="bar-battery"></div>
+                    </div>
+                </div>
+
+                <div class="telemetry-row" style="flex-direction: column; align-items: flex-start; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <span class="telemetry-label">AUDIO VOLUME:</span>
+                        <span class="telemetry-value" id="val-volume">--%</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="bar-volume" style="background: linear-gradient(90deg, var(--holo-blue), var(--droid-yellow))"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action Board -->
+            <div class="glass-panel">
+                <h3 class="telemetry-title">Quick Dashboard</h3>
+                <div class="quick-actions">
+                    <button class="btn" onclick="fireQuickGet('/audio/Happy007')">
+                        <span>🔊 Happy</span>
+                    </button>
+                    <button class="btn" onclick="fireQuickGet('/audio/random/scream')">
+                        <span>😱 Scream</span>
+                    </button>
+                    <button class="btn" onclick="fireQuickGet('/audio/random/alarm')">
+                        <span>🚨 Alarm</span>
+                    </button>
+                    <button class="btn btn-warning" onclick="fireQuickPost('/autodome/toggle_random')">
+                        <span>🔄 Look-Around</span>
+                    </button>
+                    <button class="btn btn-danger" onclick="stopDome()">
+                        <span>🛑 Stop Dome</span>
+                    </button>
+                    <button class="btn btn-danger" onclick="shutdownDroid()">
+                        <span>🔌 Shutdown</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="main-view">
+            
+            <div class="glass-panel" style="padding: 15px 20px;">
+                <div class="search-row">
+                    <input type="text" class="search-input" id="search-box" placeholder="Search R2D2 API catalog (e.g. status, spin)..." oninput="filterCatalog()">
+                    <div class="filter-group">
+                        <button class="filter-btn active" id="btn-filter-all" onclick="setFilter('ALL')">All</button>
+                        <button class="filter-btn" id="btn-filter-get" onclick="setFilter('GET')">GET</button>
+                        <button class="filter-btn" id="btn-filter-post" onclick="setFilter('POST')">POST</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endpoint List -->
+            <div class="catalog" id="catalog-container">
+                
+                {% for url in urls %}
+                <div class="glass-panel endpoint-card {{ url.methods[0] }}" data-path="{{ url.path }}" data-doc="{{ url.doc }}" data-method="{{ url.methods[0] }}">
+                    <div class="endpoint-header" onclick="toggleDetails(this)">
+                        <div class="endpoint-route">
+                            <span class="method-badge {{ url.methods[0] }}">{{ url.methods[0] }}</span>
+                            <span>{{ url.path }}</span>
+                        </div>
+                        <span class="expander">[+] Details</span>
+                    </div>
+
+                    <!-- Collapsible Request Panel -->
+                    <div class="details-section" style="display: none; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 12px; padding-top: 12px;">
+                        <div class="endpoint-doc">{{ url.doc }}</div>
+
+                        <div class="request-panel">
+                            <h4 class="request-subtitle">Build Request</h4>
+                            
+                            <!-- Dynamic Parameter Inputs -->
+                            <div class="params-container" id="params-{{ loop.index }}"></div>
+                            
+                            <!-- JSON Body Input (if POST) -->
+                            {% if url.methods[0] == 'POST' %}
+                            <div class="input-group">
+                                <label>JSON Payload Body:</label>
+                                <textarea class="form-control" id="payload-{{ loop.index }}" placeholder='{"key": "value"}'></textarea>
+                            </div>
+                            {% endif %}
+
+                            <button class="btn btn-warning" style="width: 100%; margin-top: 5px;" onclick="executeRequest('{{ url.path }}', '{{ url.methods[0] }}', {{ loop.index }})">
+                                ⚡ Send Droid Command
+                            </button>
+                        </div>
+
+                        <!-- Console Output Panel -->
+                        <div class="console-output" id="console-{{ loop.index }}">
+                            <div class="console-meta">
+                                <span>STATUS: <span class="status-badge" id="status-{{ loop.index }}">---</span></span>
+                                <span id="time-{{ loop.index }}">-- ms</span>
+                            </div>
+                            <pre class="console-pre" id="body-{{ loop.index }}">Connecting...</pre>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        <div class="footer">
+            ASTROMECH CENTRALIZED TELEMETRY TERMINAL v2.0 - OFFLINE DIAGNOSTIC MODE
+        </div>
+
     </div>
+
+    <script>
+        let currentFilter = 'ALL';
+        const endpointsData = [];
+
+        // Parse path variables (e.g. <name>, <position>)
+        function extractPathParams(path) {
+            const regex = /<([^>]+)>/g;
+            const params = [];
+            let match;
+            while ((match = regex.exec(path)) !== null) {
+                params.push(match[1]);
+            }
+            return params;
+        }
+
+        // Initialize cards and generate input fields
+        window.addEventListener('DOMContentLoaded', () => {
+            // Populate endpointsData
+            const cards = document.querySelectorAll('.endpoint-card');
+            cards.forEach((card, index) => {
+                const loopIndex = index + 1;
+                const path = card.getAttribute('data-path');
+                const method = card.getAttribute('data-method');
+                const params = extractPathParams(path);
+                
+                endpointsData.push({
+                    path,
+                    method,
+                    params
+                });
+
+                // Generate HTML fields for path variables
+                const paramsContainer = document.getElementById(`params-${loopIndex}`);
+                if (paramsContainer && params.length > 0) {
+                    params.forEach(param => {
+                        const div = document.createElement('div');
+                        div.className = 'input-group';
+                        div.innerHTML = `
+                            <label>Variable: &lt;${param}&gt;</label>
+                            <input type="text" class="form-control param-input" data-param="${param}" placeholder="Enter ${param}">
+                        `;
+                        paramsContainer.appendChild(div);
+                    });
+                }
+
+                // Prefill default JSON payloads for popular POST actions
+                const payloadBox = document.getElementById(`payload-${loopIndex}`);
+                if (payloadBox) {
+                    if (path.includes('spin')) {
+                        payloadBox.value = JSON.stringify({"direction": "right", "speed": 0.3}, null, 2);
+                    } else if (path.includes('random')) {
+                        payloadBox.value = JSON.stringify({"enabled": true}, null, 2);
+                    } else if (path.includes('position')) {
+                        payloadBox.value = JSON.stringify({"position": 45}, null, 2);
+                    } else if (path.includes('mode')) {
+                        payloadBox.value = JSON.stringify({"mode": "continuous"}, null, 2);
+                    } else {
+                        payloadBox.value = "{\n  \n}";
+                    }
+                }
+            });
+
+            // Start Live Telemetry Polling
+            pollTelemetry();
+            setInterval(pollTelemetry, 3000);
+        });
+
+        // Toggle details panel collapsible
+        function toggleDetails(header) {
+            const details = header.nextElementSibling;
+            const expander = header.querySelector('.expander');
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                expander.textContent = '[-] Hide';
+            } else {
+                details.style.display = 'none';
+                expander.textContent = '[+] Details';
+            }
+        }
+
+        // Live HUD telemetry poller
+        function pollTelemetry() {
+            fetch('/status/json')
+                .then(res => {
+                    if (!res.ok) throw new Error("Offline");
+                    return res.json();
+                })
+                .then(data => {
+                    // Update global status HUD indicators
+                    document.getElementById('global-status-dot').className = 'status-dot';
+                    document.getElementById('hud-status-dot').className = 'status-dot';
+                    document.getElementById('global-status-text').textContent = 'CONNECTED';
+                    document.getElementById('global-status-text').style.color = 'var(--cyber-green)';
+
+                    // Extract and render status fields
+                    if (data.system) {
+                        document.getElementById('val-uptime').textContent = data.system.uptime || '--:--:--';
+                        document.getElementById('val-internet').textContent = data.system.internet ? 'ACTIVE' : 'OFFLINE';
+                        document.getElementById('val-internet').style.color = data.system.internet ? 'var(--cyber-green)' : 'var(--imperial-red)';
+                        
+                        let battVal = parseFloat(data.system.remote_battery) || 0;
+                        document.getElementById('val-battery').textContent = battVal + '%';
+                        const battBar = document.getElementById('bar-battery');
+                        battBar.style.width = battVal + '%';
+                        if (battVal < 30) {
+                            battBar.style.background = 'var(--imperial-red)';
+                            battBar.style.boxShadow = '0 0 8px var(--imperial-red)';
+                        } else if (battVal < 60) {
+                            battBar.style.background = 'var(--droid-yellow)';
+                            battBar.style.boxShadow = '0 0 8px var(--droid-yellow)';
+                        } else {
+                            battBar.style.background = 'linear-gradient(90deg, var(--holo-blue), var(--holo-cyan))';
+                            battBar.style.boxShadow = '0 0 8px var(--holo-cyan)';
+                        }
+                    }
+
+                    // Query Volume
+                    if (data.plugins && data.plugins.Audio) {
+                        let volFloat = parseFloat(data.plugins.Audio.volume) || 0.0;
+                        let volPct = Math.round(volFloat * 100);
+                        document.getElementById('val-volume').textContent = volPct + '%';
+                        document.getElementById('bar-volume').style.width = volPct + '%';
+                    } else {
+                        // fallback or direct check
+                        document.getElementById('val-volume').textContent = '30%';
+                        document.getElementById('bar-volume').style.width = '30%';
+                    }
+                })
+                .catch(err => {
+                    // Update global status HUD indicators to offline state
+                    document.getElementById('global-status-dot').className = 'status-dot offline';
+                    document.getElementById('hud-status-dot').className = 'status-dot offline';
+                    document.getElementById('global-status-text').textContent = 'OFFLINE MODE';
+                    document.getElementById('global-status-text').style.color = 'var(--imperial-red)';
+                });
+        }
+
+        // Search Filter
+        function filterCatalog() {
+            const query = document.getElementById('search-box').value.toLowerCase();
+            const cards = document.querySelectorAll('.endpoint-card');
+            
+            cards.forEach(card => {
+                const path = card.getAttribute('data-path').toLowerCase();
+                const doc = card.getAttribute('data-doc').toLowerCase();
+                const method = card.getAttribute('data-method');
+
+                const matchesSearch = path.includes(query) || doc.includes(query);
+                const matchesFilter = (currentFilter === 'ALL') || (method === currentFilter);
+
+                if (matchesSearch && matchesFilter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Method Tabs Filters
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (filterType === 'ALL') document.getElementById('btn-filter-all').classList.add('active');
+            if (filterType === 'GET') document.getElementById('btn-filter-get').classList.add('active');
+            if (filterType === 'POST') document.getElementById('btn-filter-post').classList.add('active');
+            
+            filterCatalog();
+        }
+
+        // Execute Command Sandbox
+        function executeRequest(rawPath, method, loopIndex) {
+            const consolePanel = document.getElementById(`console-${loopIndex}`);
+            const statusLabel = document.getElementById(`status-${loopIndex}`);
+            const timeLabel = document.getElementById(`time-${loopIndex}`);
+            const bodyBox = document.getElementById(`body-${loopIndex}`);
+
+            consolePanel.style.display = 'block';
+            bodyBox.textContent = 'Transmitting command packets...';
+            statusLabel.className = 'status-badge';
+            statusLabel.textContent = 'PENDING';
+
+            // 1. Build path with variables replaced
+            let finalPath = rawPath;
+            const container = document.getElementById(`params-${loopIndex}`);
+            if (container) {
+                const inputs = container.querySelectorAll('.param-input');
+                inputs.forEach(input => {
+                    const paramName = input.getAttribute('data-param');
+                    const paramVal = input.value.trim() || `<${paramName}>`;
+                    finalPath = finalPath.replace(`<${paramName}>`, encodeURIComponent(paramVal));
+                    // Handle alternative format <body|dome> choices
+                    finalPath = finalPath.replace(`<body|dome>`, encodeURIComponent(paramVal));
+                });
+            }
+
+            // 2. Build fetch settings
+            const startTime = performance.now();
+            const fetchOptions = { method: method };
+
+            if (method === 'POST') {
+                const payloadBox = document.getElementById(`payload-${loopIndex}`);
+                if (payloadBox) {
+                    try {
+                        const jsonRaw = payloadBox.value.trim();
+                        if (jsonRaw) {
+                            JSON.parse(jsonRaw); // validate JSON
+                            fetchOptions.body = jsonRaw;
+                            fetchOptions.headers = {
+                                'Content-Type': 'application/json'
+                            };
+                        }
+                    } catch (e) {
+                        statusLabel.textContent = 'INVALID JSON';
+                        statusLabel.className = 'status-badge error';
+                        bodyBox.textContent = `Local validation error: ${e.message}`;
+                        return;
+                    }
+                }
+            }
+
+            // 3. Dispatch HTTP request
+            fetch(finalPath, fetchOptions)
+                .then(res => {
+                    const endTime = performance.now();
+                    const latency = Math.round(endTime - startTime);
+                    timeLabel.textContent = `${latency} ms`;
+
+                    statusLabel.textContent = `${res.status} ${res.statusText}`;
+                    if (res.ok) {
+                        statusLabel.className = 'status-badge success';
+                    } else {
+                        statusLabel.className = 'status-badge error';
+                    }
+
+                    const contentType = res.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        return res.json().then(obj => JSON.stringify(obj, null, 2));
+                    } else {
+                        return res.text();
+                    }
+                })
+                .then(body => {
+                    bodyBox.textContent = body;
+                })
+                .catch(err => {
+                    const endTime = performance.now();
+                    const latency = Math.round(endTime - startTime);
+                    timeLabel.textContent = `${latency} ms`;
+                    statusLabel.textContent = 'FAILED';
+                    statusLabel.className = 'status-badge error';
+                    bodyBox.textContent = `Transmission failed: ${err.message}`;
+                });
+        }
+
+        // Quick Command Triggers
+        function fireQuickGet(path) {
+            fetch(path)
+                .then(res => res.text())
+                .then(text => console.log(`Quick action get [${path}] succeeded:`, text))
+                .catch(err => console.error(`Quick action get [${path}] failed:`, err));
+        }
+
+        function fireQuickPost(path, bodyObj = {}) {
+            fetch(path, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bodyObj)
+            })
+                .then(res => res.json())
+                .then(data => console.log(`Quick action post [${path}] succeeded:`, data))
+                .catch(err => console.error(`Quick action post [${path}] failed:`, err));
+        }
+
+        function stopDome() {
+            fireQuickPost('/autodome/random', { "enabled": false });
+            setTimeout(() => {
+                fireQuickPost('/autodome/spin', { "direction": "left", "speed": 0 });
+            }, 100);
+        }
+
+        function shutdownDroid() {
+            if (confirm("Confirm protocol: Shut down R2-D2 core processor?")) {
+                fireQuickGet('/shutdown/now');
+            }
+        }
+    </script>
 </body>
 </html>
