@@ -2,6 +2,6 @@ Origin: R2-Control
 Label: R2-Control
 Suite: stable
 Codename: stable
-Architectures: arm64 armhf
+Architectures: arm64 armhf all
 Components: main
 Description: GitHub Actions Auto-Generated APT Repository
