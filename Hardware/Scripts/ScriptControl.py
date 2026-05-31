@@ -105,14 +105,25 @@ class ScriptControl(object):
         return message
 
     def stop_script(self, kill_id):
-        idx = 0
         if __debug__:
-            print(f"Trying to stop script ID {kill_id}")
+            print(f"Trying to stop script {kill_id}")
+            
+        to_remove = []
         for script in self.running_scripts:
-            if (int(script.script_id) == int(kill_id)) or (script.name == kill_id):
-                script.thread.stop()
-                self.running_scripts.pop(idx)
-            idx += 1
+            match = False
+            try:
+                if int(script.script_id) == int(kill_id):
+                    match = True
+            except ValueError:
+                if script.name == kill_id:
+                    match = True
+            if match:
+                to_remove.append(script)
+                
+        for script in to_remove:
+            script.thread.stop()
+            self.running_scripts.remove(script)
+            
         return "Ok"
 
     def stop_all(self):

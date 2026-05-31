@@ -8,7 +8,7 @@
     <script src="js/jquery-ui-slider-pips.js"></script>
     <link rel="stylesheet" type="text/css" href="js/jquery-ui.min.css"/>
     <link rel="stylesheet" type="text/css" href="js/jquery-ui-slider-pips.css"/>
-    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css?v=<?php echo filemtime('css/style.css'); ?>"/>
 </head>
 <body id="body" class="<?php echo file_get_contents('theme.txt'); ?>">
 

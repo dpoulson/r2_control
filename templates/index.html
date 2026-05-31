@@ -699,6 +699,12 @@
                         payloadBox.value = JSON.stringify({"enabled": true}, null, 2);
                     } else if (path.includes('position')) {
                         payloadBox.value = JSON.stringify({"position": 45}, null, 2);
+                    } else if (path.includes('config/set')) {
+                        payloadBox.value = JSON.stringify({
+                            "servo_addr_dome": "0x0a",
+                            "plugin_cfg__Dome__DEFAULT__auto_interval_seconds": "10.0",
+                            "action": "restart"
+                        }, null, 2);
                     } else if (path.includes('mode')) {
                         payloadBox.value = JSON.stringify({"mode": "continuous"}, null, 2);
                     } else {

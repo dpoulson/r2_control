@@ -8,6 +8,7 @@ from builtins import object
 from flask import Blueprint, request
 from pygame import mixer
 from r2utils import mainconfig
+import logging
 
 
 _configfile = mainconfig.mainconfig['config_dir'] + 'audio.cfg'
@@ -58,7 +59,7 @@ api = Blueprint('audio', __name__, url_prefix='/audio')
 @api.route('/', methods=['GET'])
 @api.route('/list', methods=['GET'])
 def _audio_list():
-    """GET gives a comma separated list of available sounds"""
+    """Get a list of all available sound files in the library."""
     message = ""
     if request.method == 'GET':
         message += audio.ListSounds()
@@ -67,16 +68,19 @@ def _audio_list():
 
 @api.route('/<name>', methods=['GET'])
 def _audio(name):
-    """GET to trigger the given sound"""
+    """Play the sound file specified by <name> (e.g. 'Happy007')."""
+    success = False
     if request.method == 'GET':
-        audio.TriggerSound(name)
-    return "Ok"
+        success = audio.TriggerSound(name)
+    if success:
+        return "Ok"
+    return "Sound file not found or invalid", 404
 
 
 @api.route('/random/', methods=['GET'])
 @api.route('/random/list', methods=['GET'])
 def _random_audio_list():
-    """GET returns types of sounds available at random"""
+    """Get the list of available random sound categories (e.g. 'alarm', 'happy', 'scream')."""
     types = ""
     if request.method == 'GET':
         types = ', '.join(_Random_Sounds)
@@ -85,15 +89,18 @@ def _random_audio_list():
 
 @api.route('/random/<name>', methods=['GET'])
 def _random_audio(name):
-    """GET to play a random sound of a given type"""
+    """Play a random sound from the category specified by <name> (e.g. 'alarm')."""
+    success = False
     if request.method == 'GET':
-        audio.TriggerRandomSound(name)
-    return "Ok"
+        success = audio.TriggerRandomSound(name)
+    if success:
+        return "Ok"
+    return "Random sound category not found or invalid", 404
 
 
 @api.route('/volume', methods=['GET'])
 def _get_volume():
-    """GET returns current volume level"""
+    """Get the current audio volume level (as a float between 0.0 and 1.0)."""
     message = ""
     if request.method == 'GET':
         cur_vol = mixer.music.get_volume()
@@ -108,13 +115,11 @@ def _get_volume():
 @api.route('/volume/<level>', methods=['GET'])
 def _set_volume(level):
     """
-    Changes the volume level
-
-    Parameters
-    ----------
-    level : str
-            Either a string of up/down to increment/decrement the volume, or
-            an explicitly set volume between 0 and 1
+    Change the audio volume level.
+    
+    Expected inputs for <level>:
+    - 'up' or 'down' (to increment/decrement by 0.025)
+    - a float between '0.0' and '1.0' (e.g. '0.5' for 50% volume)
     """
     if request.method == 'GET':
         if level == "up":
@@ -186,19 +191,27 @@ class _AudioLibrary(object):
         data : str
              Name of file (not including extension)
         """
-
-        if __debug__:
-            print(f"Playing {data}")
-        audio_file = self.sounds_dir + data + ".mp3"
-        # mixer.init()
-        if __debug__:
-            print("Init mixer")
-        mixer.music.load(audio_file)  # % (audio_dir, data))
-        if __debug__:
-            print(f"{audio_file} Loaded")
-        mixer.music.play()
-        if __debug__:
-            print("Play")
+        import os
+        try:
+            if __debug__:
+                print(f"Playing {data}")
+            audio_file = self.sounds_dir + data + ".mp3"
+            if not os.path.exists(audio_file):
+                logging.error(f"Sound file does not exist: {audio_file}")
+                return False
+            # mixer.init()
+            if __debug__:
+                print("Init mixer")
+            mixer.music.load(audio_file)  # % (audio_dir, data))
+            if __debug__:
+                print(f"{audio_file} Loaded")
+            mixer.music.play()
+            if __debug__:
+                print("Play")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to play sound '{data}': {e}")
+            return False
 
     def TriggerRandomSound(self, data):
         """
@@ -209,24 +222,34 @@ class _AudioLibrary(object):
         data : str
              Sound group prefix
         """
-
-        idx = _Random_Sounds.index(data)
-        prefix = _Random_Files[idx]
-        print(f"Random index: {idx}, prefix={prefix}, sounds_dir={self.sounds_dir}")
-        file_list = glob.glob(self.sounds_dir + prefix + "*.mp3")
-        file_idx = len(file_list) - 1
-        audio_file = file_list[random.randint(0, file_idx)]
-        if __debug__:
-            print(f"Playing {data}")
-        mixer.init()
-        if __debug__:
-            print("Init mixer")
-        mixer.music.load(audio_file)  # % (audio_dir, data))
-        if __debug__:
-            print(f"{audio_file} Loaded")
-        mixer.music.play()
-        if __debug__:
-            print("Play")
+        try:
+            if data not in _Random_Sounds:
+                logging.error(f"Invalid random sound category: {data}")
+                return False
+            idx = _Random_Sounds.index(data)
+            prefix = _Random_Files[idx]
+            print(f"Random index: {idx}, prefix={prefix}, sounds_dir={self.sounds_dir}")
+            file_list = glob.glob(self.sounds_dir + prefix + "*.mp3")
+            if not file_list:
+                logging.error(f"No sound files found for category prefix: {prefix}")
+                return False
+            file_idx = len(file_list) - 1
+            audio_file = file_list[random.randint(0, file_idx)]
+            if __debug__:
+                print(f"Playing {data}")
+            mixer.init()
+            if __debug__:
+                print("Init mixer")
+            mixer.music.load(audio_file)  # % (audio_dir, data))
+            if __debug__:
+                print(f"{audio_file} Loaded")
+            mixer.music.play()
+            if __debug__:
+                print("Play")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to play random sound category '{data}': {e}")
+            return False
 
     def ListSounds(self):
         """ Returns the list of sounds available """

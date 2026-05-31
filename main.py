@@ -233,14 +233,14 @@ logging.info("============================================")
 @app.route('/joystick', methods=['GET'])
 @app.route('/joystick/list', methods=['GET'])
 def joystick_list():
-    """GET to display list of possible joysticks"""
+    """Get the list of available joystick controller profiles."""
     logging.info("Retrieving list of joysticks")
     return '\n'.join(list_joysticks())
 
 
 @app.route('/joystick/current', methods=['GET'])
 def joystick_current():
-    """GET to display current joystick"""
+    """Get the currently selected joystick controller profile."""
     logging.info("Retrieving current joystick")
     with open("controllers/.current", "r", encoding="utf-8") as current_joy:
         current = current_joy.read()
@@ -250,7 +250,7 @@ def joystick_current():
 
 @app.route('/joystick/<stick>', methods=['GET'])
 def joystick_change(stick):
-    """GET to change joystick to <stick> """
+    """Change the active controller profile to <stick> (e.g. 'ps3_autodome')."""
     logging.info("Changing joystick to " + stick)
 
     message = "Invalid stick"
@@ -265,7 +265,7 @@ def joystick_change(stick):
 
 @app.route('/shutdown/now', methods=['GET'])
 def shutdown():
-    """GET to shutdown Raspberry Pi"""
+    """Shut down the Raspberry Pi operating system safely."""
     logging.info("****** Shutting down ******")
     if mainconfig.mainconfig['telegram']:
         tg.send("Night night...")
@@ -280,7 +280,7 @@ def shutdown():
 @app.route('/status', methods=['GET'])
 @app.route('/status/display', methods=['GET'])
 def sysstatus():
-    """GET to display system status"""
+    """Get system status formatted as a plain-text report."""
     message = ""
     message = system_status()
     return message
@@ -288,7 +288,7 @@ def sysstatus():
 
 @app.route('/status/send', methods=['GET'])
 def sendstatus():
-    """GET to send system status via telegram"""
+    """Send the current system status report via Telegram message."""
     message = ""
     if mainconfig.mainconfig['telegram']:
         tg.send(system_status())
@@ -300,7 +300,7 @@ def sendstatus():
 
 @app.route('/status/csv', methods=['GET'])
 def sendstatuscsv():
-    """GET to display a CSV of current stats"""
+    """Get system status formatted as a comma-separated (CSV) list."""
     message = ""
     message = system_status_csv()
     return message
@@ -308,13 +308,13 @@ def sendstatuscsv():
 
 @app.route('/status/json', methods=['GET'])
 def sendstatusjson():
-    """GET to display an object of current stats"""
+    """Get a complete JSON object containing real-time telemetry from all modules."""
     return jsonify(system_status_json())
 
 
 @app.route('/internet', methods=['GET'])
 def sendstatusinternet():
-    """GET to display internet status"""
+    """Check and return the internet connectivity status ('True' or 'False')."""
     message = ""
     if internet.check():
         message = "True"
@@ -325,7 +325,7 @@ def sendstatusinternet():
 
 @app.route('/config/get', methods=['GET'])
 def get_config():
-    """GET current system configuration"""
+    """Get the current droid system configuration as a JSON object."""
     import configparser
     def get_servo_addr(name):
         p = os.path.expanduser(f'~/.r2_config/servo_{name}.cfg')
@@ -390,11 +390,29 @@ def get_config():
 
 @app.route('/config/set', methods=['POST'])
 def set_config():
-    """POST to update configuration"""
+    """Update droid system and plugin configuration settings.
+
+    Accepts either JSON payload (recommended) or form-urlencoded parameters.
+
+    Supported Keys:
+    - "servo_addr_<name>" (string): Update target servo hardware address. E.g. {"servo_addr_dome": "0x0a"}
+    - "plugin_cfg__<plugin>__<section>__<key>" (string): Update key/value pair in specific plugin config file. E.g. {"plugin_cfg__Dome__DEFAULT__auto_dwell_seconds": "4.0"}
+    - "action" (string): Set to "restart" to trigger a safe background restart of the main Flask application.
+
+    Example JSON payload:
+    {
+      "servo_addr_dome": "0x0a",
+      "plugin_cfg__Dome__DEFAULT__auto_interval_seconds": "10.0",
+      "action": "restart"
+    }
+    """
     import threading
     import configparser
     
-    data = request.form
+    if request.is_json:
+        data = request.get_json() or {}
+    else:
+        data = request.form
     mainconfig.save_config(data)
     
     def set_servo_addr(name, val):

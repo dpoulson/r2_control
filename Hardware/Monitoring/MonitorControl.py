@@ -36,7 +36,7 @@ api = Blueprint('monitoring', __name__, url_prefix='/monitoring')
 @api.route('/', methods=['GET'])
 @api.route('/battery', methods=['GET'])
 def _battery():
-    """GET gives a comma separated list of stats"""
+    """Get a detailed comma-separated list of battery stats (e.g. voltage, current, capacity)."""
     message = ""
     if request.method == 'GET':
         message += str(monitoring.queryBattery())
@@ -45,7 +45,7 @@ def _battery():
 
 @api.route('/balance', methods=['GET'])
 def _balance():
-    """GET gives the current battery balance"""
+    """Get the current cell-by-cell balance status of the batteries."""
     message = ""
     if request.method == 'GET':
         message += str(monitoring.queryBatteryBalance())
@@ -54,7 +54,7 @@ def _balance():
 
 @api.route('/current', methods=['GET'])
 def _current():
-    """GET gives the current main current draw"""
+    """Get the main system current draw in Amperes."""
     message = ""
     if request.method == 'GET':
         message += str(monitoring.queryCurrentMain())

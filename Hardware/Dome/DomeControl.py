@@ -28,7 +28,8 @@ _config = configparser.ConfigParser({
     'auto_left_max': '45',
     'auto_right_max': '45',
     'auto_dwell_seconds': '2',
-    'auto_interval_seconds': '10'
+    'auto_interval_seconds': '10',
+    'auto_speed_max': '0.35'
 })
 _config.read(_configfile)
 
@@ -42,7 +43,6 @@ _defaults = _config.defaults()
 _DOME_ADDR = int(_defaults['address'])
 _DOME_PORT = _defaults['port']
 _DOME_TYPE = _defaults['type']
-
 _ENCODER_URL = _defaults['encoder_url'] if _defaults['encoder_url'] else None
 _ENCODER_POLL = float(_defaults['encoder_poll_interval'])
 
@@ -95,6 +95,7 @@ class DomeController(threading.Thread):
         self.auto_right_max = float(_defaults['auto_right_max'])
         self.auto_dwell = float(_defaults['auto_dwell_seconds'])
         self.auto_interval = float(_defaults['auto_interval_seconds'])
+        self.auto_speed_max = float(_defaults.get('auto_speed_max', '0.35'))
         # Internal timers for auto mode
         self._auto_last_move = 0
         self._auto_target = 0.0
@@ -112,6 +113,10 @@ class DomeController(threading.Thread):
         except Exception as e:
             logging.error(f"Failed to initialise Sabertooth driver: {e}")
             self.driver = None
+
+        # Command caching to prevent redundant driver writes (efficiency)
+        self._last_sent_val = None
+        self._last_sent_time = 0.0
 
     # -------------------------------------------------------------------
     # Public API – thread‑safe setters
@@ -180,10 +185,17 @@ class DomeController(threading.Thread):
         if not self.driver:
             return
         clamped = max(-0.99, min(0.99, value))
-        try:
-            self.driver.driveCommand(clamped)
-        except Exception as e:
-            logging.error(f"Failed to send command to dome driver: {e}")
+        
+        # Command caching logic (prevent serial port flood/spam)
+        # Only send if the command value has changed significantly (diff > 0.01)
+        if (self._last_sent_val is None or 
+            abs(clamped - self._last_sent_val) > 0.01):
+            try:
+                self.driver.driveCommand(clamped)
+                self._last_sent_val = clamped
+                self._last_sent_time = time.time()
+            except Exception as e:
+                logging.error(f"Failed to send command to dome driver: {e}")
 
     # -------------------------------------------------------------------
     # Main loop
@@ -230,7 +242,7 @@ class DomeController(threading.Thread):
                             self._auto_phase = 'moving'
                     elif self._auto_phase == 'moving':
                         error = self._auto_target - current
-                        command = max(-1.0, min(1.0, error / 180.0))
+                        command = max(-self.auto_speed_max, min(self.auto_speed_max, error / 180.0))
                         self._command_driver(command)
                         if abs(error) < 5:
                             self._auto_phase = 'dwell'
@@ -241,7 +253,7 @@ class DomeController(threading.Thread):
                             self._auto_phase = 'returning'
                     elif self._auto_phase == 'returning':
                         error = self._auto_target - current
-                        command = max(-1.0, min(1.0, error / 180.0))
+                        command = max(-self.auto_speed_max, min(self.auto_speed_max, error / 180.0))
                         self._command_driver(command)
                         if abs(error) < 5:
                             self._auto_phase = 'idle'
@@ -252,7 +264,7 @@ class DomeController(threading.Thread):
                         if now - self._auto_last_move >= self.auto_interval:
                             # Choose a random direction, speed, and duration for the move
                             self._auto_move_direction = random.choice([-1, 1])
-                            self._auto_move_speed = random.uniform(0.2, 0.4)
+                            self._auto_move_speed = random.uniform(self.auto_speed_max * 0.5, self.auto_speed_max)
                             self._auto_move_duration = random.uniform(0.5, 1.5)
                             self._auto_move_start = now
                             self._auto_phase = 'moving'

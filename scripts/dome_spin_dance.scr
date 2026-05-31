@@ -1,0 +1,20 @@
+# Play a happy sound
+sound,Happy007
+# Spin the entire autodome left for 1.5 seconds at speed 0.35
+autodome,spin,left,1,1.5
+# Sleep for 0.5s
+sleep,0.5
+# Play another random happy sound
+sound,random,happy
+# Spin the entire autodome right for 1.5 seconds at speed 0.35
+autodome,spin,right,0.35,1.5
+# Sleep for 1.0s
+sleep,1.0
+# Toggle random look-around mode on!
+autodome,random,on
+# Sleep for 5.0 seconds while it looks around
+sleep,5.0
+# Toggle random look-around off
+autodome,random,off
+# Play a whistle sound
+sound,WOLFWSTL

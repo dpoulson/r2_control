@@ -437,7 +437,9 @@ footer {
 
 .items {
     display: flex;
-    flex-flow: column;
+    flex-flow: row wrap;
+    padding: 1rem;
+    gap: 15px;
 }
 
 h3.current, h3.avail {
@@ -449,14 +451,16 @@ h3.current, h3.avail {
 }
 
 .items .current {
-    flex: 1 0;
+    flex: 0 0 240px;
     background: black;
     border: 1px solid #333;
     color: white;
-    margin: 1rem;
+    margin: 0;
     font-family: Atures700, sans-serif;
     font-size: 1rem;
-    line-height: 44px;
+    line-height: 50px;
+    box-sizing: border-box;
+    border-radius: 6px;
 }
 
 .blueprint .items .current {
@@ -471,22 +475,33 @@ h3.current, h3.avail {
 }
 
 .items .item {
-    flex: 1 0;
+    flex: 0 0 240px;
     color: white;
-    margin: 1rem;
+    margin: 0;
     font-family: Atures700, sans-serif;
     font-size: 1rem;
-    line-height: 44px;
+    line-height: 50px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.items .item:hover {
+    transform: translateY(-2px);
 }
 
 .items .item img, .items .current img {
     float: right;
-    margin: 2px 6rem 2px 0;
+    margin: 5px 15px 5px 0;
 }
 
 .blueprint .items .item {
     background: #4965B8;
     border: 1px solid #668CFF;
+}
+
+.blueprint .items .item:hover {
+    background: #5c7cd1;
 }
 
 .galactic .items .item {
@@ -495,9 +510,16 @@ h3.current, h3.avail {
     box-shadow: 0 0 6px 2px #6DB0F3;
 }
 
+.galactic .items .item:hover {
+    box-shadow: 0 0 10px 4px #6DB0F3;
+}
+
 .items .item a, .items .current {
     display: block;
-    padding-left: 6rem;
+    padding-left: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .leftsound {

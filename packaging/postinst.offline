@@ -14,7 +14,14 @@ venv/bin/python3 -m pip install --no-index --find-links=wheels -r requirements.t
 # Optional: clean up the installer wheels to save space
 rm -rf wheels/
 
-# 3. Enable and start your services
+# 3. Secure scripts directory for web writer access
+if [ -d /opt/r2_control/scripts ]; then
+    chgrp -R www-data /opt/r2_control/scripts || true
+    chmod -R g+w /opt/r2_control/scripts || true
+    chmod g+s /opt/r2_control/scripts || true
+fi
+
+# 4. Enable and start your services
 systemctl enable r2_control.service
 systemctl restart r2_control.service
 
